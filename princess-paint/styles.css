@@ -12,14 +12,15 @@ body {
 }
 
 .main-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
     gap: 20px;
+    height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .canvas-area {
+    flex: 4;
     background: white;
     border-radius: 8px;
     padding: 20px;
@@ -36,11 +37,12 @@ body {
     padding: 10px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 20px;
-    height: 120px;
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
     width: 100%;
+    height: auto;
+    min-height: 120px;
 }
 
 .gallery::-webkit-scrollbar {
@@ -72,11 +74,12 @@ body {
     cursor: pointer;
     transition: transform 0.2s;
     background: #f8f9fa;
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .gallery-item:hover {
@@ -85,17 +88,21 @@ body {
 }
 
 .color-picker {
+    flex: 1;
     background: white;
     border-radius: 8px;
     padding: 10px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
 }
 
 .color-grid {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
     padding: 5px;
 }
 
@@ -106,6 +113,13 @@ body {
     border-radius: 50%;
     cursor: pointer;
     transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 0;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .color-button:hover {
@@ -119,11 +133,25 @@ body {
 
 
 .cursor-fill {
+    position: absolute;
     width: 20px;
     height: 20px;
     border-radius: 50%;
     pointer-events: none;
-    position: fixed;
     z-index: 1000;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    opacity: 0.8;
+}
+
+.cursor-color-indicator {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    border: 2px solid white;
+    opacity: 0.9;
     mix-blend-mode: difference;
 }

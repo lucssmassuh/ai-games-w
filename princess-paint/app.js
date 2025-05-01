@@ -3,6 +3,7 @@ let currentColor = '#FF0000'; // Default to red
 let drawing = null;
 let selectedElement = null;
 let cursorFill = null;
+let cursorColorIndicator = null;
 
 // Function to load paintings from drawings folder
 async function loadPaintings() {
@@ -44,8 +45,9 @@ async function loadGallery() {
 
         const img = document.createElement('img');
         img.src = 'drawings/' + painting;
-        img.style.width = '80px';
-        img.style.height = '80px';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
 
         item.appendChild(img);
         gallery.appendChild(item);
@@ -56,10 +58,26 @@ async function loadGallery() {
 function loadColors() {
     const colorGrid = document.getElementById('colorGrid');
     const colors = [
-        '#FF0000', '#00FF00', '#0000FF', '#FFFF00',
-        '#FF00FF', '#00FFFF', '#FFA500', '#800080',
-        '#008000', '#FF69B4', '#4169E1', '#FFD700',
-        '#8B4513', '#000000', '#FFFFFF'
+        // Reds
+        '#FF0000', '#FF4500', '#FF69B4', '#FF1493', '#DB7093',
+        // Oranges
+        '#FFA500', '#FF8C00', '#FF6347', '#FFD700', '#FFA07A',
+        // Yellows
+        '#FFFF00', '#FFD700', '#FFEC8B', '#FFDAB9', '#FFFACD',
+        // Greens
+        '#00FF00', '#008000', '#32CD32', '#98FB98', '#90EE90',
+        // Blues
+        '#0000FF', '#00BFFF', '#4169E1', '#6495ED', '#87CEEB',
+        // Purples
+        '#800080', '#9400D3', '#BA55D3', '#9370DB', '#E6E6FA',
+        // Pinks
+        '#FF1493', '#FF69B4', '#FFB6C1', '#FFC0CB', '#FFE4E1',
+        // Browns
+        '#8B4513', '#A0522D', '#D2691E', '#8B0000', '#CD5C5C',
+        // Grays
+        '#808080', '#A9A9A9', '#C0C0C0', '#D3D3D3', '#F0F0F0',
+        // Black and White
+        '#000000', '#FFFFFF'
     ];
 
     colors.forEach(color => {
@@ -93,10 +111,35 @@ function loadPainting(filename) {
             const containerWidth = container.clientWidth;
             const containerHeight = container.clientHeight;
             
+            // Calculate the SVG's bounding box
+            const bbox = svg.getBBox();
+            const svgWidth = bbox.width;
+            const svgHeight = bbox.height;
+            
+            // Calculate scaling factors to fit SVG while maintaining aspect ratio
+            const scaleX = containerWidth / svgWidth;
+            const scaleY = containerHeight / svgHeight;
+            const scale = Math.min(scaleX, scaleY) * 0.95; // 95% to add some padding
+            
+            // Calculate translation to center the SVG
+            const translateX = (containerWidth - svgWidth * scale) / 2;
+            const translateY = (containerHeight - svgHeight * scale) / 2;
+            
+            // Create a group element to apply transformations
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
+            
+            // Move all SVG content into the group
+            while (svg.firstChild) {
+                g.appendChild(svg.firstChild);
+            }
+            
             // Set SVG dimensions to match container
             svg.setAttribute('width', containerWidth);
             svg.setAttribute('height', containerHeight);
-            svg.setAttribute('viewBox', '0 0 ' + containerWidth + ' ' + containerHeight);
+            
+            // Append the group to the SVG
+            svg.appendChild(g);
             
             // Append the SVG to the drawing area
             drawing.appendChild(svg);
@@ -145,19 +188,25 @@ function setupEventListeners() {
 
 // Function to create and update the fill cursor
 function updateFillCursor(x, y) {
-}
-
-// Function to create and update the fill cursor
-function updateFillCursor(x, y) {
+    // Update the fill cursor
     if (!cursorFill) {
         cursorFill = document.createElement('div');
         cursorFill.className = 'cursor-fill';
         document.body.appendChild(cursorFill);
     }
-    
     cursorFill.style.backgroundColor = currentColor;
     cursorFill.style.left = x + 'px';
     cursorFill.style.top = y + 'px';
+
+    // Update the color indicator
+    if (!cursorColorIndicator) {
+        cursorColorIndicator = document.createElement('div');
+        cursorColorIndicator.className = 'cursor-color-indicator';
+        document.body.appendChild(cursorColorIndicator);
+    }
+    cursorColorIndicator.style.backgroundColor = currentColor;
+    cursorColorIndicator.style.left = (x + 20) + 'px'; // Offset to the right
+    cursorColorIndicator.style.top = (y - 20) + 'px';  // Offset up
 }
 
 // Handle mouse movement in the canvas area
@@ -171,30 +220,7 @@ function handleMouseMove(e) {
     }
 }
 
-// Create a new drawing
-function createNewDrawing() {
-    // Clear the drawing area
-    drawing.innerHTML = '';
-    
-    // Create a new SVG element
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', '800');
-    svg.setAttribute('height', '600');
-    svg.setAttribute('viewBox', '0 0 800 600');
-    
-    // Add a white background
-    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    rect.setAttribute('width', '100%');
-    rect.setAttribute('height', '100%');
-    rect.setAttribute('fill', '#FFFFFF');
-    svg.appendChild(rect);
-    
-    // Append the SVG to the drawing area
-    drawing.appendChild(svg);
-    
-    // Set up event listeners
-    setupEventListeners();
-}
+
 
 // Initialize the app
 async function init() {
@@ -207,10 +233,6 @@ async function init() {
     
     // Add mouse move event listener to the canvas area
     drawing.addEventListener('mousemove', handleMouseMove);
-    
-    // Add new drawing button handler
-    const newDrawingBtn = document.getElementById('newDrawingBtn');
-    newDrawingBtn.addEventListener('click', createNewDrawing);
 }
 
 // Start the app
