@@ -1,0 +1,28 @@
+{
+  "name": "guada-games",
+  "framework": "static",
+  "output": "dist",
+  "build": {
+    "commands": [
+      "npm install",
+      "npm run build"
+    ]
+  },
+  "routes": {
+    "/": {
+      "dist": "index.html"
+    },
+    "/princess-paint/*": {
+      "dist": "princess-paint/index.html"
+    },
+    "/castle-wars/*": {
+      "dist": "castle-wars/index.html"
+    },
+    "/robo-punch/*": {
+      "dist": "robo-punch/index.html"
+    },
+    "/knife-duel/*": {
+      "dist": "knife-duel/index.html"
+    }
+  }
+}

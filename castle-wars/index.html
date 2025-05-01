@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Castle Wars</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #87CEEB, #1E90FF);
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <audio id="cannonSound" src="https://assets.mixkit.co/active_storage/sfx/2579/2579-preview.mp3" preload="auto"></audio>
+    <audio id="impactSound" src="https://assets.mixkit.co/active_storage/sfx/143/143-preview.mp3" preload="auto"></audio>
+    <audio id="explosionSound" src="https://assets.mixkit.co/active_storage/sfx/2577/2577-preview.mp3" preload="auto"></audio>
+    <script src="game.js"></script>
+</body>
+</html> 

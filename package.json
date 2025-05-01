@@ -1,0 +1,14 @@
+{
+  "name": "web-apps-catalog",
+  "version": "1.0.0",
+  "description": "Catalog of web applications",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build": "mkdir -p dist && cp -r * dist/",
+    "deploy": "firebase deploy"
+  },
+  "dependencies": {
+    "firebase": "^10.7.2"
+  }
+}

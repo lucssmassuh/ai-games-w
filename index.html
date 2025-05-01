@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guada Games</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .app-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .app-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .app-card:hover {
+            transform: translateY(-5px);
+        }
+        .app-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 15px;
+        }
+        .app-title {
+            font-size: 1.5em;
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .app-description {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .launch-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .launch-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Guada Games</h1>
+    <div class="app-list" id="appList">
+        <!-- Apps will be dynamically added here -->
+    </div>
+
+    <script>
+        // Sample apps data - replace with your actual apps
+        const apps = [
+            {
+                name: "Princess Paint",
+                description: "Create beautiful artwork with magical princess colors",
+                icon: "princess-paint/princess-paint-icon.png",
+                path: "princess-paint/"
+            },
+            {
+                name: "Castle Wars",
+                description: "Defend your castle against waves of enemies",
+                icon: "castle-wars/castle-wars-icon.png",
+                path: "castle-wars/"
+            },
+            {
+                name: "Robo Punch",
+                description: "Fight your way through robot arenas with powerful punches",
+                icon: "robo-punch/robo-punch-icon.png",
+                path: "robo-punch/"
+            },
+            {
+                name: "Knife Duel",
+                description: "Test your reflexes in intense knife throwing duels",
+                icon: "knife-duel/knife-duel-icon.png",
+                path: "knife-duel/"
+            }
+        ];
+
+        function createAppCard(app) {
+            const card = document.createElement('div');
+            card.className = 'app-card';
+            
+            card.innerHTML = `
+                <img src="${app.icon}" alt="${app.name}" class="app-icon">
+                <h2 class="app-title">${app.name}</h2>
+                <p class="app-description">${app.description}</p>
+                <a href="${app.path}/index.html" class="launch-button">Launch App</a>
+            `;
+            
+            return card;
+        }
+
+        const appList = document.getElementById('appList');
+        apps.forEach(app => {
+            appList.appendChild(createAppCard(app));
+        });
+    </script>
+</body>
+</html>

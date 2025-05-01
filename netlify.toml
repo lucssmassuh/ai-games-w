@@ -1,0 +1,24 @@
+[build]
+  base = "/"
+  publish = "/"
+  command = "echo 'Building static site...'
+
+[context.production]
+  command = "echo 'Building production site...'
+
+[context.deploy-preview]
+  command = "echo 'Building preview site...'
+
+[context.branch-deploy]
+  command = "echo 'Building branch site...'
+
+[redirects]
+  /princess-paint/*  /princess-paint/index.html  200
+  /castle-wars/*     /castle-wars/index.html     200
+  /robo-punch/*      /robo-punch/index.html      200
+  /knife-duel/*      /knife-duel/index.html      200
+
+[headers]
+  /*
+    Access-Control-Allow-Origin = "*"
+    Cache-Control = "public, max-age=0, must-revalidate"
