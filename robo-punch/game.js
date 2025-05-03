@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.style.border = '1pt solid black';
   
     // Create two player robots with different initial positions and colors
-    const separation = 200; // Distance between the two players
+    const separation = 400; // Increased distance between players for larger canvas
     const player1 = new Robot('red', canvas.width / 2 - separation / 2, canvas.height / 2);
     player1.score = 0; // Initialize score
     const player2 = new Robot('blue', canvas.width / 2 + separation / 2, canvas.height / 2);
