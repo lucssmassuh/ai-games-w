@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hero Game</title>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <script type="text/javascript" src="cocos/cocos2d-js-v3.13.js" charset="UTF-8"></script>
+    <script type="text/javascript" src="game.js" charset="UTF-8"></script>
+
+    <script type="text/javascript">
+        window.onload = function () {
+            cc.game.onStart = function () {
+                cc.view.setDesignResolutionSize(800, 600, cc.ResolutionPolicy.SHOW_ALL);
+                cc.view.resizeWithBrowserSize(true);
+
+                // Load hero.png before starting
+                cc.LoaderScene.preload(["assets/hero.png"], function () {
+                    cc.director.runScene(new GameScene());
+                }, this);
+            };
+            cc.game.run("gameCanvas");
+        };
+    </script>
+</body>
+</html>
