@@ -65,6 +65,14 @@ var Arrow = cc.Sprite.extend({
         pos.y += this.vy * dt;
         this.setPosition(pos);
 
+        // Rotate arrow to match trajectory tangent (only for left/right shots)
+        if (this.direction === 'right' || this.direction === 'left') {
+            var rad = Math.atan2(this.vy, this.vx);
+            // Map vector angle to sprite rotation: default up at 0, positive cw
+            var deg = 90 - (rad * 180 / Math.PI);
+            this.setRotation(deg);
+        }
+
         // Remove horizontal arrows once below launch height
         if ((this.direction === 'right' || this.direction === 'left') && pos.y < this.startY) {
             this.removeFromParent();
