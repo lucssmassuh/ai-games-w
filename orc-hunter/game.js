@@ -15,34 +15,17 @@ var GameLayer = cc.Layer.extend({
         this.hero = new Hero();
         this.addChild(this.hero);
 
-        // Load orc walk frames
+        // Spawn 5 orcs using the Orc class
         var orcTexture = cc.textureCache.addImage("assets/orc.png");
-        var ofw = orcTexture.width / 3;
-        var ofh = orcTexture.height / 4;
-        for (var d = 0; d < 4; d++) {
-            var rowFrames = [];
-            for (var c = 0; c < 3; c++) {
-                rowFrames.push(new cc.SpriteFrame(
-                    orcTexture,
-                    cc.rect(c * ofw, (3 - d) * ofh, ofw, ofh)
-                ));
-            }
-            this.orcFrames.push(rowFrames);
-        }
-        // Spawn 5 orcs
         for (var i = 0; i < 5; i++) {
-            var dir = Math.floor(Math.random() * 4);
-            var o = new cc.Sprite(this.orcFrames[dir][0]);
-            o.direction = dir;
-            o.speed = 30 + Math.random() * 30;
+            var o = new Orc();
+            o.init(orcTexture);
             o.setPosition(
                 Math.random() * cc.winSize.width,
                 Math.random() * cc.winSize.height
             );
             this.addChild(o);
             this.orcs.push(o);
-            var walkAnim = new cc.Animation(this.orcFrames[dir], 0.2);
-            o.runAction(cc.repeatForever(new cc.Animate(walkAnim)));
         }
 
         // Prepare arrow projectile frame (first of 10)
@@ -61,24 +44,6 @@ var GameLayer = cc.Layer.extend({
     },
 
     update: function (dt) {
-        // Update orcs movement
-        for (var j = 0; j < this.orcs.length; j++) {
-            var o = this.orcs[j];
-            var dx = 0, dy = 0;
-            switch (o.direction) {
-                case 0: dy = o.speed * dt; break;
-                case 1: dx = o.speed * dt; break;
-                case 2: dy = -o.speed * dt; break;
-                case 3: dx = -o.speed * dt; break;
-            }
-            var pos = o.getPosition();
-            pos.x += dx; pos.y += dy;
-            if (pos.x < 0 || pos.x > cc.winSize.width || pos.y < 0 || pos.y > cc.winSize.height) {
-                o.direction = (o.direction + 2) % 4;
-            } else {
-                o.setPosition(pos);
-            }
-        }
 
         // Update arrows
         for (var a = this.arrows.length - 1; a >= 0; a--) {
