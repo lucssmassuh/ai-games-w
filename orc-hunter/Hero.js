@@ -8,7 +8,6 @@ var Hero = cc.Sprite.extend({
     bowSprite: null,
     keyPressed: {},
     arrows: [],
-    arrowFrame: null,
 
     ctor: function() {
         this._super();
@@ -51,12 +50,6 @@ var Hero = cc.Sprite.extend({
         //     }
         // }.bind(this), 0.1);
 
-        // Prepare arrow projectile frame (first of 10)
-        var arrowTexture = cc.textureCache.addImage("assets/arrow.png");
-        var arrowFrameWidth = arrowTexture.width / 10;
-        var arrowFrameHeight = arrowTexture.height;
-        var arrowRect = cc.rect(0, 0, arrowFrameWidth, arrowFrameHeight);
-        this.arrowFrame = new cc.SpriteFrame(arrowTexture, arrowRect);
 
         // Initialize event listeners
         cc.eventManager.addListener({
@@ -116,16 +109,10 @@ var Hero = cc.Sprite.extend({
     },
 
     shootArrow: function() {
-        // Create arrow sprite
-        var arrow = new cc.Sprite(this.arrowFrame);
-        arrow.direction = this.direction;
-        arrow.speed = 300;
         var pos = this.getPosition();
-        arrow.setPosition(pos.x, pos.y);
+        var arrow = new Arrow(this.direction, pos);
         this.parent.addChild(arrow);
         this.arrows.push(arrow);
-        
-        // Rotate bow to face firing direction
         var angle = {up: 90, right: 0, down: -90, left: 180}[this.direction];
         this.bowSprite.setRotation(angle);
     },
@@ -155,28 +142,6 @@ var Hero = cc.Sprite.extend({
             });
         }
 
-        // Update arrows
-        for (var a = this.arrows.length - 1; a >= 0; a--) {
-            var arr = this.arrows[a];
-            var dx = 0, dy = 0;
-            switch (arr.direction) {
-                case 'up':    dy = arr.speed * dt; break;
-                case 'right': dx = arr.speed * dt; break;
-                case 'down':  dy = -arr.speed * dt; break;
-                case 'left':  dx = -arr.speed * dt; break;
-            }
-            var apos = arr.getPosition();
-            apos.x += dx; apos.y += dy;
-            arr.setPosition(apos);
-            
-            // Remove off-screen
-            if (apos.x < 0 || apos.x > cc.winSize.width || 
-                apos.y < 0 || apos.y > cc.winSize.height) {
-                arr.removeFromParent(); 
-                this.arrows.splice(a, 1);
-                continue;
-            }
-        }
     },
 
     startMoveRight: function() {

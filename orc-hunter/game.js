@@ -52,6 +52,7 @@ var GameLayer = cc.Layer.extend({
             arrowTexture,
             cc.rect(0, 0, arrowFrameWidth, arrowTexture.height)
         );
+        Arrow.arrowFrame = this.arrowFrame;
         this.arrows = [];
 
         this.scheduleUpdate();
