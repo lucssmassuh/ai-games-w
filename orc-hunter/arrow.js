@@ -23,6 +23,21 @@ var Arrow = cc.Sprite.extend({
             this.setTexture(Arrow.arrowFrame.getTexture());
             this.setTextureRect(Arrow.arrowFrame.getRect());
         }
+        // Rotate arrow so its tip (default up) points along firing direction
+        switch (direction) {
+            case 'up':
+                this.setRotation(0);
+                break;
+            case 'right':
+                this.setRotation(90);
+                break;
+            case 'down':
+                this.setRotation(180);
+                break;
+            case 'left':
+                this.setRotation(270);
+                break;
+        }
         this.direction = direction;
         this.setPosition(pos);
         this.scheduleUpdate();
