@@ -4,7 +4,7 @@
 // Arrow class for firing arrows. Sprite sheet contains 10 arrows aligned horizontally.
 var Arrow = cc.Sprite.extend({
     direction: null,
-    speed: 300,
+    speed: 600,
 
     ctor: function(direction, pos) {
         this._super();
@@ -41,20 +41,35 @@ var Arrow = cc.Sprite.extend({
         this.direction = direction;
         this.setPosition(pos);
         this.scheduleUpdate();
+
+        // Record launch height and initialize parabolic motion for horizontal shots
+        this.startY = pos.y;
+        if (direction === 'right' || direction === 'left') {
+            this.vx = this.speed * 0.7 * (direction === 'right' ? 1 : -1);
+            this.vy = this.speed * 0.5;      // initial upward lift
+            this.gravity = -500;             // gravity acceleration (pixels/sec²)
+        } else {
+            this.vx = 0;
+            this.vy = (direction === 'up' ? this.speed : -this.speed);
+            this.gravity = 0;
+        }
     },
 
     update: function(dt) {
-        var dx = 0, dy = 0;
-        switch (this.direction) {
-            case 'up':    dy = this.speed * dt; break;
-            case 'right': dx = this.speed * dt; break;
-            case 'down':  dy = -this.speed * dt; break;
-            case 'left':  dx = -this.speed * dt; break;
+        // Update position with velocity and gravity
+        if (this.gravity) {
+            this.vy += this.gravity * dt;
         }
         var pos = this.getPosition();
-        pos.x += dx;
-        pos.y += dy;
+        pos.x += this.vx * dt;
+        pos.y += this.vy * dt;
         this.setPosition(pos);
+
+        // Remove horizontal arrows once below launch height
+        if ((this.direction === 'right' || this.direction === 'left') && pos.y < this.startY) {
+            this.removeFromParent();
+            return;
+        }
 
         // Remove arrow when off-screen
         if (pos.x < 0 || pos.x > cc.winSize.width ||
