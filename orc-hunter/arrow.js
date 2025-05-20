@@ -1,13 +1,28 @@
 // arrow.js
 
+
 // Arrow class for firing arrows. Sprite sheet contains 10 arrows aligned horizontally.
 var Arrow = cc.Sprite.extend({
     direction: null,
     speed: 300,
 
     ctor: function(direction, pos) {
-        this._super(Arrow.arrowFrame.getTexture());
-        this.setTextureRect(Arrow.arrowFrame.getRect());
+        this._super();
+        if (!Arrow.arrowFrame) {
+            cc.loader.load({ url: "assets/arrow.png", type: "png" }, function(err, texture) {
+                if (err) {
+                    cc.error("Failed to load arrow texture:", err);
+                    return;
+                }
+                var frameWidth = texture.width / 10;
+                Arrow.arrowFrame = new cc.SpriteFrame(texture, cc.rect(0, 0, frameWidth, texture.height));
+                this.setTexture(Arrow.arrowFrame.getTexture());
+                this.setTextureRect(Arrow.arrowFrame.getRect());
+            }.bind(this));
+        } else {
+            this.setTexture(Arrow.arrowFrame.getTexture());
+            this.setTextureRect(Arrow.arrowFrame.getRect());
+        }
         this.direction = direction;
         this.setPosition(pos);
         this.scheduleUpdate();
@@ -33,14 +48,5 @@ var Arrow = cc.Sprite.extend({
         }
     }
 });
-
-(function() {
-    var arrowTexture = cc.textureCache.addImage("assets/arrow.png");
-    var frameWidth = arrowTexture.width / 10;
-    Arrow.arrowFrame = new cc.SpriteFrame(
-        arrowTexture,
-        cc.rect(0, 0, frameWidth, arrowTexture.height)
-    );
-})();
 
 cc.Arrow = Arrow;
