@@ -11,6 +11,46 @@ var GameLayer = cc.Layer.extend({
     ctor: function () {
         this._super();
 
+        // Initialize tilemap
+        this.tileSize = 32;
+        this.map = [
+            [12, 0, 7, 0, 12, 0, 7, 0, 12],
+            [7, 7, 7, 7, 7, 7, 7, 7, 7],
+            [7, 9, 7, 7, 7, 7, 7, 9, 7],
+            [7, 7, 7, 7, 1, 7, 7, 7, 7]
+        ];
+        // Map values now represent tile indices in the tileset (0 = no tile)
+
+        // Load and place castle tiles
+        var tileset = cc.textureCache.addImage("assets/castle-tileset.png");
+        var tileSize = this.tileSize;
+
+        for (var y = 0; y < this.map.length; y++) {
+            for (var x = 0; x < this.map[y].length; x++) {
+                var tileIndex = this.map[y][x];
+                if (tileIndex > 0) {
+                    // Calculate tile position in the tileset based on index
+                    var tilesPerRow = 8; // 8 columns in the tileset
+                    var tileX = ((tileIndex - 1) % tilesPerRow) * tileSize; // -1 because 0 = no tile
+                    var tileY = Math.floor((tileIndex - 1) / tilesPerRow) * tileSize;
+                    
+                    var tile = new cc.Sprite(
+                        tileset,
+                        cc.rect(tileX, tileY, tileSize, tileSize)
+                    );
+                    
+                    // Position the tile on screen with vertical offset (higher on screen)
+                    var verticalOffset = 100; // Adjust this value to move the castle up/down
+                    tile.setPosition(
+                        x * tileSize + tileSize/2,
+                        (this.map.length - y - 1) * tileSize + tileSize/2 + verticalOffset
+                    );
+                    this.addChild(tile, 0); // Add to bottom layer
+                }
+            }
+        }
+
+
         // Initialize hero
         this.hero = new Hero();
         this.addChild(this.hero);
