@@ -1,55 +1,30 @@
 var Orc = cc.Sprite.extend({
-    // Directions
-    DIRECTIONS: {
-        UP: 0,
-        RIGHT: 1,
-        DOWN: 2,
-        LEFT: 3
-    },
-
     // Animation properties
     ANIMATION_SPEED: 0.2, // 0.2 seconds per frame
     WALK_SPEED: 100, // pixels per second
-    DIRECTION_CHANGE_INTERVAL: 1.0, // Change direction every 1 second
 
     // Constructor
     ctor: function() {
         this._super();
         this.frames = [];
-        this.currentDirection = this.DIRECTIONS.DOWN;
-        this.schedule(this.changeDirection, this.DIRECTION_CHANGE_INTERVAL);
         this.scheduleUpdate();
     },
 
-    // Update method with debug
+    // Update position - always move left
     update: function(dt) {
-        // Debug current frame
-        var currentFrame = this.getCurrentFrameIndex();
-        cc.log('Current frame: ' + currentFrame);
-
-        // Update position based on direction
-        var dx = 0, dy = 0;
-        
-        switch (this.currentDirection) {
-            case this.DIRECTIONS.UP:
-                dy = this.WALK_SPEED * dt;
-                break;
-            case this.DIRECTIONS.RIGHT:
-                dx = this.WALK_SPEED * dt;
-                break;
-            case this.DIRECTIONS.DOWN:
-                dy = -this.WALK_SPEED * dt;
-                break;
-            case this.DIRECTIONS.LEFT:
-                dx = -this.WALK_SPEED * dt;
-                break;
-        }
-
-        // Update position
+        // Move left
         var pos = this.getPosition();
-        pos.x += dx;
-        pos.y += dy;
+        pos.x -= this.WALK_SPEED * dt;
         this.setPosition(pos);
+
+        // Remove orc if it goes off screen to the left
+        if (pos.x < -this.width) {
+            this.removeFromParent();
+            var index = this.orcs.indexOf(this);
+            if (index > -1) {
+                this.orcs.splice(index, 1);
+            }
+        }
     },
 
     // Initialize with texture
@@ -64,27 +39,31 @@ var Orc = cc.Sprite.extend({
         var frameWidth = texture.width / 3;
         var frameHeight = texture.height / 4;
 
-        // Create frames for each direction
-        for (var row = 0; row < 4; row++) {
-            var directionFrames = [];
-            for (var col = 0; col < 3; col++) {
-                // Calculate frame position
-                var x = col * frameWidth;
-                var y = (3 - row) * frameHeight;
-                
-                // Create frame with proper dimensions
-                var frame = cc.SpriteFrame.create(
-                    texture,
-                    cc.rect(x, y, frameWidth, frameHeight)
-                );
-                
-                // Debug logging to verify frame creation
-                cc.log('Frame ' + row + ',' + col + ': ' + 
-                       x + ',' + y + ' -> ' + 
-                       (x + frameWidth) + ',' + (y + frameHeight));
-                
-                directionFrames.push(frame);
-            }
+        // Only use the first row (top row) of the sprite sheet
+        var row = 3; // First row from the bottom (since y=0 is at the bottom)
+        var directionFrames = [];
+        
+        for (var col = 0; col < 3; col++) {
+            // Calculate frame position
+            var x = col * frameWidth;
+            var y = row * frameHeight;
+            
+            // Create frame with proper dimensions
+            var frame = cc.SpriteFrame.create(
+                texture,
+                cc.rect(x, y, frameWidth, frameHeight)
+            );
+            
+            // Debug logging to verify frame creation
+            cc.log('Frame ' + col + ': ' + 
+                   x + ',' + y + ' -> ' + 
+                   (x + frameWidth) + ',' + (y + frameHeight));
+            
+            directionFrames.push(frame);
+        }
+        
+        // Use the same frames for all directions since we only have one row
+        for (var i = 0; i < 4; i++) {
             this.frames.push(directionFrames);
         }
 
@@ -112,10 +91,12 @@ var Orc = cc.Sprite.extend({
         return 0;
     },
 
-    // Start animation for current direction
+
+
+    // Start animation for walking left
     startAnimation: function() {
-        // Create animation
-        var frames = this.frames[this.currentDirection];
+        // Create animation using the first row of frames (left movement)
+        var frames = this.frames[0]; // First row is for left movement
         var animation = new cc.Animation(frames, this.ANIMATION_SPEED);
         
         // Create and run action
@@ -127,47 +108,7 @@ var Orc = cc.Sprite.extend({
         
         // Run action with tag
         this.stopAllActions();
-        this.runAction(repeat.clone(), 1); // Tag the action with 1
-    },
-
-    // Change direction randomly
-    changeDirection: function() {
-        // Get new direction (0-3)
-        this.currentDirection = Math.floor(Math.random() * 4);
-        
-        // Start new animation
-        this.startAnimation();
-    },
-
-    // Update position based on direction
-    update: function(dt) {
-        // Debug current frame
-        var currentFrame = this.getCurrentFrameIndex();
-        cc.log('Current frame: ' + currentFrame);
-
-        var dx = 0, dy = 0;
-        
-        // Calculate movement based on direction
-        switch (this.currentDirection) {
-            case this.DIRECTIONS.UP:
-                dy = this.WALK_SPEED * dt;
-                break;
-            case this.DIRECTIONS.RIGHT:
-                dx = this.WALK_SPEED * dt;
-                break;
-            case this.DIRECTIONS.DOWN:
-                dy = -this.WALK_SPEED * dt;
-                break;
-            case this.DIRECTIONS.LEFT:
-                dx = -this.WALK_SPEED * dt;
-                break;
-        }
-
-        // Update position
-        var pos = this.getPosition();
-        pos.x += dx;
-        pos.y += dy;
-        this.setPosition(pos);
+        this.runAction(repeat, 1); // Tag the action with 1
     }
 });
 

@@ -54,18 +54,32 @@ var GameLayer = cc.Layer.extend({
         this.hero = new Hero();
         this.addChild(this.hero);
 
-        // Spawn 5 orcs using the Orc class
+        // Spawn orcs at the right side of the screen
         var orcTexture = cc.textureCache.addImage("assets/orc.png");
-        for (var i = 0; i < 5; i++) {
+        var verticalOffset = 100; // Same as castle's vertical offset
+        var orcY = verticalOffset + 50; // Slightly above the bottom of the castle
+        
+        // Function to spawn a single orc
+        var spawnOrc = function() {
             var o = new Orc();
             o.init(orcTexture);
             o.setPosition(
-                Math.random() * cc.winSize.width,
-                Math.random() * cc.winSize.height
+                cc.winSize.width + 50, // Start just off-screen to the right
+                orcY // Fixed Y position at the bottom of the castle
             );
             this.addChild(o);
             this.orcs.push(o);
-        }
+            
+            // Schedule next orc spawn
+            if (this.orcs.length < 5) {
+                this.scheduleOnce(function() {
+                    spawnOrc.call(this);
+                }, 2.0); // Spawn a new orc every 2 seconds
+            }
+        }.bind(this);
+        
+        // Start spawning orcs
+        spawnOrc();
 
         // Prepare arrow projectile frame (first of 10)
         var arrowTexture = cc.textureCache.addImage("assets/arrow.png");
