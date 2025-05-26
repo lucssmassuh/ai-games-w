@@ -5,9 +5,7 @@ var Hero = cc.Sprite.extend({
     moveFrames: [],
     isMoving: false,
     direction: 'down',
-    bowSprite: null,
     keyPressed: {},
-    arrows: [],
 
     ctor: function() {
         this._super();
@@ -37,18 +35,6 @@ var Hero = cc.Sprite.extend({
         this.setAnchorPoint(0.5, 0.5);  // Center anchor point for hero
         this.setScale(1.5);
 
-        // Initialize bow sprite
-        this.initBowSprite();
-
-        // Position bow at center of hero sprite
-        // this.scheduleOnce(function() {
-        //     if (this.bowSprite) {
-        //         this.bowSprite.setPosition(
-        //             this.getContentSize().width / 2,
-        //             this.getContentSize().height / 2
-        //         );
-        //     }
-        // }.bind(this), 0.1);
 
 
         // Initialize event listeners
@@ -61,39 +47,7 @@ var Hero = cc.Sprite.extend({
         this.scheduleUpdate();
     },
 
-    initBowSprite: function() {
-        // Create sprite frame for the first frame of bow.png
-        var bowTexture = cc.textureCache.addImage("assets/bow.png");
-        var bowFrameWidth = 55;  // Each frame is 55 pixels wide
-        var bowFrameHeight = 95;  // Fixed height
-        var bowRect = cc.rect(0, 0, bowFrameWidth, bowFrameHeight);
 
-        // Create sprite frame from texture
-        var bowFrame = new cc.SpriteFrame(bowTexture, bowRect);
-        
-        // Create sprite from frame
-        this.bowSprite = new cc.Sprite(bowFrame);
-        this.bowSprite.setScale(0.5);
-        // Set anchor point to center of first frame (x=27.5, y=47.5)
-        this.bowSprite.setAnchorPoint(27.5 / bowFrameWidth, 47.5 / bowFrameHeight);
-        this.addChild(this.bowSprite, 1);
-        this.bowSprite.setPosition(
-            this.getContentSize().width / 2,
-            this.getContentSize().height / 2
-        );
-        this.bowSprite.setVisible(true);
-
-        // Debug logging
-        console.log('Bow sprite initialized with frame:', bowRect);
-        console.log('Frame size:', bowFrame.getRect());
-        console.log('Anchor point:', this.bowSprite.getAnchorPoint());
-        console.log('Initial position:', this.bowSprite.getPosition());
-
-
-
-        // Ensure bow stays centered when rotating
-        this.bowSprite.setRotation(0);
-    },
 
     onKeyPressed: function(keyCode, event) {
         this.keyPressed[keyCode] = true;
@@ -114,12 +68,11 @@ var Hero = cc.Sprite.extend({
         this.parent.addChild(arrow);
         this.arrows.push(arrow);
         var angle = {up: 90, right: 0, down: -90, left: 180}[this.direction];
-        this.bowSprite.setRotation(angle);
+        // Bow removed
     },
 
     update: function(dt) {
-        // Keep bow aligned to hero
-        
+
         // Handle movement
         if (this.keyPressed[cc.KEY.right] && !this.isMoving) {
             this.startMoveRight();
@@ -147,8 +100,7 @@ var Hero = cc.Sprite.extend({
     startMoveRight: function() {
         this.isMoving = true;
         this.direction = 'right';
-        this.bowSprite.setRotation(0);
-        this.bowSprite.setLocalZOrder(1);
+        // Bow removed
         // Stop any current actions
         this.stopAllActions();
         
@@ -188,8 +140,7 @@ var Hero = cc.Sprite.extend({
     startMoveLeft: function() {
         this.isMoving = true;
         this.direction = 'left';
-        this.bowSprite.setRotation(180);
-        this.bowSprite.setLocalZOrder(1);
+        // Bow removed
         // Stop any current actions
         this.stopAllActions();
         
@@ -229,8 +180,7 @@ var Hero = cc.Sprite.extend({
     startMoveUp: function() {
         this.isMoving = true;
         this.direction = 'up';
-        this.bowSprite.setRotation(-90);
-        this.bowSprite.setLocalZOrder(-1);
+        // Bow removed
         // Stop any current actions
         this.stopAllActions();
         
@@ -270,8 +220,7 @@ var Hero = cc.Sprite.extend({
     startMoveDown: function() {
         this.isMoving = true;
         this.direction = 'down';
-        this.bowSprite.setRotation(90);
-        this.bowSprite.setLocalZOrder(1);
+        // Bow removed
         // Stop any current actions
         this.stopAllActions();
         

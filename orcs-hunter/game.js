@@ -6,7 +6,6 @@ var GameLayer = cc.Layer.extend({
     orcFrames: [],
     arrows: [],
     arrowFrame: null,
-    bowSprite: null,
 
     ctor: function () {
         this._super();
@@ -166,9 +165,7 @@ var GameLayer = cc.Layer.extend({
         arrow.setPosition(pos.x, pos.y);
         this.addChild(arrow);
         this.arrows.push(arrow);
-        // Rotate bow to face firing direction
-        var angle = {up: 90, right: 0, down: -90, left: 180}[this.direction];
-        this.bowSprite.setRotation(angle);
+        // Bow removed
     }
 });
 
