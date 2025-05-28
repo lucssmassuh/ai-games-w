@@ -73,15 +73,11 @@ var Arrow = cc.Sprite.extend({
             this.setRotation(deg);
         }
 
-        // Remove horizontal arrows once below launch height
-        if ((this.direction === 'right' || this.direction === 'left') && pos.y < this.startY) {
-            this.removeFromParent();
-            return;
-        }
-
-        // Remove arrow when off-screen
-        if (pos.x < 0 || pos.x > cc.winSize.width ||
-            pos.y < 0 || pos.y > cc.winSize.height) {
+        // Remove arrow when completely off-screen
+        var arrowWidth = this.getBoundingBox().width;
+        var arrowHeight = this.getBoundingBox().height;
+        if (pos.x < -arrowWidth || pos.x > cc.winSize.width + arrowWidth ||
+            pos.y < -arrowHeight || pos.y > cc.winSize.height + arrowHeight) {
             this.removeFromParent();
         }
     }
