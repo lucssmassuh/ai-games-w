@@ -9,6 +9,7 @@ var Hero = cc.Sprite.extend({
 
     ctor: function() {
         this._super();
+        this.arrows = []; // Initialize arrows array
         this.initHero();
     },
 
