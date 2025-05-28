@@ -105,6 +105,10 @@ var Orc = cc.Sprite.extend({
         return 0;
     },
 
+    checkCollisionWith: function(sprite) {
+        return cc.rectIntersectsRect(this.getBoundingBox(), sprite.getBoundingBox());
+    },
+
 
 
     // Play death animation

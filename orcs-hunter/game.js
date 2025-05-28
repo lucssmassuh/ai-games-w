@@ -111,6 +111,7 @@ var GameLayer = cc.Layer.extend({
         );
         Arrow.arrowFrame = this.arrowFrame;
         this.arrows = [];
+        this.hero.arrows = this.arrows;
         
         // Set arrow z-order to be above hero but below orcs
         Arrow.zOrder = 1;
@@ -122,57 +123,30 @@ var GameLayer = cc.Layer.extend({
 
     update: function (dt) {
 
-        // Update arrows
+        // Update arrows with motion, including gravity, rotation, and removal handled by Arrow.update
         for (var a = this.arrows.length - 1; a >= 0; a--) {
             var arr = this.arrows[a];
-            var dx = 0, dy = 0;
-            switch (arr.direction) {
-                case 'up':    dy = arr.speed * dt; break;
-                case 'right': dx = arr.speed * dt; break;
-                case 'down':  dy = -arr.speed * dt; break;
-                case 'left':  dx = -arr.speed * dt; break;
-            }
-            var apos = arr.getPosition();
-            apos.x += dx; apos.y += dy;
-            arr.setPosition(apos);
-            // Remove off-screen
-            if (apos.x < 0 || apos.x > cc.winSize.width || apos.y < 0 || apos.y > cc.winSize.height) {
-                arr.removeFromParent(); this.arrows.splice(a,1);
+            arr.update(dt);
+            // Remove arrow from tracking if it was removed from the scene
+            if (!arr.getParent()) {
+                this.arrows.splice(a, 1);
                 continue;
             }
             // Check collision with orcs
             for (var o = this.orcs.length - 1; o >= 0; o--) {
                 var orc = this.orcs[o];
-                
-                // Skip if orc is already dying
                 if (orc.isDying) continue;
-                
-                // Get bounding boxes in world space
-                var arrowBox = arr.getBoundingBox();
-                var orcBox = orc.getBoundingBox();
-                
-                // Draw debug rectangles (visible in browser's debug overlay)
-                this.drawDebugRect(arrowBox, cc.color(255, 0, 0, 180)); // Red for arrow
-                this.drawDebugRect(orcBox, cc.color(0, 255, 0, 180));   // Green for orc
-                
-                // Simple distance check first (faster than full rect intersection)
-                var arrowCenter = cc.p(arrowBox.x + arrowBox.width/2, arrowBox.y + arrowBox.height/2);
-                var orcCenter = cc.p(orcBox.x + orcBox.width/2, orcBox.y + orcBox.height/2);
-                var dx = arrowCenter.x - orcCenter.x;
-                var dy = arrowCenter.y - orcCenter.y;
-                var distance = Math.sqrt(dx*dx + dy*dy);
-                var minDistance = (arrowBox.width + orcBox.width) * 0.4; // 40% of combined sizes
-                
-                if (distance < minDistance) {
-                    // Remove the arrow
+                var collision = typeof orc.checkCollisionWith === 'function'
+                                ? orc.checkCollisionWith(arr)
+                                : orc.getBoundingBox().intersects(arr.getBoundingBox());
+                if (collision) {
+                    cc.log(
+                        'Collision detected: Arrow at (' + arr.getPosition().x + ',' + arr.getPosition().y +
+                        ') hit Orc at (' + orc.getPosition().x + ',' + orc.getPosition().y + ')'
+                    );
                     arr.removeFromParent();
-                    this.arrows.splice(a,1);
-                    
-                    // Trigger orc death animation
+                    this.arrows.splice(a, 1);
                     orc.die();
-                    
-                    // Remove the orc from the array (it will remove itself after animation)
-                    this.orcs.splice(o,1);
                     break;
                 }
             }
