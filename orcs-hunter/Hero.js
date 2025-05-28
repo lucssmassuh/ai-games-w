@@ -11,6 +11,11 @@ var Hero = cc.Sprite.extend({
         this._super();
         this.arrows = []; // Initialize arrows array
         this.isShooting = false; // Initialize shooting state
+        this.chargeStartTime = 0; // When charging started
+        this.isCharging = false; // If currently charging a shot
+        this.maxChargeTime = 1.5; // Maximum charge time in seconds
+        this.minArrowSpeed = 300; // Minimum arrow speed
+        this.maxArrowSpeed = 1000; // Maximum arrow speed
         this.initHero();
     },
 
@@ -60,18 +65,102 @@ var Hero = cc.Sprite.extend({
     onKeyPressed: function(keyCode, event) {
         this.keyPressed[keyCode] = true;
         
-        // Check if space bar is pressed and shoot arrow
-        if (keyCode === cc.KEY.space) {
-            this.shootArrow();
+        // Start charging when space is pressed
+        if (keyCode === cc.KEY.space && !this.isShooting && !this.isCharging) {
+            this.startCharging();
         }
     },
-
+    
     onKeyReleased: function(keyCode, event) {
         this.keyPressed[keyCode] = false;
+        
+        // Shoot when space is released if we were charging
+        if (keyCode === cc.KEY.space && this.isCharging) {
+            this.releaseArrow();
+        }
     },
-
-    shootArrow: function() {
-        // Don't shoot if already shooting
+    
+    startCharging: function() {
+        if (this.isShooting) return;
+        
+        this.isCharging = true;
+        this.chargeStartTime = Date.now() / 1000; // Store start time in seconds
+        
+        // Set to frame 1 (second frame) for charging
+        this.setSpriteFrame(this.frames[3]);
+    },
+    
+    releaseArrow: function() {
+        if (!this.isCharging) return;
+        
+        // Calculate charge duration (0 to maxChargeTime)
+        var chargeTime = (Date.now() / 1000) - this.chargeStartTime;
+        chargeTime = Math.min(Math.max(0, chargeTime), this.maxChargeTime);
+        
+        // Calculate speed based on charge time (ease-out curve)
+        var t = chargeTime / this.maxChargeTime;
+        var speed = this.minArrowSpeed + (this.maxArrowSpeed - this.minArrowSpeed) * t * t;
+        
+        // Shoot with calculated speed
+        this.shootArrow(speed);
+        
+        // Reset charging state and return to frame 0 (standing)
+        this.isCharging = false;
+        this.setScale(1.8); // Reset scale
+        this.setSpriteFrame(this.frames[0]); // Return to standing frame
+    },
+    
+    releaseArrow: function() {
+        if (!this.isCharging) return;
+        
+        // Calculate charge duration (0 to maxChargeTime)
+        var chargeTime = (Date.now() / 1000) - this.chargeStartTime;
+        chargeTime = Math.min(Math.max(0, chargeTime), this.maxChargeTime);
+        
+        // Calculate speed based on charge time (ease-out curve)
+        var t = chargeTime / this.maxChargeTime;
+        var speed = this.minArrowSpeed + (this.maxArrowSpeed - this.minArrowSpeed) * t * t;
+        
+        // Shoot with calculated speed
+        this.shootArrow(speed);
+        
+        // Reset charging state and return to frame 0 (standing)
+        this.isCharging = false;
+        this.setColor(cc.color(255, 255, 255)); // Reset color
+        this.setScale(1.8); // Reset scale
+        this.setSpriteFrame(this.frames[0]); // Return to standing frame
+    },
+    
+    update: function(dt) {
+        // Handle movement - only horizontal now
+        if (this.keyPressed[cc.KEY.right]) {
+            if (!this.isMoving || this.direction !== 'right') {
+                this.startMoveRight();
+            }
+        } else if (this.keyPressed[cc.KEY.left]) {
+            if (!this.isMoving || this.direction !== 'left') {
+                this.startMoveLeft();
+            }
+        } else if (this.isMoving && !this.isCharging) {  // Don't stop moving if charging
+            // No movement keys pressed but we're still moving - stop movement
+            this.stopMoving();
+        }
+        
+        // Visual feedback for charging (pulse effect)
+        if (this.isCharging) {
+            var chargeTime = (Date.now() / 1000) - this.chargeStartTime;
+            var t = Math.min(chargeTime / this.maxChargeTime, 1);
+            var pulse = 1 + Math.sin(chargeTime * 10) * 0.05 * t; // Subtle pulsing effect
+            this.setScale(1.8 * pulse);
+            
+            // Ensure we're using frame 1 while charging
+            if (this.getSpriteFrame() !== this.frames[1]) {
+                this.setSpriteFrame(this.frames[1]);
+            }
+        }
+    },
+    
+    shootArrow: function(speed) {
         if (this.isShooting) return;
         
         this.isShooting = true;
@@ -88,9 +177,9 @@ var Hero = cc.Sprite.extend({
         var sequence = cc.sequence(
             animate,
             cc.callFunc(function() {
-                // Create and fire the arrow at the end of the shooting animation
+                // Create and fire the arrow with calculated speed
                 var pos = this.getPosition();
-                var arrow = new Arrow(this.direction, pos);
+                var arrow = new Arrow(this.direction, pos, speed);
                 this.parent.addChild(arrow);
                 this.arrows.push(arrow);
                 
@@ -113,7 +202,7 @@ var Hero = cc.Sprite.extend({
         
         this.runAction(sequence);
     },
-
+    
     update: function(dt) {
         // Handle movement - only horizontal now
         if (this.keyPressed[cc.KEY.right]) {
@@ -127,6 +216,14 @@ var Hero = cc.Sprite.extend({
         } else if (this.isMoving) {
             // No movement keys pressed but we're still moving - stop movement
             this.stopMoving();
+        }
+        
+        // Visual feedback for charging (pulse effect)
+        if (this.isCharging) {
+            var chargeTime = (Date.now() / 1000) - this.chargeStartTime;
+            var t = Math.min(chargeTime / this.maxChargeTime, 1);
+            var pulse = 1 + Math.sin(chargeTime * 10) * 0.05 * t; // Subtle pulsing effect
+            this.setScale(1.8 * pulse);
         }
     },
 

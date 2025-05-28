@@ -1,12 +1,18 @@
 // arrow.js
 
-
-// Arrow class for firing arrows. Sprite sheet contains 10 arrows aligned horizontally.
+// Arrow class for firing arrows with variable speed based on charge time
 var Arrow = cc.Sprite.extend({
     direction: null,
-    speed: 600,
+    speed: 0, // Will be set when creating the arrow
+    vx: 0,
+    vy: 0,
+    gravity: 800, // Gravity effect (pixels/second²)
 
-    ctor: function(direction, pos) {
+
+    ctor: function(direction, pos, speed = 600) {
+        this._super();
+        this.speed = speed; // Set the arrow speed based on charge time
+        
         // Load the texture first
         var texture = cc.textureCache.addImage("assets/arrow.png");
         if (!texture) {
