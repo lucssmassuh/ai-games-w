@@ -118,8 +118,8 @@ var Hero = cc.Sprite.extend({
         // Draw fill based on progress (0 to 1)
         var fillWidth = Math.max(0, (this.chargeBar.width - this.chargeBar.padding * 2) * progress);
         if (fillWidth > 0) {
-            var fillX = bgX + this.chargeBar.padding;
-            var fillY = bgY + this.chargeBar.padding;
+            var fillX = -this.chargeBar.width/2 + this.chargeBar.padding; // Align with background left edge + padding
+            var fillY = -this.chargeBar.height/2 + this.chargeBar.padding; // Center vertically with padding
             this.chargeBar.fill.drawRect(
                 cc.p(fillX, fillY),
                 cc.p(fillX + fillWidth, fillY + (this.chargeBar.height - this.chargeBar.padding * 2)),
