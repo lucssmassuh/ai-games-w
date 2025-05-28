@@ -1,7 +1,7 @@
 var Orc = cc.Sprite.extend({
     // Animation properties
-    ANIMATION_SPEED: 0.2, // 0.2 seconds per frame
-    WALK_SPEED: 100, // pixels per second
+    ANIMATION_SPEED: 0.1, // 0.2 seconds per frame
+    WALK_SPEED: 20, // pixels per second
 
     // Constructor
     ctor: function(gameLayer) {
@@ -35,27 +35,29 @@ var Orc = cc.Sprite.extend({
         // Initialize sprite
         this.initWithTexture(texture);
         
-        // Set scale
-        this.setScale(1.5);
+        // Set scale to maintain original size
+        this.setScale(1);
 
-        // Create frames from sprite sheet
-        var frameWidth = texture.width / 3;
-        var frameHeight = texture.height / 4;
+        // Create frames from sprite sheet (10 columns x 5 rows)
+        var frameWidth = texture.width / 10; // 10 columns
+        var frameHeight = texture.height / 5; // 5 rows
 
-        // Only use the first row (top row) of the sprite sheet
-        var row = 3; // First row from the bottom (since y=0 is at the bottom)
+        // Use the 3rd row from the bottom (which is row index 1 since y=0 is bottom)
+        var row = 2; // 3rd from bottom (rows: 4=bottom, 3, 2, 1, 0=top)
         var directionFrames = [];
         
-        for (var col = 0; col < 3; col++) {
+        // Use first 3 frames from the selected row for walking animation
+        for (var col = 0; col < 10; col++) {
             // Calculate frame position
             var x = col * frameWidth;
             var y = row * frameHeight;
             
-            // Create frame with proper dimensions
+            // Create frame with proper dimensions, cropping 5 pixels from bottom
             var frame = cc.SpriteFrame.create(
                 texture,
-                cc.rect(x, y, frameWidth, frameHeight)
+                cc.rect(x, y, frameWidth, frameHeight - 5) // Crop 5 pixels from bottom
             );
+            frame.setOffset(cc.p(0, 5)); // Adjust offset to compensate for the crop
             
             // Debug logging to verify frame creation
             cc.log('Frame ' + col + ': ' + 
@@ -65,7 +67,7 @@ var Orc = cc.Sprite.extend({
             directionFrames.push(frame);
         }
         
-        // Use the same frames for all directions since we only have one row
+        // Use the same frames for all directions since we only have one row of animation
         for (var i = 0; i < 4; i++) {
             this.frames.push(directionFrames);
         }

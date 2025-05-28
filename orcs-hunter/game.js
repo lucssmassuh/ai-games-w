@@ -58,7 +58,7 @@ var GameLayer = cc.Layer.extend({
         // Spawn orcs at the right side of the screen
         var orcTexture = cc.textureCache.addImage("assets/orc.png");
         var verticalOffset = 100; // Same as castle's vertical offset
-        var orcY = verticalOffset + 50; // Slightly above the bottom of the castle
+        var orcY = verticalOffset + 16; // Align with the base of the castle (verticalOffset + tileSize/2)
         
         // Function to spawn a single orc
         var spawnOrc = function() {
