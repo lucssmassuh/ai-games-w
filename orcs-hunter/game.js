@@ -7,8 +7,28 @@ var GameLayer = cc.Layer.extend({
     arrows: [],
     arrowFrame: null,
 
+    // Draw debug rectangle for collision visualization
+    drawDebugRect: function(rect, color) {
+        if (!this.debugNode) {
+            this.debugNode = new cc.DrawNode();
+            this.addChild(this.debugNode, 999); // Add on top of everything
+        }
+        
+        // Draw rectangle border
+        this.debugNode.drawRect(
+            cc.p(rect.x, rect.y),
+            cc.p(rect.x + rect.width, rect.y + rect.height),
+            color,
+            1,
+            color
+        );
+    },
+
     ctor: function () {
         this._super();
+        
+        // Initialize debug node (will be created when needed)
+        this.debugNode = null;
 
         // Initialize tilemap
         this.tileSize = 32;
@@ -123,10 +143,36 @@ var GameLayer = cc.Layer.extend({
             // Check collision with orcs
             for (var o = this.orcs.length - 1; o >= 0; o--) {
                 var orc = this.orcs[o];
-                if (cc.rectIntersectsRect(arr.getBoundingBox(), orc.getBoundingBox())) {
-                    // remove orc and arrow
-                    orc.removeFromParent(); this.orcs.splice(o,1);
-                    arr.removeFromParent(); this.arrows.splice(a,1);
+                
+                // Skip if orc is already dying
+                if (orc.isDying) continue;
+                
+                // Get bounding boxes in world space
+                var arrowBox = arr.getBoundingBox();
+                var orcBox = orc.getBoundingBox();
+                
+                // Draw debug rectangles (visible in browser's debug overlay)
+                this.drawDebugRect(arrowBox, cc.color(255, 0, 0, 180)); // Red for arrow
+                this.drawDebugRect(orcBox, cc.color(0, 255, 0, 180));   // Green for orc
+                
+                // Simple distance check first (faster than full rect intersection)
+                var arrowCenter = cc.p(arrowBox.x + arrowBox.width/2, arrowBox.y + arrowBox.height/2);
+                var orcCenter = cc.p(orcBox.x + orcBox.width/2, orcBox.y + orcBox.height/2);
+                var dx = arrowCenter.x - orcCenter.x;
+                var dy = arrowCenter.y - orcCenter.y;
+                var distance = Math.sqrt(dx*dx + dy*dy);
+                var minDistance = (arrowBox.width + orcBox.width) * 0.4; // 40% of combined sizes
+                
+                if (distance < minDistance) {
+                    // Remove the arrow
+                    arr.removeFromParent();
+                    this.arrows.splice(a,1);
+                    
+                    // Trigger orc death animation
+                    orc.die();
+                    
+                    // Remove the orc from the array (it will remove itself after animation)
+                    this.orcs.splice(o,1);
                     break;
                 }
             }

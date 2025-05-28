@@ -2,6 +2,7 @@ var Orc = cc.Sprite.extend({
     // Animation properties
     ANIMATION_SPEED: 0.1, // 0.2 seconds per frame
     WALK_SPEED: 20, // pixels per second
+    isDying: false, // Track if orc is in dying state
 
     // Constructor
     ctor: function(gameLayer) {
@@ -13,6 +14,9 @@ var Orc = cc.Sprite.extend({
 
     // Update position - always move left
     update: function(dt) {
+        // Don't update position if dying
+        if (this.isDying) return;
+
         // Move left
         var pos = this.getPosition();
         pos.x -= this.WALK_SPEED * dt;
@@ -35,14 +39,19 @@ var Orc = cc.Sprite.extend({
         // Initialize sprite
         this.initWithTexture(texture);
         
+        // Store texture and frame dimensions for death animation
+        this.texture = texture;
+        this.frameWidth = texture.width / 10; // 10 columns
+        this.frameHeight = texture.height / 5; // 5 rows
+        
         // Set scale to maintain original size
         this.setScale(1);
 
         // Create frames from sprite sheet (10 columns x 5 rows)
-        var frameWidth = texture.width / 10; // 10 columns
-        var frameHeight = texture.height / 5; // 5 rows
+        var frameWidth = this.frameWidth;
+        var frameHeight = this.frameHeight;
 
-        // Use the 3rd row from the bottom (which is row index 1 since y=0 is bottom)
+        // Use the 3rd row from the bottom (which is row index 2 since y=0 is bottom)
         var row = 2; // 3rd from bottom (rows: 4=bottom, 3, 2, 1, 0=top)
         var directionFrames = [];
         
@@ -98,6 +107,45 @@ var Orc = cc.Sprite.extend({
 
 
 
+    // Play death animation
+    die: function() {
+        if (this.isDying) return;
+        
+        this.isDying = true;
+        this.stopAllActions();
+        
+        // Create death animation frames (row 4, which is index 0 since y=0 is bottom)
+        var deathFrames = [];
+        for (var col = 0; col < 10; col++) {
+            var frame = cc.SpriteFrame.create(
+                this.texture,
+                cc.rect(col * this.frameWidth, 0, this.frameWidth, this.frameHeight - 5) // Row 4 is at y=0
+            );
+            frame.setOffset(cc.p(0, 5));
+            deathFrames.push(frame);
+        }
+        
+        // Create and run death animation
+        var deathAnim = new cc.Animation(deathFrames, 0.1, 1);
+        var deathAnimate = new cc.Animate(deathAnim);
+        
+        // After animation completes, remove the orc
+        var sequence = cc.sequence(
+            deathAnimate,
+            cc.callFunc(function() {
+                this.removeFromParent();
+                if (this.gameLayer && this.gameLayer.orcs) {
+                    var index = this.gameLayer.orcs.indexOf(this);
+                    if (index > -1) {
+                        this.gameLayer.orcs.splice(index, 1);
+                    }
+                }
+            }, this)
+        );
+        
+        this.runAction(sequence);
+    },
+    
     // Start animation for walking left
     startAnimation: function() {
         // Create animation using the first row of frames (left movement)
