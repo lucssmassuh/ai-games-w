@@ -15,19 +15,22 @@ var Hero = cc.Sprite.extend({
     initHero: function() {
         // Initialize hero
         var texture = cc.textureCache.addImage("assets/hero.png");
-        var frameWidth = texture.width / 4;
-        var frameHeight = texture.height / 4;
+        this.frameWidth = texture.width / 7; // 7 frames in a single row
+        this.frameHeight = texture.height;
 
         // Load all frames
-        for (var y = 0; y < 4; y++) {
-            for (var x = 0; x < 4; x++) {
-                var frame = new cc.SpriteFrame(
-                    texture,
-                    cc.rect(x * frameWidth, y * frameHeight, frameWidth, frameHeight)
-                );
-                this.frames.push(frame);
-            }
+        for (var x = 0; x < 7; x++) {
+            var frame = new cc.SpriteFrame(
+                texture,
+                cc.rect(x * this.frameWidth, 0, this.frameWidth, this.frameHeight)
+            );
+            this.frames.push(frame);
         }
+        
+        // Create walking animation frames (only frames 1 and 2, frame 0 is for standing)
+        this.walkFrames = [this.frames[1], this.frames[2]];
+        // Create shooting animation frames (frames 3,4)
+        this.shootFrames = [this.frames[3], this.frames[4]];
 
         // Set initial sprite
         this.setSpriteFrame(this.frames[0]);
@@ -73,190 +76,85 @@ var Hero = cc.Sprite.extend({
     },
 
     update: function(dt) {
+        // Handle movement - only horizontal now
+        if (this.keyPressed[cc.KEY.right]) {
+            if (!this.isMoving || this.direction !== 'right') {
+                this.startMoveRight();
+            }
+        } else if (this.keyPressed[cc.KEY.left]) {
+            if (!this.isMoving || this.direction !== 'left') {
+                this.startMoveLeft();
+            }
+        } else if (this.isMoving) {
+            // No movement keys pressed but we're still moving - stop movement
+            this.stopMoving();
+        }
+    },
 
-        // Handle movement
-        if (this.keyPressed[cc.KEY.right] && !this.isMoving) {
-            this.startMoveRight();
-        }
-        if (this.keyPressed[cc.KEY.left] && !this.isMoving) {
-            this.startMoveLeft();
-        }
-        if (this.keyPressed[cc.KEY.up] && !this.isMoving) {
-            this.startMoveUp();
-        }
-        if (this.keyPressed[cc.KEY.down] && !this.isMoving) {
-            this.startMoveDown();
-        }
-
-        if (this.isMoving) {
-            // Log hero position
-            console.log('Hero position:', {
-                x: this.getPosition().x,
-                y: this.getPosition().y
-            });
-        }
-
+    stopMoving: function() {
+        this.isMoving = false;
+        this.stopAllActions();
+        this.setSpriteFrame(this.frames[0]); // Return to first frame
+    },
+    
+    startWalkingAnimation: function() {
+        // Stop any existing animations
+        this.stopAllActions();
+        
+        // Create and start the walking animation loop (only between frames 1 and 2)
+        var walkAnim = new cc.Animation(this.walkFrames, 0.2);
+        walkAnim.setLoops(cc.REPEAT_FOREVER);
+        this.walkAction = cc.animate(walkAnim);
+        this.runAction(this.walkAction);
     },
 
     startMoveRight: function() {
         this.isMoving = true;
         this.direction = 'right';
-        // Bow removed
-        // Stop any current actions
-        this.stopAllActions();
+        this.setFlippedX(false);
         
-        // Create movement animation
-        var texture = cc.textureCache.addImage("assets/hero.png");
-        var frameWidth = texture.width / 4;
-        var frameHeight = texture.height / 4;
-
-        this.moveFrames = [];
-        var row = 3; // 4th row (index 3)
-
-        for (var x = 0; x < 4; x++) {
-            var frame = new cc.SpriteFrame(
-                texture,
-                cc.rect(x * frameWidth, row * frameHeight, frameWidth, frameHeight)
-            );
-            this.moveFrames.push(frame);
-        }
-
-        var moveAnim = new cc.Animation(this.moveFrames, 0.1);
-        var animate = cc.animate(moveAnim);
+        // Start the walking animation immediately
+        this.startWalkingAnimation();
         
-        // Create movement action
-        var moveAction = cc.moveBy(0.5, cc.p(50, 0));
+        // Move right
+        var moveAction = cc.moveBy(1, cc.p(100, 0));
         
-        // Create sequence that moves and animates
+        // Create sequence for movement
         var sequence = cc.sequence(
-            cc.spawn(animate, moveAction),
+            moveAction,
             cc.callFunc(function() {
-                this.isMoving = false;
+                this.stopMoving();
             }, this)
         );
         
+        // Run movement sequence
         this.runAction(sequence);
     },
 
     startMoveLeft: function() {
         this.isMoving = true;
         this.direction = 'left';
-        // Bow removed
-        // Stop any current actions
-        this.stopAllActions();
+        this.setFlippedX(true);
         
-        // Create movement animation
-        var texture = cc.textureCache.addImage("assets/hero.png");
-        var frameWidth = texture.width / 4;
-        var frameHeight = texture.height / 4;
-
-        this.moveFrames = [];
-        var row = 2; // 3rd row (index 2)
-
-        for (var x = 0; x < 4; x++) {
-            var frame = new cc.SpriteFrame(
-                texture,
-                cc.rect(x * frameWidth, row * frameHeight, frameWidth, frameHeight)
-            );
-            this.moveFrames.push(frame);
-        }
-
-        var moveAnim = new cc.Animation(this.moveFrames, 0.1);
-        var animate = cc.animate(moveAnim);
+        // Start the walking animation immediately
+        this.startWalkingAnimation();
         
-        // Create movement action
-        var moveAction = cc.moveBy(0.5, cc.p(-50, 0));
+        // Move left
+        var moveAction = cc.moveBy(1, cc.p(-100, 0));
         
-        // Create sequence that moves and animates
+        // Create sequence for movement
         var sequence = cc.sequence(
-            cc.spawn(animate, moveAction),
+            moveAction,
             cc.callFunc(function() {
-                this.isMoving = false;
+                this.stopMoving();
             }, this)
         );
         
+        // Run movement sequence
         this.runAction(sequence);
     },
 
-    startMoveUp: function() {
-        this.isMoving = true;
-        this.direction = 'up';
-        // Bow removed
-        // Stop any current actions
-        this.stopAllActions();
-        
-        // Create movement animation
-        var texture = cc.textureCache.addImage("assets/hero.png");
-        var frameWidth = texture.width / 4;
-        var frameHeight = texture.height / 4;
-
-        this.moveFrames = [];
-        var row = 1; // 2nd row (index 1)
-
-        for (var x = 0; x < 4; x++) {
-            var frame = new cc.SpriteFrame(
-                texture,
-                cc.rect(x * frameWidth, row * frameHeight, frameWidth, frameHeight)
-            );
-            this.moveFrames.push(frame);
-        }
-
-        var moveAnim = new cc.Animation(this.moveFrames, 0.1);
-        var animate = cc.animate(moveAnim);
-        
-        // Create movement action
-        var moveAction = cc.moveBy(0.5, cc.p(0, 50));
-        
-        // Create sequence that moves and animates
-        var sequence = cc.sequence(
-            cc.spawn(animate, moveAction),
-            cc.callFunc(function() {
-                this.isMoving = false;
-            }, this)
-        );
-        
-        this.runAction(sequence);
-    },
-
-    startMoveDown: function() {
-        this.isMoving = true;
-        this.direction = 'down';
-        // Bow removed
-        // Stop any current actions
-        this.stopAllActions();
-        
-        // Create movement animation
-        var texture = cc.textureCache.addImage("assets/hero.png");
-        var frameWidth = texture.width / 4;
-        var frameHeight = texture.height / 4;
-
-        this.moveFrames = [];
-        var row = 0; // 1st row (index 0)
-
-        for (var x = 0; x < 4; x++) {
-            var frame = new cc.SpriteFrame(
-                texture,
-                cc.rect(x * frameWidth, row * frameHeight, frameWidth, frameHeight)
-            );
-            this.moveFrames.push(frame);
-        }
-
-        var moveAnim = new cc.Animation(this.moveFrames, 0.1);
-        var animate = cc.animate(moveAnim);
-        
-        // Create movement action
-        var moveAction = cc.moveBy(0.5, cc.p(0, -50));
-        
-        // Create sequence that moves and animates
-        var sequence = cc.sequence(
-            cc.spawn(animate, moveAction),
-            cc.callFunc(function() {
-                this.isMoving = false;
-            }, this)
-        );
-        
-        this.runAction(sequence);
-    }
+    // Removed vertical movement functions as we only support horizontal movement now
 });
 
 // Register the Hero class
