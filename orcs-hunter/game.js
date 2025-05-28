@@ -44,7 +44,7 @@ var GameLayer = cc.Layer.extend({
                         x * tileSize + tileSize/2,
                         (this.map.length - y - 1) * tileSize + tileSize/2 + verticalOffset
                     );
-                    this.addChild(tile, 1); // Add castle tiles at z-order 1
+                    this.addChild(tile, 2); // Add castle tiles at z-order 2
                 }
             }
         }
@@ -52,8 +52,8 @@ var GameLayer = cc.Layer.extend({
 
         // Initialize hero
         this.hero = new Hero();
-        // Add hero with z-order 2 (in front of castle, behind arrows)
-        this.addChild(this.hero, 2);
+        // Add hero with z-order 0 (bottom layer)
+        this.addChild(this.hero, 0);
 
         // Spawn orcs at the right side of the screen
         var orcTexture = cc.textureCache.addImage("assets/orc.png");
@@ -68,7 +68,7 @@ var GameLayer = cc.Layer.extend({
                 cc.winSize.width + 50, // Start just off-screen to the right
                 orcY // Fixed Y position at the bottom of the castle
             );
-            this.addChild(o, 0); // Add orcs at z-order 0 (behind everything)
+            this.addChild(o, 3); // Add orcs at z-order 3 (top layer)
             this.orcs.push(o);
             
             // Schedule next orc spawn
@@ -92,8 +92,8 @@ var GameLayer = cc.Layer.extend({
         Arrow.arrowFrame = this.arrowFrame;
         this.arrows = [];
         
-        // Set arrow z-order to be in front of hero but behind orcs
-        Arrow.zOrder = 3;
+        // Set arrow z-order to be above hero but below orcs
+        Arrow.zOrder = 1;
 
         this.scheduleUpdate();
 
