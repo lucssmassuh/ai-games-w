@@ -4,8 +4,9 @@ var Orc = cc.Sprite.extend({
     WALK_SPEED: 100, // pixels per second
 
     // Constructor
-    ctor: function() {
+    ctor: function(gameLayer) {
         this._super();
+        this.gameLayer = gameLayer; // Store reference to game layer
         this.frames = [];
         this.scheduleUpdate();
     },
@@ -20,9 +21,11 @@ var Orc = cc.Sprite.extend({
         // Remove orc if it goes off screen to the left
         if (pos.x < -this.width) {
             this.removeFromParent();
-            var index = this.orcs.indexOf(this);
-            if (index > -1) {
-                this.orcs.splice(index, 1);
+            if (this.gameLayer && this.gameLayer.orcs) {
+                var index = this.gameLayer.orcs.indexOf(this);
+                if (index > -1) {
+                    this.gameLayer.orcs.splice(index, 1);
+                }
             }
         }
     },

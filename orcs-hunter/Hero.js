@@ -31,9 +31,10 @@ var Hero = cc.Sprite.extend({
 
         // Set initial sprite
         this.setSpriteFrame(this.frames[0]);
-        this.setPosition(cc.winSize.width / 2, cc.winSize.height / 2);
+        // Position hero on top of the castle but behind it
+        this.setPosition(cc.winSize.width / 2, 250); // Adjust Y position to be on top of castle
         this.setAnchorPoint(0.5, 0.5);  // Center anchor point for hero
-        this.setScale(1.5);
+        this.setScale(1.8); // Slightly larger to be visible above the castle
 
 
 

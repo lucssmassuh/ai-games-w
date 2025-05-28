@@ -52,7 +52,8 @@ var GameLayer = cc.Layer.extend({
 
         // Initialize hero
         this.hero = new Hero();
-        this.addChild(this.hero);
+        // Add hero with z-order -1 to place it behind the castle
+        this.addChild(this.hero, -1);
 
         // Spawn orcs at the right side of the screen
         var orcTexture = cc.textureCache.addImage("assets/orc.png");
@@ -61,7 +62,7 @@ var GameLayer = cc.Layer.extend({
         
         // Function to spawn a single orc
         var spawnOrc = function() {
-            var o = new Orc();
+            var o = new Orc(this); // Pass game layer reference to Orc
             o.init(orcTexture);
             o.setPosition(
                 cc.winSize.width + 50, // Start just off-screen to the right
