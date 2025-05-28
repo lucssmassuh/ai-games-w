@@ -44,7 +44,7 @@ var GameLayer = cc.Layer.extend({
                         x * tileSize + tileSize/2,
                         (this.map.length - y - 1) * tileSize + tileSize/2 + verticalOffset
                     );
-                    this.addChild(tile, 0); // Add to bottom layer
+                    this.addChild(tile, 1); // Add castle tiles at z-order 1
                 }
             }
         }
@@ -52,8 +52,8 @@ var GameLayer = cc.Layer.extend({
 
         // Initialize hero
         this.hero = new Hero();
-        // Add hero with z-order -1 to place it behind the castle
-        this.addChild(this.hero, -1);
+        // Add hero with z-order 2 (in front of castle, behind arrows)
+        this.addChild(this.hero, 2);
 
         // Spawn orcs at the right side of the screen
         var orcTexture = cc.textureCache.addImage("assets/orc.png");
@@ -68,7 +68,7 @@ var GameLayer = cc.Layer.extend({
                 cc.winSize.width + 50, // Start just off-screen to the right
                 orcY // Fixed Y position at the bottom of the castle
             );
-            this.addChild(o);
+            this.addChild(o, 0); // Add orcs at z-order 0 (behind everything)
             this.orcs.push(o);
             
             // Schedule next orc spawn
@@ -91,6 +91,9 @@ var GameLayer = cc.Layer.extend({
         );
         Arrow.arrowFrame = this.arrowFrame;
         this.arrows = [];
+        
+        // Set arrow z-order to be in front of hero but behind orcs
+        Arrow.zOrder = 3;
 
         this.scheduleUpdate();
 
@@ -172,14 +175,10 @@ var GameLayer = cc.Layer.extend({
     },
 
     shootArrow: function() {
-        // Create arrow sprite
-        var arrow = new cc.Sprite(this.arrowFrame);
-        arrow.direction = this.direction;
-        arrow.speed = 300;
-        var pos = this.sprite.getPosition();
-        arrow.setPosition(pos.x, pos.y);
-        this.addChild(arrow);
+        var arrow = new Arrow(this.hero.direction, this.hero.getPosition());
+        this.addChild(arrow, Arrow.zOrder || 3); // Add arrow with specified z-order
         this.arrows.push(arrow);
+        var angle = {up: 90, right: 0, down: -90, left: 180}[this.hero.direction];
         // Bow removed
     }
 });
