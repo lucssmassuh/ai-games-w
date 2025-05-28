@@ -10,6 +10,7 @@ var Hero = cc.Sprite.extend({
     ctor: function() {
         this._super();
         this.arrows = []; // Initialize arrows array
+        this.isShooting = false; // Initialize shooting state
         this.initHero();
     },
 
@@ -35,8 +36,10 @@ var Hero = cc.Sprite.extend({
 
         // Set initial sprite
         this.setSpriteFrame(this.frames[0]);
-        // Position hero on top of the castle but behind it
-        this.setPosition(cc.winSize.width / 2, 250); // Adjust Y position to be on top of castle
+        // Position hero at the left side, above the second row of castle tiles
+        var startX = 50; // Position from the left edge of the screen
+        var startY = 220; // Position above the second row of castle tiles (adjust if needed)
+        this.setPosition(startX, startY);
         this.setAnchorPoint(0.5, 0.5);  // Center anchor point for hero
         this.setScale(1.8); // Slightly larger to be visible above the castle
 
@@ -68,12 +71,47 @@ var Hero = cc.Sprite.extend({
     },
 
     shootArrow: function() {
-        var pos = this.getPosition();
-        var arrow = new Arrow(this.direction, pos);
-        this.parent.addChild(arrow);
-        this.arrows.push(arrow);
-        var angle = {up: 90, right: 0, down: -90, left: 180}[this.direction];
-        // Bow removed
+        // Don't shoot if already shooting
+        if (this.isShooting) return;
+        
+        this.isShooting = true;
+        
+        // Stop current actions but save the movement state
+        var wasMoving = this.isMoving;
+        this.stopAllActions();
+        
+        // Set shooting frames (frames 3,4)
+        var shootAnim = new cc.Animation(this.shootFrames, 0.1);
+        var animate = cc.animate(shootAnim);
+        
+        // Create sequence: play shoot animation, then return to appropriate state
+        var sequence = cc.sequence(
+            animate,
+            cc.callFunc(function() {
+                // Create and fire the arrow at the end of the shooting animation
+                var pos = this.getPosition();
+                var arrow = new Arrow(this.direction, pos);
+                this.parent.addChild(arrow);
+                this.arrows.push(arrow);
+                
+                // Reset shooting state
+                this.isShooting = false;
+                
+                // Return to walking animation if we were moving
+                if (wasMoving) {
+                    if (this.direction === 'right') {
+                        this.startMoveRight();
+                    } else {
+                        this.startMoveLeft();
+                    }
+                } else {
+                    // Return to standing frame if not moving
+                    this.setSpriteFrame(this.frames[0]);
+                }
+            }, this)
+        );
+        
+        this.runAction(sequence);
     },
 
     update: function(dt) {
