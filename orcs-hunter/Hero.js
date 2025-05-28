@@ -6,7 +6,7 @@ var Hero = cc.Sprite.extend({
     isMoving: false,
     direction: 'down',
     keyPressed: {},
-
+    
     ctor: function() {
         this._super();
         this.arrows = []; // Initialize arrows array
@@ -16,6 +16,16 @@ var Hero = cc.Sprite.extend({
         this.maxChargeTime = 1.5; // Maximum charge time in seconds
         this.minArrowSpeed = 300; // Minimum arrow speed
         this.maxArrowSpeed = 1000; // Maximum arrow speed
+        
+        // Charge bar properties
+        this.chargeBar = {
+            width: 40,  // 2x smaller (was 80)
+            height: 3,  // Slightly thinner (was 5)
+            padding: 1, // Smaller padding (was 2)
+            bgColor: cc.color(100, 100, 100, 200),
+            fillColor: cc.color(255, 255, 255, 255)
+        };
+        
         this.initHero();
     },
 
@@ -47,8 +57,9 @@ var Hero = cc.Sprite.extend({
         this.setPosition(startX, startY);
         this.setAnchorPoint(0.5, 0.5);  // Center anchor point for hero
         this.setScale(1.8); // Slightly larger to be visible above the castle
-
-
+        
+        // Create charge bar
+        this.createChargeBar();
 
         // Initialize event listeners
         cc.eventManager.addListener({
@@ -59,8 +70,68 @@ var Hero = cc.Sprite.extend({
 
         this.scheduleUpdate();
     },
-
-
+    
+    createChargeBar: function() {
+        // Create background of the charge bar
+        this.chargeBar.bg = new cc.DrawNode();
+        this.chargeBar.fill = new cc.DrawNode();
+        
+        // Position the bar above the hero's head
+        var yOffset = this.frameHeight * 0.5 + 20; // 20 pixels above the hero's head (was 10)
+        this.chargeBar.bg.setAnchorPoint(0.5, 0.5);
+        this.chargeBar.fill.setAnchorPoint(0, 0.5); // Left-aligned fill with center Y
+        
+        // Position the bar to the right of the hero's center
+        var xOffset = this.frameWidth * 0.3; // Move right by 30% of hero's width
+        this.chargeBar.bg.setPosition(xOffset, yOffset);
+        this.chargeBar.fill.setPosition(xOffset - this.chargeBar.width/2, yOffset); // Keep fill aligned with background
+        
+        // Add to hero
+        this.addChild(this.chargeBar.bg);
+        this.addChild(this.chargeBar.fill);
+        
+        // Initially hide the charge bar
+        this.chargeBar.bg.setVisible(false);
+        this.chargeBar.fill.setVisible(false);
+    },
+    
+    updateChargeBar: function(progress) {
+        // Show bar when charging starts
+        if (!this.chargeBar.bg.isVisible()) {
+            this.chargeBar.bg.setVisible(true);
+            this.chargeBar.fill.setVisible(true);
+        }
+        
+        // Clear previous drawings
+        this.chargeBar.bg.clear();
+        this.chargeBar.fill.clear();
+        
+        // Draw background
+        var bgX = -this.chargeBar.width / 2;
+        var bgY = 0;
+        this.chargeBar.bg.drawRect(
+            cc.p(bgX, bgY),
+            cc.p(bgX + this.chargeBar.width, bgY + this.chargeBar.height),
+            this.chargeBar.bgColor, 1, this.chargeBar.bgColor
+        );
+        
+        // Draw fill based on progress (0 to 1)
+        var fillWidth = Math.max(0, (this.chargeBar.width - this.chargeBar.padding * 2) * progress);
+        if (fillWidth > 0) {
+            var fillX = bgX + this.chargeBar.padding;
+            var fillY = bgY + this.chargeBar.padding;
+            this.chargeBar.fill.drawRect(
+                cc.p(fillX, fillY),
+                cc.p(fillX + fillWidth, fillY + (this.chargeBar.height - this.chargeBar.padding * 2)),
+                this.chargeBar.fillColor, 1, this.chargeBar.fillColor
+            );
+        }
+    },
+    
+    hideChargeBar: function() {
+        this.chargeBar.bg.setVisible(false);
+        this.chargeBar.fill.setVisible(false);
+    },
 
     onKeyPressed: function(keyCode, event) {
         this.keyPressed[keyCode] = true;
@@ -86,8 +157,11 @@ var Hero = cc.Sprite.extend({
         this.isCharging = true;
         this.chargeStartTime = Date.now() / 1000; // Store start time in seconds
         
-        // Set to frame 1 (second frame) for charging
+        // Set to frame 3 for charging
         this.setSpriteFrame(this.frames[3]);
+        
+        // Show and reset charge bar
+        this.updateChargeBar(0);
     },
     
     releaseArrow: function() {
@@ -104,60 +178,11 @@ var Hero = cc.Sprite.extend({
         // Shoot with calculated speed
         this.shootArrow(speed);
         
-        // Reset charging state and return to frame 0 (standing)
+        // Reset charging state
         this.isCharging = false;
+        this.hideChargeBar();
         this.setScale(1.8); // Reset scale
         this.setSpriteFrame(this.frames[0]); // Return to standing frame
-    },
-    
-    releaseArrow: function() {
-        if (!this.isCharging) return;
-        
-        // Calculate charge duration (0 to maxChargeTime)
-        var chargeTime = (Date.now() / 1000) - this.chargeStartTime;
-        chargeTime = Math.min(Math.max(0, chargeTime), this.maxChargeTime);
-        
-        // Calculate speed based on charge time (ease-out curve)
-        var t = chargeTime / this.maxChargeTime;
-        var speed = this.minArrowSpeed + (this.maxArrowSpeed - this.minArrowSpeed) * t * t;
-        
-        // Shoot with calculated speed
-        this.shootArrow(speed);
-        
-        // Reset charging state and return to frame 0 (standing)
-        this.isCharging = false;
-        this.setColor(cc.color(255, 255, 255)); // Reset color
-        this.setScale(1.8); // Reset scale
-        this.setSpriteFrame(this.frames[0]); // Return to standing frame
-    },
-    
-    update: function(dt) {
-        // Handle movement - only horizontal now
-        if (this.keyPressed[cc.KEY.right]) {
-            if (!this.isMoving || this.direction !== 'right') {
-                this.startMoveRight();
-            }
-        } else if (this.keyPressed[cc.KEY.left]) {
-            if (!this.isMoving || this.direction !== 'left') {
-                this.startMoveLeft();
-            }
-        } else if (this.isMoving && !this.isCharging) {  // Don't stop moving if charging
-            // No movement keys pressed but we're still moving - stop movement
-            this.stopMoving();
-        }
-        
-        // Visual feedback for charging (pulse effect)
-        if (this.isCharging) {
-            var chargeTime = (Date.now() / 1000) - this.chargeStartTime;
-            var t = Math.min(chargeTime / this.maxChargeTime, 1);
-            var pulse = 1 + Math.sin(chargeTime * 10) * 0.05 * t; // Subtle pulsing effect
-            this.setScale(1.8 * pulse);
-            
-            // Ensure we're using frame 1 while charging
-            if (this.getSpriteFrame() !== this.frames[1]) {
-                this.setSpriteFrame(this.frames[1]);
-            }
-        }
     },
     
     shootArrow: function(speed) {
@@ -213,20 +238,26 @@ var Hero = cc.Sprite.extend({
             if (!this.isMoving || this.direction !== 'left') {
                 this.startMoveLeft();
             }
-        } else if (this.isMoving) {
+        } else if (this.isMoving && !this.isCharging) {  // Don't stop moving if charging
             // No movement keys pressed but we're still moving - stop movement
             this.stopMoving();
         }
         
-        // Visual feedback for charging (pulse effect)
+        // Update charge bar if charging
         if (this.isCharging) {
             var chargeTime = (Date.now() / 1000) - this.chargeStartTime;
-            var t = Math.min(chargeTime / this.maxChargeTime, 1);
-            var pulse = 1 + Math.sin(chargeTime * 10) * 0.05 * t; // Subtle pulsing effect
-            this.setScale(1.8 * pulse);
+            var progress = Math.min(chargeTime / this.maxChargeTime, 1);
+            this.updateChargeBar(progress);
+            
+            // Set frame 3 while charging
+            if (this.getSpriteFrame() !== this.frames[3]) {
+                this.setSpriteFrame(this.frames[3]);
+            }
+            // Maintain scale without pulsing
+            this.setScale(1.8);
         }
     },
-
+    
     stopMoving: function() {
         this.isMoving = false;
         this.stopAllActions();
@@ -243,7 +274,7 @@ var Hero = cc.Sprite.extend({
         this.walkAction = cc.animate(walkAnim);
         this.runAction(this.walkAction);
     },
-
+    
     startMoveRight: function() {
         this.isMoving = true;
         this.direction = 'right';
@@ -263,10 +294,9 @@ var Hero = cc.Sprite.extend({
             }, this)
         );
         
-        // Run movement sequence
         this.runAction(sequence);
     },
-
+    
     startMoveLeft: function() {
         this.isMoving = true;
         this.direction = 'left';
@@ -286,15 +316,9 @@ var Hero = cc.Sprite.extend({
             }, this)
         );
         
-        // Run movement sequence
         this.runAction(sequence);
-    },
-
-    // Removed vertical movement functions as we only support horizontal movement now
+    }
 });
 
 // Register the Hero class
-cc.Hero = Hero;
-
-// Ensure the Hero class is properly initialized when the script loads
-cc.Hero.prototype.initHero = Hero.prototype.initHero;
+cc.js.setClassName('Hero', Hero);
