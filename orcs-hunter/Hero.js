@@ -77,14 +77,16 @@ var Hero = cc.Sprite.extend({
         this.chargeBar.fill = new cc.DrawNode();
         
         // Position the bar above the hero's head
-        var yOffset = this.frameHeight * 0.5 + 20; // 20 pixels above the hero's head (was 10)
-        this.chargeBar.bg.setAnchorPoint(0.5, 0.5);
-        this.chargeBar.fill.setAnchorPoint(0, 0.5); // Left-aligned fill with center Y
+        var yOffset = this.frameHeight * 0.5 + 20; // 20 pixels above the hero's head
+        var xOffset = this.frameWidth * 0.3; // 30% of hero's width to the right
         
-        // Position the bar to the right of the hero's center
-        var xOffset = this.frameWidth * 0.3; // Move right by 30% of hero's width
+        // Position both elements at the same spot
         this.chargeBar.bg.setPosition(xOffset, yOffset);
-        this.chargeBar.fill.setPosition(xOffset - this.chargeBar.width/2, yOffset); // Keep fill aligned with background
+        this.chargeBar.fill.setPosition(xOffset, yOffset);
+        
+        // Set anchor points
+        this.chargeBar.bg.setAnchorPoint(0.5, 0.5);
+        this.chargeBar.fill.setAnchorPoint(0, 0.5);
         
         // Add to hero
         this.addChild(this.chargeBar.bg);
@@ -106,23 +108,22 @@ var Hero = cc.Sprite.extend({
         this.chargeBar.bg.clear();
         this.chargeBar.fill.clear();
         
-        // Draw background
-        var bgX = -this.chargeBar.width / 2;
-        var bgY = 0;
+        // Draw background (gray frame)
+        const halfW = this.chargeBar.width / 2;
+        const halfH = this.chargeBar.height / 2;
         this.chargeBar.bg.drawRect(
-            cc.p(bgX, bgY),
-            cc.p(bgX + this.chargeBar.width, bgY + this.chargeBar.height),
+            cc.p(-halfW, -halfH),
+            cc.p(halfW, halfH),
             this.chargeBar.bgColor, 1, this.chargeBar.bgColor
         );
         
-        // Draw fill based on progress (0 to 1)
-        var fillWidth = Math.max(0, (this.chargeBar.width - this.chargeBar.padding * 2) * progress);
-        if (fillWidth > 0) {
-            var fillX = -this.chargeBar.width/2 + this.chargeBar.padding; // Align with background left edge + padding
-            var fillY = -this.chargeBar.height/2 + this.chargeBar.padding; // Center vertically with padding
+        // Draw fill (white progress)
+        if (progress > 0) {
+            const fillW = (this.chargeBar.width - 2) * progress; // -2 for 1px border on each side
+            const fillH = this.chargeBar.height - 2; // -2 for 1px border on each side
             this.chargeBar.fill.drawRect(
-                cc.p(fillX, fillY),
-                cc.p(fillX + fillWidth, fillY + (this.chargeBar.height - this.chargeBar.padding * 2)),
+                cc.p(-halfW + 1, -fillH/2), // +1 for 1px border
+                cc.p(-halfW + 1 + fillW, fillH/2),
                 this.chargeBar.fillColor, 1, this.chargeBar.fillColor
             );
         }
