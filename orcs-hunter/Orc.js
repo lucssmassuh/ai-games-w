@@ -2,6 +2,7 @@ var Orc = cc.Sprite.extend({
     // Animation properties
     ANIMATION_SPEED: 0.1, // 0.2 seconds per frame
     WALK_SPEED: 20, // pixels per second
+    DYING_ROW: 4, // Top row (0-indexed) for death animation frames
     isDying: false, // Track if orc is in dying state
 
     // Constructor
@@ -118,12 +119,18 @@ var Orc = cc.Sprite.extend({
         this.isDying = true;
         this.stopAllActions();
         
-        // Create death animation frames (row 4, which is index 0 since y=0 is bottom)
+        // Move the orc down by 10 pixels when dying starts
+        var moveDown = cc.moveBy(0.1, cc.p(0, -10));
+        this.runAction(moveDown);
+        
+        // Create death animation frames using the specified row in reverse order
         var deathFrames = [];
-        for (var col = 0; col < 10; col++) {
+        var rowY = this.DYING_ROW * this.frameHeight;
+        // Loop from last column to first (9 to 0)
+        for (var col = 9; col >= 0; col--) {
             var frame = cc.SpriteFrame.create(
                 this.texture,
-                cc.rect(col * this.frameWidth, 0, this.frameWidth, this.frameHeight - 5) // Row 4 is at y=0
+                cc.rect(col * this.frameWidth, rowY, this.frameWidth, this.frameHeight - 5)
             );
             frame.setOffset(cc.p(0, 5));
             deathFrames.push(frame);
