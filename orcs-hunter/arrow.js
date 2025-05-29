@@ -26,24 +26,19 @@ var Arrow = cc.Sprite.extend({
         // Store direction and position
         this.direction = direction;
         
-        // Calculate frame dimensions (assuming 10 frames in a row)
-        var frameWidth = texture.width / 10;
-        var frameHeight = texture.height;
-        
-        // Set texture rect for the first frame
-        this.setTextureRect(cc.rect(0, 0, frameWidth, frameHeight));
+        // Use the full texture since it's a single arrow image
         this.setAnchorPoint(cc.p(0.5, 0.5)); // Center the anchor point for better rotation
         
-        // Set content size explicitly
-        this.setContentSize(cc.size(frameWidth, frameHeight));
+        // Set content size to match the texture
+        this.setContentSize(cc.size(texture.width, texture.height));
         
         // Set initial position and scale
         this.setPosition(pos);
-        this.setScale(1.0);
+        this.setScale(0.4);
         
         // Store frame for other arrows
         if (!Arrow.arrowFrame) {
-            Arrow.arrowFrame = new cc.SpriteFrame(texture, cc.rect(0, 0, frameWidth, frameHeight));
+            Arrow.arrowFrame = new cc.SpriteFrame(texture, cc.rect(0, 0, texture.width, texture.height));
         }
         
         // Set initial rotation based on direction
