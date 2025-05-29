@@ -6,6 +6,7 @@ var GameLayer = cc.Layer.extend({
     orcFrames: [],
     arrows: [],
     arrowFrame: null,
+    castle: null,
 
     // Draw debug rectangle for collision visualization
     drawDebugRect: function(rect, color) {
@@ -30,44 +31,12 @@ var GameLayer = cc.Layer.extend({
         // Initialize debug node (will be created when needed)
         this.debugNode = null;
 
-        // Initialize tilemap
-        this.tileSize = 32;
-        this.map = [
-            [12, 0, 7, 0, 12, 0, 7, 0, 12],
-            [7, 7, 7, 7, 7, 7, 7, 7, 7],
-            [7, 9, 7, 7, 7, 7, 7, 9, 7],
-            [7, 7, 7, 7, 1, 7, 7, 7, 7]
-        ];
-        // Map values now represent tile indices in the tileset (0 = no tile)
-
-        // Load and place castle tiles
-        var tileset = cc.textureCache.addImage("assets/castle-tileset.png");
-        var tileSize = this.tileSize;
-
-        for (var y = 0; y < this.map.length; y++) {
-            for (var x = 0; x < this.map[y].length; x++) {
-                var tileIndex = this.map[y][x];
-                if (tileIndex > 0) {
-                    // Calculate tile position in the tileset based on index
-                    var tilesPerRow = 8; // 8 columns in the tileset
-                    var tileX = ((tileIndex - 1) % tilesPerRow) * tileSize; // -1 because 0 = no tile
-                    var tileY = Math.floor((tileIndex - 1) / tilesPerRow) * tileSize;
-                    
-                    var tile = new cc.Sprite(
-                        tileset,
-                        cc.rect(tileX, tileY, tileSize, tileSize)
-                    );
-                    
-                    // Position the tile on screen with vertical offset (higher on screen)
-                    var verticalOffset = 100; // Adjust this value to move the castle up/down
-                    tile.setPosition(
-                        x * tileSize + tileSize/2,
-                        (this.map.length - y - 1) * tileSize + tileSize/2 + verticalOffset
-                    );
-                    this.addChild(tile, 2); // Add castle tiles at z-order 2
-                }
-            }
-        }
+        // Create and add castle
+        console.log("Creating castle instance...");
+        this.castle = new cc.Castle();
+        console.log("Adding castle to scene...");
+        this.addChild(this.castle);
+        console.log("Castle added to scene, position:", this.castle.getPosition());
 
 
         // Initialize hero
@@ -75,10 +44,8 @@ var GameLayer = cc.Layer.extend({
         // Add hero with z-order 0 (bottom layer)
         this.addChild(this.hero, 0);
 
-        // Spawn orcs at the right side of the screen
-        var orcTexture = cc.textureCache.addImage("assets/orc.png");
-        var verticalOffset = 100; // Same as castle's vertical offset
-        var orcY = verticalOffset + 16; // Align with the base of the castle (verticalOffset + tileSize/2)
+        // Position orcs at the right side of the screen, aligned with the castle base
+        var orcY = this.castle.getOrcBaseY(); // Align with the base of the castle
         
         // Function to spawn a single orc
         var spawnOrc = function() {

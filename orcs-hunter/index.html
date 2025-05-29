@@ -10,6 +10,7 @@
     <script type="text/javascript" src="arrow.js" charset="UTF-8"></script>
     <script type="text/javascript" src="Hero.js" charset="UTF-8"></script>
     <script type="text/javascript" src="Orc.js" charset="UTF-8"></script>
+    <script type="text/javascript" src="castle.js" charset="UTF-8"></script>
     <script type="text/javascript" src="game.js" charset="UTF-8"></script>
 
     <script type="text/javascript">
@@ -18,8 +19,8 @@
                 cc.view.setDesignResolutionSize(800, 600, cc.ResolutionPolicy.SHOW_ALL);
                 cc.view.resizeWithBrowserSize(true);
 
-                // Load hero.png before starting
-                cc.LoaderScene.preload(["assets/hero.png", "assets/arrow.png", "assets/orc.png"], function () {
+                // Load all assets before starting
+                cc.LoaderScene.preload(["assets/hero.png", "assets/arrow.png", "assets/orc.png", "assets/castle-tileset.png"], function () {
                     cc.director.runScene(new GameScene());
                 }, this);
             };
