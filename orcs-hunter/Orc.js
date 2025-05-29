@@ -112,6 +112,22 @@ var Orc = cc.Sprite.extend({
 
 
 
+    checkCollisionWith: function(sprite) {
+        return cc.rectIntersectsRect(this.getBoundingBox(), sprite.getBoundingBox());
+    },
+    // Override getBoundingBox to return a smaller collision box (80% of width, 70% of height)
+    getBoundingBox: function() {
+        var rect = this._super();
+        var width = rect.width * 0.6;  // 80% of original width
+        var height = rect.height * 0.5; // 70% of original height
+        return cc.rect(
+            rect.x + (rect.width - width) / 2,  // Center horizontally
+            rect.y + (rect.height - height) / 4, // Slightly lower center vertically
+            width,
+            height
+        );
+    },
+    
     // Play death animation
     die: function() {
         if (this.isDying) return;
@@ -120,7 +136,7 @@ var Orc = cc.Sprite.extend({
         this.stopAllActions();
         
         // Move the orc down by 10 pixels when dying starts
-        var moveDown = cc.moveBy(0.1, cc.p(0, -10));
+        var moveDown = cc.moveBy(0.1, cc.p(0, -8));
         this.runAction(moveDown);
         
         // Create death animation frames using the specified row in reverse order
