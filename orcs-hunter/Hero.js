@@ -14,8 +14,8 @@ var Hero = cc.Sprite.extend({
         this.chargeStartTime = 0; // When charging started
         this.isCharging = false; // If currently charging a shot
         this.maxChargeTime = 1.5; // Maximum charge time in seconds
-        this.minArrowSpeed = 300; // Minimum arrow speed
-        this.maxArrowSpeed = 1000; // Maximum arrow speed
+        this.minArrowSpeed = 360; // Minimum arrow speed (increased by 20% from 300)
+        this.maxArrowSpeed = 1200; // Maximum arrow speed (increased by 20% from 1000)
         
         // Charge bar properties
         this.chargeBar = {

@@ -6,7 +6,7 @@ var Arrow = cc.Sprite.extend({
     speed: 0, // Will be set when creating the arrow
     vx: 0,
     vy: 0,
-    gravity: 800, // Gravity effect (pixels/second²)
+    gravity: 640, // Gravity effect (pixels/second²) - reduced by 20% from 800
 
 
     ctor: function(direction, pos, speed = 600) {
@@ -66,9 +66,11 @@ var Arrow = cc.Sprite.extend({
     // Initialize motion based on direction
     initMotion: function(direction) {
         if (direction === 'right' || direction === 'left') {
-            this.vx = this.speed * 0.7 * (direction === 'right' ? 1 : -1);
-            this.vy = this.speed * 0.5;      // initial upward lift
-            this.gravity = -500;             // gravity acceleration (pixels/sec²)
+            // Calculate velocity components for 20 degree launch angle
+            const angleRad = 20 * Math.PI / 180; // Convert 20 degrees to radians
+            this.vx = this.speed * Math.cos(angleRad) * (direction === 'right' ? 1 : -1);
+            this.vy = this.speed * Math.sin(angleRad); // initial upward lift for 20 degree angle
+            this.gravity = -400;             // gravity acceleration (pixels/sec²)
         } else {
             this.vx = 0;
             this.vy = (direction === 'up' ? this.speed : -this.speed);
