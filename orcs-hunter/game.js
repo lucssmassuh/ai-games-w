@@ -39,6 +39,13 @@ var GameLayer = cc.Layer.extend({
         console.log("Castle added to scene, position:", this.castle.getPosition());
 
 
+        // Load the orc texture
+        this.orcTexture = cc.textureCache.addImage("assets/orc.png");
+        if (!this.orcTexture) {
+            console.error("Failed to load orc.png");
+            return;
+        }
+
         // Initialize hero
         this.hero = new Hero();
         // Add hero with z-order 0 (bottom layer)
@@ -50,7 +57,7 @@ var GameLayer = cc.Layer.extend({
         // Function to spawn a single orc
         var spawnOrc = function() {
             var o = new Orc(this); // Pass game layer reference to Orc
-            o.init(orcTexture);
+            o.init(this.orcTexture);
             o.setPosition(
                 cc.winSize.width + 50, // Start just off-screen to the right
                 orcY // Fixed Y position at the bottom of the castle

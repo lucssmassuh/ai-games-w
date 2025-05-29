@@ -53,10 +53,10 @@ var Hero = cc.Sprite.extend({
         this.setSpriteFrame(this.frames[0]);
         // Position hero at the left side, above the second row of castle tiles
         var startX = 50; // Position from the left edge of the screen
-        var startY = 220; // Position above the second row of castle tiles (adjust if needed)
+        var startY = 247; // Position above the second row of castle tiles (adjust if needed)
         this.setPosition(startX, startY);
         this.setAnchorPoint(0.5, 0.5);  // Center anchor point for hero
-        this.setScale(1.8); // Slightly larger to be visible above the castle
+        this.setScale(1); // Slightly larger to be visible above the castle
         
         // Create charge bar
         this.createChargeBar();
@@ -182,7 +182,7 @@ var Hero = cc.Sprite.extend({
         // Reset charging state
         this.isCharging = false;
         this.hideChargeBar();
-        this.setScale(1.8); // Reset scale
+        this.setScale(1.0); // Reset scale
         this.setSpriteFrame(this.frames[0]); // Return to standing frame
     },
     
@@ -255,7 +255,7 @@ var Hero = cc.Sprite.extend({
                 this.setSpriteFrame(this.frames[3]);
             }
             // Maintain scale without pulsing
-            this.setScale(1.8);
+            this.setScale(1);
         }
     },
     
@@ -321,5 +321,5 @@ var Hero = cc.Sprite.extend({
     }
 });
 
-// Register the Hero class
-cc.js.setClassName('Hero', Hero);
+// Register the Hero class with Cocos2d-js
+cc.Hero = Hero;

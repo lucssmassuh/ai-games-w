@@ -3,7 +3,7 @@
 var Castle = cc.Node.extend({
     map: null,
     tileSize: 32,
-    verticalOffset: 100,
+    verticalOffset: 350,
 
     ctor: function() {
         this._super();
@@ -13,7 +13,11 @@ var Castle = cc.Node.extend({
         this.map = [
             [12, 0, 7, 0, 12, 0, 7, 0, 12],
             [7, 7, 7, 7, 7, 7, 7, 7, 7],
-            [7, 9, 7, 7, 7, 7, 7, 9, 7],
+            [7, 9, 7, 9, 7, 9, 7, 9, 7],
+            [7, 7, 7, 7, 7, 7, 7, 7, 7],
+            [7, 7, 11, 7, 11, 7, 11, 7, 7],
+            [7, 7, 7, 7, 7, 7, 7, 7, 7],
+            [7, 7, 7, 7, 7, 7, 7, 7, 7],
             [7, 7, 7, 7, 1, 7, 7, 7, 7]
         ];
         
@@ -31,6 +35,9 @@ var Castle = cc.Node.extend({
         }
         console.log("Castle tileset loaded successfully");
         var tileSize = this.tileSize;
+        
+        // Scale down the entire castle
+        this.setScale(0.4);
 
         for (var y = 0; y < this.map.length; y++) {
             for (var x = 0; x < this.map[y].length; x++) {

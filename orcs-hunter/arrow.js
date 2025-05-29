@@ -34,7 +34,7 @@ var Arrow = cc.Sprite.extend({
         
         // Set initial position and scale
         this.setPosition(pos);
-        this.setScale(0.4);
+        this.setScale(0.2);
         
         // Store frame for other arrows
         if (!Arrow.arrowFrame) {

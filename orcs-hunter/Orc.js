@@ -118,7 +118,7 @@ var Orc = cc.Sprite.extend({
     // Override getBoundingBox to return a smaller collision box (80% of width, 70% of height)
     getBoundingBox: function() {
         var rect = this._super();
-        var width = rect.width * 0.6;  // 80% of original width
+        var width = rect.width * 0.3;  // 80% of original width
         var height = rect.height * 0.5; // 70% of original height
         return cc.rect(
             rect.x + (rect.width - width) / 2,  // Center horizontally
