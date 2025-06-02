@@ -8,42 +8,27 @@ var Arrow = cc.Sprite.extend({
     gravity: -400, // Gravity effect (pixels/second²)
 
 
-    ctor: function(angleRad, pos, speed = 600) {
-        this._super();
-        this.speed = speed; // Set the arrow speed based on charge time
-        
-        // Load the texture first
+    ctor: function(angleRad, pos, speed) {
+        // Load the arrow texture and initialize sprite
         var texture = cc.textureCache.addImage("assets/arrow.png");
         if (!texture) {
             cc.error("Failed to load arrow texture");
             return;
         }
-        
-        // Initialize sprite with texture
         this._super(texture);
-        
-        
-        // Use the full texture since it's a single arrow image
-        this.setAnchorPoint(cc.p(0.5, 0.5)); // Center the anchor point for better rotation
-        
-        // Set content size to match the texture
+        // Set arrow speed (default 600 if unspecified)
+        this.speed = (typeof speed !== 'undefined') ? speed : 600;
+        this.setAnchorPoint(0.5, 0.5);
         this.setContentSize(cc.size(texture.width, texture.height));
-        
-        // Set initial position and scale
-        this.setPosition(pos);
         this.setScale(0.2);
-        
-        // Store frame for other arrows
-        if (!Arrow.arrowFrame) {
-            Arrow.arrowFrame = new cc.SpriteFrame(texture, cc.rect(0, 0, texture.width, texture.height));
-        }
-        
-        // Compute initial velocity, apply gravity, and set rotation
+        this.setPosition(pos);
+        // Compute initial velocity and rotation
         this.vx = this.speed * Math.cos(angleRad);
         this.vy = this.speed * Math.sin(angleRad);
         this.gravity = -400;
         this.setRotation(90 - (angleRad * 180 / Math.PI));
         this.startY = pos.y;
+        // Schedule update for motion and collision
         this.scheduleUpdate();
     },
     
@@ -83,8 +68,8 @@ var Arrow = cc.Sprite.extend({
     // Update collision box based on current rotation and position
     updateCollisionBox: function() {
         // Get the size of the arrow (accounting for scale)
-        var width = this.width * this.getScaleX();
-        var height = this.height * this.getScaleY();
+        var width = this.getContentSize().width * this.getScaleX();
+        var height = this.getContentSize().height * this.getScaleY();
         
         // Create a smaller collision box (70% of actual size for better feel)
         var collisionWidth = width * 0.7;

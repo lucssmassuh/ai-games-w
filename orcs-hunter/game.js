@@ -4,6 +4,7 @@ var GameLayer = cc.Layer.extend({
     hero: null,
     orcs: [],
     orcFrames: [],
+    dragons: [],
     arrows: [],
     arrowFrame: null,
     castle: null,
@@ -104,14 +105,16 @@ var GameLayer = cc.Layer.extend({
         Arrow.arrowFrame = this.arrowFrame;
         this.arrows = [];
         this.hero.arrows = this.arrows;
+        this.dragons = [];
         
         // Set arrow z-order to be above hero but below orcs
         Arrow.zOrder = 1;
 
         // Spawn an initial dragon and then at regular intervals
         var spawnDragon = function() {
-            var d = new cc.Dragon();
+            var d = new cc.Dragon(this);
             this.addChild(d, 2);
+            this.dragons.push(d);
         }.bind(this);
         spawnDragon();
         this.schedule(spawnDragon, 10.0);
@@ -138,7 +141,10 @@ var GameLayer = cc.Layer.extend({
                 if (orc.isDying) continue;
                 var collision = typeof orc.checkCollisionWith === 'function'
                                 ? orc.checkCollisionWith(arr)
-                                : orc.getBoundingBox().intersects(arr.getBoundingBox());
+                                : cc.rectIntersectsRect(
+                                    orc.getBoundingBox(),
+                                    arr.getBoundingBox()
+                                  );
                 if (collision) {
                     cc.log(
                         'Collision detected: Arrow at (' + arr.getPosition().x + ',' + arr.getPosition().y +
@@ -147,6 +153,20 @@ var GameLayer = cc.Layer.extend({
                     arr.removeFromParent();
                     this.arrows.splice(a, 1);
                     orc.die();
+                    break;
+                }
+            }
+            // Check collision with dragons
+            for (var d = this.dragons.length - 1; d >= 0; d--) {
+                var dragon = this.dragons[d];
+                if (dragon.isDying) continue;
+                if (cc.rectIntersectsRect(
+                        dragon.getBoundingBox(),
+                        arr.getBoundingBox()
+                    )) {
+                    arr.removeFromParent();
+                    this.arrows.splice(a, 1);
+                    dragon.die();
                     break;
                 }
             }

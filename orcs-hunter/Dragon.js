@@ -9,11 +9,16 @@ var Dragon = cc.Sprite.extend({
     frequency: 2,
     // Time accumulator for sine movement
     timeElapsed: 0,
-    // Frames for wing-flapping animation
+    // Frames for wing-flapping animation (last row)
     frames: [],
+    // Frames for death animation (first row)
+    deathFrames: [],
+    // Track if dragon is dying (should fall)
+    isDying: false,
+    // Speed at which dragon falls when dying (pixels/sec)
+    fallSpeed: 200,
 
-    ctor: function() {
-        this._super();
+    ctor: function(gameLayer) {
         // Load the dragon sprite sheet (4 rows × 3 columns)
         var texture = cc.textureCache.addImage("assets/dragon-red.png");
         if (!texture) {
@@ -21,6 +26,7 @@ var Dragon = cc.Sprite.extend({
             return;
         }
         this._super(texture);
+        this.gameLayer = gameLayer;
 
         var cols = 3;
         var rows = 4;
@@ -41,6 +47,17 @@ var Dragon = cc.Sprite.extend({
         this.setAnchorPoint(0.5, 0.5);
         this.setContentSize(cc.size(frameWidth, frameHeight));
 
+        // Prepare death animation frames from first row
+        var deathY = 0;
+        for (var j = 0; j < cols; j++) {
+            this.deathFrames.push(
+                new cc.SpriteFrame(
+                    texture,
+                    cc.rect(j * frameWidth, deathY, frameWidth, frameHeight)
+                )
+            );
+        }
+
         // Start off-screen on the right, vertically centered
         var startX = cc.winSize.width + frameWidth / 2;
         var startY = cc.winSize.height / 2;
@@ -60,18 +77,46 @@ var Dragon = cc.Sprite.extend({
     },
 
     update: function(dt) {
+        // If dying, let the dragon fall until off-screen, then clean up
+        if (this.isDying) {
+            var pos = this.getPosition();
+            pos.y -= this.fallSpeed * dt;
+            this.setPosition(pos);
+            if (pos.y < -this.getContentSize().height * this.getScaleY()) {
+                this.removeFromParent();
+                // Remove from game layer tracking
+                if (this.gameLayer && this.gameLayer.dragons) {
+                    var idx = this.gameLayer.dragons.indexOf(this);
+                    if (idx > -1) {
+                        this.gameLayer.dragons.splice(idx, 1);
+                    }
+                }
+            }
+            return;
+        }
+
+        // Normal flight: sine-wave vertical movement and leftward motion
         this.timeElapsed += dt;
         var pos = this.getPosition();
-        // Move left
         pos.x -= this.speed * dt;
-        // Apply sinusoidal vertical movement around startY
         pos.y = this.startY + this.amplitude * Math.sin(this.frequency * this.timeElapsed);
         this.setPosition(pos);
 
-        // Remove when off-screen to the left
+        // Remove when fully off-screen to the left
         if (pos.x < -this.getContentSize().width / 2) {
             this.removeFromParent();
         }
+    },
+
+    // Trigger death animation and start falling
+    die: function() {
+        if (this.isDying) return;
+        this.isDying = true;
+        this.stopAllActions();
+        // Play death animation loop from first-row frames
+        var deathAnim = new cc.Animation(this.deathFrames, 0.15);
+        deathAnim.setLoops(cc.REPEAT_FOREVER);
+        this.runAction(cc.animate(deathAnim));
     }
 });
 
