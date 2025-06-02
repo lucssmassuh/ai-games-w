@@ -9,16 +9,16 @@ var Dragon = cc.Sprite.extend({
     frequency: 2,
     // Time accumulator for sine movement
     timeElapsed: 0,
-    // Frames for wing-flapping animation (last row)
-    frames: [],
-    // Frames for death animation (first row)
-    deathFrames: [],
     // Track if dragon is dying (should fall)
     isDying: false,
     // Speed at which dragon falls when dying (pixels/sec)
     fallSpeed: 200,
 
     ctor: function(gameLayer) {
+        // Initialize frames arrays
+        this.frames = [];
+        this.deathFrames = [];
+        
         // Load the dragon sprite sheet (4 rows × 3 columns)
         var texture = cc.textureCache.addImage("assets/dragon-red.png");
         if (!texture) {
