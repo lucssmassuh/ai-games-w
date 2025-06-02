@@ -2,14 +2,13 @@
 
 // Arrow class for firing arrows with variable speed based on charge time
 var Arrow = cc.Sprite.extend({
-    direction: null,
     speed: 0, // Will be set when creating the arrow
     vx: 0,
     vy: 0,
-    gravity: 640, // Gravity effect (pixels/second²) - reduced by 20% from 800
+    gravity: -400, // Gravity effect (pixels/second²)
 
 
-    ctor: function(direction, pos, speed = 600) {
+    ctor: function(angleRad, pos, speed = 600) {
         this._super();
         this.speed = speed; // Set the arrow speed based on charge time
         
@@ -23,8 +22,6 @@ var Arrow = cc.Sprite.extend({
         // Initialize sprite with texture
         this._super(texture);
         
-        // Store direction and position
-        this.direction = direction;
         
         // Use the full texture since it's a single arrow image
         this.setAnchorPoint(cc.p(0.5, 0.5)); // Center the anchor point for better rotation
@@ -41,42 +38,15 @@ var Arrow = cc.Sprite.extend({
             Arrow.arrowFrame = new cc.SpriteFrame(texture, cc.rect(0, 0, texture.width, texture.height));
         }
         
-        // Set initial rotation based on direction
-        this.setRotation(this.getRotationForDirection(direction));
-        this.direction = direction;
-        this.setPosition(pos);
-        this.scheduleUpdate();
-
-        // Record launch height and initialize motion
+        // Compute initial velocity, apply gravity, and set rotation
+        this.vx = this.speed * Math.cos(angleRad);
+        this.vy = this.speed * Math.sin(angleRad);
+        this.gravity = -400;
+        this.setRotation(90 - (angleRad * 180 / Math.PI));
         this.startY = pos.y;
-        this.initMotion(direction);
+        this.scheduleUpdate();
     },
     
-    // Get rotation angle for a given direction
-    getRotationForDirection: function(direction) {
-        switch (direction) {
-            case 'up': return 0;
-            case 'right': return 90;
-            case 'down': return 180;
-            case 'left': return 270;
-            default: return 0;
-        }
-    },
-    
-    // Initialize motion based on direction
-    initMotion: function(direction) {
-        if (direction === 'right' || direction === 'left') {
-            // Calculate velocity components for 20 degree launch angle
-            const angleRad = 20 * Math.PI / 180; // Convert 20 degrees to radians
-            this.vx = this.speed * Math.cos(angleRad) * (direction === 'right' ? 1 : -1);
-            this.vy = this.speed * Math.sin(angleRad); // initial upward lift for 20 degree angle
-            this.gravity = -400;             // gravity acceleration (pixels/sec²)
-        } else {
-            this.vx = 0;
-            this.vy = (direction === 'up' ? this.speed : -this.speed);
-            this.gravity = 0;
-        }
-    },
 
     update: function(dt) {
         // Update position with velocity and gravity
@@ -90,13 +60,10 @@ var Arrow = cc.Sprite.extend({
         pos.y += this.vy * dt;
         this.setPosition(pos);
         
-        // Update rotation based on velocity for horizontal shots
-        if (this.direction === 'right' || this.direction === 'left') {
-            var rad = Math.atan2(this.vy, this.vx);
-            // Map vector angle to sprite rotation: default up at 0, positive cw
-            var deg = 90 - (rad * 180 / Math.PI);
-            this.setRotation(deg);
-        }
+        // Rotate arrow based on current velocity vector
+        var rad = Math.atan2(this.vy, this.vx);
+        var deg = 90 - (rad * 180 / Math.PI);
+        this.setRotation(deg);
         
         // Update collision box
         this.updateCollisionBox();

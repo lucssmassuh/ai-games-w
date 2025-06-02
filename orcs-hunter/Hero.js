@@ -67,6 +67,12 @@ var Hero = cc.Sprite.extend({
             onKeyPressed: this.onKeyPressed.bind(this),
             onKeyReleased: this.onKeyReleased.bind(this)
         }, this);
+        cc.eventManager.addListener({
+            event: cc.EventListener.MOUSE,
+            onMouseMove: function(event) {
+                this.mousePos = event.getLocation();
+            }.bind(this)
+        }, this);
 
         this.scheduleUpdate();
     },
@@ -176,8 +182,11 @@ var Hero = cc.Sprite.extend({
         var t = chargeTime / this.maxChargeTime;
         var speed = this.minArrowSpeed + (this.maxArrowSpeed - this.minArrowSpeed) * t * t;
         
-        // Shoot with calculated speed
-        this.shootArrow(speed);
+        // Shoot with calculated speed towards mouse pointer
+        var posHero = this.getPosition();
+        var target = this.mousePos || cc.p(posHero.x + 1, posHero.y);
+        var angleRad = Math.atan2(target.y - posHero.y, target.x - posHero.x);
+        this.shootArrow(angleRad, speed);
         
         // Reset charging state
         this.isCharging = false;
@@ -186,7 +195,7 @@ var Hero = cc.Sprite.extend({
         this.setSpriteFrame(this.frames[0]); // Return to standing frame
     },
     
-    shootArrow: function(speed) {
+    shootArrow: function(angleRad, speed) {
         if (this.isShooting) return;
         
         this.isShooting = true;
@@ -205,7 +214,7 @@ var Hero = cc.Sprite.extend({
             cc.callFunc(function() {
                 // Create and fire the arrow with calculated speed
                 var pos = this.getPosition();
-                var arrow = new Arrow(this.direction, pos, speed);
+                var arrow = new Arrow(angleRad, pos, speed);
                 this.parent.addChild(arrow);
                 this.arrows.push(arrow);
                 
