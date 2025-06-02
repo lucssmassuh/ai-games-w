@@ -71,7 +71,8 @@ var Castle = cc.Node.extend({
     
     // Get the base Y position where the orcs should walk
     getOrcBaseY: function() {
-        return this.verticalOffset + 16; // 16 is half of tileSize
+        // Position orcs at 25% from the bottom of the canvas
+        return cc.winSize.height * 0.25;
     }
 });
 

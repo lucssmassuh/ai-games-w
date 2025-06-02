@@ -7,6 +7,7 @@ var GameLayer = cc.Layer.extend({
     arrows: [],
     arrowFrame: null,
     castle: null,
+    background: null,
 
     // Draw debug rectangle for collision visualization
     drawDebugRect: function(rect, color) {
@@ -28,8 +29,24 @@ var GameLayer = cc.Layer.extend({
     ctor: function () {
         this._super();
         
-        // Initialize debug node (will be created when needed)
+        // Initialize arrays and variables
+        this.orcs = [];
+        this.arrows = [];
+        this.keys = {};
         this.debugNode = null;
+
+        // Add background (z-order: -1 to be behind everything)
+        console.log("Creating background...");
+        this.background = new cc.Background();
+        if (this.background) {
+            console.log("Background created, adding to scene...");
+            this.background.setPosition(0, 0);
+            this.background.setAnchorPoint(0, 0);
+            this.addChild(this.background, -1);
+            console.log("Background added to scene");
+        } else {
+            console.error("Failed to create background!");
+        }
 
         // Create and add castle
         console.log("Creating castle instance...");
@@ -176,6 +193,28 @@ var GameLayer = cc.Layer.extend({
         // Bow removed
     }
 });
+
+// Add keyboard input handling methods to GameLayer
+GameLayer.onKeyPressed = function(keyCode, event) {
+    this.keys[keyCode] = true;
+};
+
+GameLayer.onKeyReleased = function(keyCode, event) {
+    this.keys[keyCode] = false;
+};
+
+GameLayer.onEnter = function() {
+    this._super();
+    
+    // Enable keyboard input
+    cc.eventManager.addListener({
+        event: cc.EventListener.KEYBOARD,
+        onKeyPressed: this.onKeyPressed.bind(this),
+        onKeyReleased: this.onKeyReleased.bind(this)
+    }, this);
+    
+    this.scheduleUpdate();
+};
 
 var GameScene = cc.Scene.extend({
     onEnter: function () {
