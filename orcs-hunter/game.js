@@ -108,6 +108,14 @@ var GameLayer = cc.Layer.extend({
         // Set arrow z-order to be above hero but below orcs
         Arrow.zOrder = 1;
 
+        // Spawn an initial dragon and then at regular intervals
+        var spawnDragon = function() {
+            var d = new cc.Dragon();
+            this.addChild(d, 2);
+        }.bind(this);
+        spawnDragon();
+        this.schedule(spawnDragon, 10.0);
+
         this.scheduleUpdate();
 
         return true;
