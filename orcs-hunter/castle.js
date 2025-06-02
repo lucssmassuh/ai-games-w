@@ -3,7 +3,7 @@
 var Castle = cc.Node.extend({
     map: null,
     tileSize: 32,
-    verticalOffset: 350,
+    verticalOffset: 283, // Lowered by 40px from 345
 
     ctor: function() {
         this._super();
@@ -37,7 +37,7 @@ var Castle = cc.Node.extend({
         var tileSize = this.tileSize;
         
         // Scale down the entire castle
-        this.setScale(0.4);
+        this.setScale(0.5);
 
         for (var y = 0; y < this.map.length; y++) {
             for (var x = 0; x < this.map[y].length; x++) {

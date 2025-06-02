@@ -52,6 +52,7 @@ var GameLayer = cc.Layer.extend({
         console.log("Creating castle instance...");
         this.castle = new cc.Castle();
         console.log("Adding castle to scene...");
+        this.castle.setPosition(20, 0); // Move castle 20 pixels to the right
         this.addChild(this.castle);
         console.log("Castle added to scene, position:", this.castle.getPosition());
 

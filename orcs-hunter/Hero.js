@@ -53,7 +53,7 @@ var Hero = cc.Sprite.extend({
         this.setSpriteFrame(this.frames[0]);
         // Position hero at the left side, above the second row of castle tiles
         var startX = 50; // Position from the left edge of the screen
-        var startY = 247; // Position above the second row of castle tiles (adjust if needed)
+        var startY = 270; // Position above the second row of castle tiles (adjust if needed)
         this.setPosition(startX, startY);
         this.setAnchorPoint(0.5, 0.5);  // Center anchor point for hero
         this.setScale(1); // Slightly larger to be visible above the castle
