@@ -195,15 +195,22 @@ var GameLayer = cc.Layer.extend({
         var angle = {up: 90, right: 0, down: -90, left: 180}[this.hero.direction];
     },
     spawnOrc: function() {
-        var orcY = this.castle.getOrcBaseY();
+        var baseY = this.castle.getOrcBaseY();
+        var baseX = cc.winSize.width + 50;
         var o = new Orc(this);
         o.init(this.orcTexture);
-        o.setPosition(cc.winSize.width + 50, orcY);
+        var jitterX = baseX + (Math.random() * 40 - 20);
+        var jitterY = baseY + (Math.random() * 20 - 10);
+        o.setPosition(jitterX, jitterY);
         this.addChild(o, 3);
         this.orcs.push(o);
     },
     spawnDragon: function() {
         var d = new cc.Dragon(this);
+        var pos = d.getPosition();
+        var jitterX = pos.x + (Math.random() * 40 - 20);
+        var jitterY = pos.y + (Math.random() * 40 - 20);
+        d.setPosition(jitterX, jitterY);
         this.addChild(d, 2);
         this.dragons.push(d);
     },
