@@ -70,30 +70,6 @@ var GameLayer = cc.Layer.extend({
         // Add hero with z-order 0 (bottom layer)
         this.addChild(this.hero, 0);
 
-        // Position orcs at the right side of the screen, aligned with the castle base
-        var orcY = this.castle.getOrcBaseY(); // Align with the base of the castle
-        
-        // Function to spawn a single orc
-        var spawnOrc = function() {
-            var o = new Orc(this); // Pass game layer reference to Orc
-            o.init(this.orcTexture);
-            o.setPosition(
-                cc.winSize.width + 50, // Start just off-screen to the right
-                orcY // Fixed Y position at the bottom of the castle
-            );
-            this.addChild(o, 3); // Add orcs at z-order 3 (top layer)
-            this.orcs.push(o);
-            
-            // Schedule next orc spawn
-            if (this.orcs.length < 5) {
-                this.scheduleOnce(function() {
-                    spawnOrc.call(this);
-                }, 2.0); // Spawn a new orc every 2 seconds
-            }
-        }.bind(this);
-        
-        // Start spawning orcs
-        spawnOrc();
 
         // Prepare arrow projectile frame (first of 10)
         var arrowTexture = cc.textureCache.addImage("assets/arrow.png");
@@ -107,17 +83,15 @@ var GameLayer = cc.Layer.extend({
         this.hero.arrows = this.arrows;
         this.dragons = [];
         
+
         // Set arrow z-order to be above hero but below orcs
         Arrow.zOrder = 1;
 
-        // Spawn an initial dragon and then at regular intervals
-        var spawnDragon = function() {
-            var d = new cc.Dragon(this);
-            this.addChild(d, 2);
-            this.dragons.push(d);
-        }.bind(this);
-        spawnDragon();
-        this.schedule(spawnDragon, 10.0);
+        // Load waves configuration and start the waves
+        var wavesConfig = cc.loader.getRes("waves.json");
+        this.waves = (wavesConfig && wavesConfig.waves) || [];
+        this.currentWaveIndex = 0;
+        this.startNextWave();
 
         this.scheduleUpdate();
 
@@ -216,10 +190,65 @@ var GameLayer = cc.Layer.extend({
 
     shootArrow: function() {
         var arrow = new Arrow(this.hero.direction, this.hero.getPosition());
-        this.addChild(arrow, Arrow.zOrder || 3); // Add arrow with specified z-order
+        this.addChild(arrow, Arrow.zOrder || 3);
         this.arrows.push(arrow);
         var angle = {up: 90, right: 0, down: -90, left: 180}[this.hero.direction];
-        // Bow removed
+    },
+    spawnOrc: function() {
+        var orcY = this.castle.getOrcBaseY();
+        var o = new Orc(this);
+        o.init(this.orcTexture);
+        o.setPosition(cc.winSize.width + 50, orcY);
+        this.addChild(o, 3);
+        this.orcs.push(o);
+    },
+    spawnDragon: function() {
+        var d = new cc.Dragon(this);
+        this.addChild(d, 2);
+        this.dragons.push(d);
+    },
+    startNextWave: function() {
+        if (this.currentWaveIndex >= this.waves.length) {
+            var label = new cc.LabelTTF("All waves complete!", "Arial", 36);
+            label.setPosition(cc.winSize.width / 2, cc.winSize.height / 2);
+            this.addChild(label, 1000);
+            return;
+        }
+        var wave = this.waves[this.currentWaveIndex];
+        var announcement = new cc.LabelTTF(wave.name, "Arial", 40);
+        announcement.setPosition(cc.winSize.width / 2, cc.winSize.height / 2);
+        announcement.setColor(cc.color(255, 0, 0));
+        this.addChild(announcement, 1000);
+        announcement.runAction(cc.sequence(
+            cc.delayTime(2),
+            cc.fadeOut(1),
+            cc.callFunc(function() { this.removeChild(announcement); }, this)
+        ));
+        var lastTime = 0;
+        this.spawnScheduleComplete = false;
+        wave.events.forEach(function(evt) {
+            lastTime = Math.max(lastTime, evt.time);
+            this.scheduleOnce(function() {
+                for (var i = 0; i < evt.count; i++) {
+                    if (evt.type === "orc") {
+                        this.spawnOrc();
+                    } else if (evt.type === "dragon") {
+                        this.spawnDragon();
+                    }
+                }
+            }, evt.time / 1000);
+        }, this);
+        this.scheduleOnce(function() {
+            this.spawnScheduleComplete = true;
+        }, lastTime / 1000);
+        var checkWaveDone = function() {
+            if (this.spawnScheduleComplete && this.orcs.length === 0 && this.dragons.length === 0) {
+                this.currentWaveIndex++;
+                this.startNextWave();
+                this.unschedule(checkWaveDone);
+            }
+        }.bind(this);
+        this.schedule(checkWaveDone, 0.5);
     }
 });
 

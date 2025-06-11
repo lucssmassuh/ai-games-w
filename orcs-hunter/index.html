@@ -21,11 +21,12 @@
                 cc.view.setDesignResolutionSize(800, 600, cc.ResolutionPolicy.SHOW_ALL);
                 cc.view.resizeWithBrowserSize(true);
 
-                // Load all assets before starting
+                // Load all assets and waves configuration before starting
                 cc.LoaderScene.preload([
-                    "assets/hero.png", 
-                    "assets/arrow.png", 
-                    "assets/orc.png", 
+                    "waves.json",
+                    "assets/hero.png",
+                    "assets/arrow.png",
+                    "assets/orc.png",
                     "assets/castle-tileset.png",
                     "assets/bg-tileset.png",
                     "assets/dragon-red.png"
