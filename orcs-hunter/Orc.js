@@ -4,13 +4,13 @@ var Orc = cc.Sprite.extend({
     WALK_SPEED: 20, // pixels per second
     // Sprite rows (0-indexed from bottom)
     WALK_ROW: 2,      // Third row from bottom for walking animation
-    ATTACK_ROW: 3,    // Fourth row from bottom for attack animation
-    DYING_ROW: 0,     // Bottom row for death animation frames
+    ATTACK_ROW: 3,    // Second row from bottom for attack animation
+    DYING_ROW: 4,     // Bottom row for death animation frames
     isDying: false,     // Track if orc is in dying state
     isAttacking: false, // Track if orc is in attacking state
     // Attack zone relative to left edge (px)
-    ATTACK_ZONE_MIN_X: 120,
-    ATTACK_ZONE_MAX_X: 160,
+    ATTACK_ZONE_MIN_X: 140,
+    ATTACK_ZONE_MAX_X: 170,
 
     // Constructor
     ctor: function(gameLayer) {
@@ -30,8 +30,10 @@ var Orc = cc.Sprite.extend({
         pos.x -= this.WALK_SPEED * dt;
         this.setPosition(pos);
 
-        // Start attacking when reaching this orc's chosen attackX
-        if (!this.isAttacking && this.attackX !== undefined && pos.x <= this.attackX) {
+        // Start attacking when in the predefined attack zone (px)
+        if (!this.isAttacking &&
+            pos.x <= this.ATTACK_ZONE_MAX_X &&
+            pos.x >= this.ATTACK_ZONE_MIN_X) {
             this.startAttack();
             return;
         }
@@ -101,9 +103,6 @@ var Orc = cc.Sprite.extend({
         // Start initial animation
         this.startAnimation();
 
-        // Randomize the exact stop position within the attack zone
-        this.attackX = this.ATTACK_ZONE_MIN_X + Math.random() *
-                      (this.ATTACK_ZONE_MAX_X - this.ATTACK_ZONE_MIN_X);
         return true;
     },
 
