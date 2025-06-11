@@ -2,8 +2,15 @@ var Orc = cc.Sprite.extend({
     // Animation properties
     ANIMATION_SPEED: 0.1, // 0.2 seconds per frame
     WALK_SPEED: 20, // pixels per second
-    DYING_ROW: 4, // Top row (0-indexed) for death animation frames
-    isDying: false, // Track if orc is in dying state
+    // Sprite rows (0-indexed from bottom)
+    WALK_ROW: 2,      // Third row from bottom for walking animation
+    ATTACK_ROW: 3,    // Fourth row from bottom for attack animation
+    DYING_ROW: 0,     // Bottom row for death animation frames
+    isDying: false,     // Track if orc is in dying state
+    isAttacking: false, // Track if orc is in attacking state
+    // Attack zone relative to left edge (px)
+    ATTACK_ZONE_MIN_X: 120,
+    ATTACK_ZONE_MAX_X: 160,
 
     // Constructor
     ctor: function(gameLayer) {
@@ -15,13 +22,19 @@ var Orc = cc.Sprite.extend({
 
     // Update position - always move left
     update: function(dt) {
-        // Don't update position if dying
-        if (this.isDying) return;
+        // Don't update position if dying or attacking
+        if (this.isDying || this.isAttacking) return;
 
         // Move left
         var pos = this.getPosition();
         pos.x -= this.WALK_SPEED * dt;
         this.setPosition(pos);
+
+        // Start attacking when reaching this orc's chosen attackX
+        if (!this.isAttacking && this.attackX !== undefined && pos.x <= this.attackX) {
+            this.startAttack();
+            return;
+        }
 
         // Remove orc if it goes off screen to the left
         if (pos.x < -this.width) {
@@ -52,8 +65,8 @@ var Orc = cc.Sprite.extend({
         var frameWidth = this.frameWidth;
         var frameHeight = this.frameHeight;
 
-        // Use the 3rd row from the bottom (which is row index 2 since y=0 is bottom)
-        var row = 2; // 3rd from bottom (rows: 4=bottom, 3, 2, 1, 0=top)
+        // Use the WALK_ROW'th row from the bottom for walking animation
+        var row = this.WALK_ROW;
         var directionFrames = [];
         
         // Use first 3 frames from the selected row for walking animation
@@ -88,6 +101,9 @@ var Orc = cc.Sprite.extend({
         // Start initial animation
         this.startAnimation();
 
+        // Randomize the exact stop position within the attack zone
+        this.attackX = this.ATTACK_ZONE_MIN_X + Math.random() *
+                      (this.ATTACK_ZONE_MAX_X - this.ATTACK_ZONE_MIN_X);
         return true;
     },
 
@@ -171,6 +187,34 @@ var Orc = cc.Sprite.extend({
         );
         
         this.runAction(sequence);
+    },
+
+    /**
+     * Enter attacking state: play attack animation in place.
+     */
+    startAttack: function() {
+        if (this.isAttacking) return;
+        this.isAttacking = true;
+        this.stopAllActions();
+        var attackFrames = [];
+        // Play attack frames in reverse order for correct animation direction
+        for (var col = 9; col >= 0; col--) {
+            var frame = cc.SpriteFrame.create(
+                this.texture,
+                cc.rect(
+                    col * this.frameWidth,
+                    this.ATTACK_ROW * this.frameHeight,
+                    this.frameWidth,
+                    this.frameHeight - 5
+                )
+            );
+            frame.setOffset(cc.p(0, 5));
+            attackFrames.push(frame);
+        }
+        var attackAnim = new cc.Animation(attackFrames, this.ANIMATION_SPEED);
+        var attackAnimate = new cc.Animate(attackAnim);
+        var repeat = new cc.RepeatForever(attackAnimate);
+        this.runAction(repeat, 2);
     },
     
     // Start animation for walking left
