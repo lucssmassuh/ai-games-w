@@ -245,6 +245,18 @@ var GameLayer = cc.Layer.extend({
         this.addChild(o, 3);
         this.orcs.push(o);
     },
+    // Spawn a stronger orc with higher attackPower
+    spawnBigOrc: function() {
+        var baseY = this.castle.getOrcBaseY();
+        var baseX = cc.winSize.width + 50;
+        var o = new BigOrc(this);
+        if (!o.init()) return;
+        var jitterX = baseX + (Math.random() * 40 - 20);
+        var jitterY = baseY + (Math.random() * 20 - 10);
+        o.setPosition(jitterX, jitterY);
+        this.addChild(o, 3);
+        this.orcs.push(o);
+    },
     spawnDragon: function() {
         var d = new cc.Dragon(this);
         var pos = d.getPosition();
@@ -279,6 +291,8 @@ var GameLayer = cc.Layer.extend({
                 for (var i = 0; i < evt.count; i++) {
                     if (evt.type === "orc") {
                         this.spawnOrc();
+                    } else if (evt.type === "big-orc") {
+                        this.spawnBigOrc();
                     } else if (evt.type === "dragon") {
                         this.spawnDragon();
                     }

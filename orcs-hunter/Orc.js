@@ -8,6 +8,7 @@ var Orc = cc.Sprite.extend({
     DYING_ROW: 4,     // Top row for death animation frames
     isDying: false,   // Track if orc is in dying state
     isAttacking: false, // Track if orc is in attacking state
+    attackPower: 1,     // Points of castle power drained per attack loop
     // Attack zone relative to left edge (px)
     ATTACK_ZONE_MIN_X: 120,
     ATTACK_ZONE_MAX_X: 160,
@@ -74,13 +75,13 @@ var Orc = cc.Sprite.extend({
             // Calculate frame position
             var x = col * frameWidth;
             var y = row * frameHeight;
-            
-            // Create frame with proper dimensions, cropping 5 pixels from bottom
+        // Regular orcs crop walking, attack, and death frames by 5px; big orcs don't crop
+            var crop = this.attackPower > 1 ? 0 : 5;
             var frame = cc.SpriteFrame.create(
                 texture,
-                cc.rect(x, y, frameWidth, frameHeight - 5) // Crop 5 pixels from bottom
+                cc.rect(x, y, frameWidth, frameHeight - crop)
             );
-            frame.setOffset(cc.p(0, 5)); // Adjust offset to compensate for the crop
+            frame.setOffset(cc.p(0, crop));
             
             // Debug logging to verify frame creation
             cc.log('Frame ' + col + ': ' + 
@@ -160,11 +161,13 @@ var Orc = cc.Sprite.extend({
         var rowY = this.DYING_ROW * this.frameHeight;
         // Loop from last column to first (9 to 0)
         for (var col = 9; col >= 0; col--) {
+            // Regular orcs crop attack/death, big orcs no crop
+            var crop = this.attackPower > 1 ? 0 : 5;
             var frame = cc.SpriteFrame.create(
                 this.texture,
-                cc.rect(col * this.frameWidth, rowY, this.frameWidth, this.frameHeight - 5)
+                cc.rect(col * this.frameWidth, rowY, this.frameWidth, this.frameHeight - crop)
             );
-            frame.setOffset(cc.p(0, 5));
+            frame.setOffset(cc.p(0, crop));
             deathFrames.push(frame);
         }
         
@@ -213,12 +216,14 @@ var Orc = cc.Sprite.extend({
         }
         var attackAnim = new cc.Animation(attackFrames, this.ANIMATION_SPEED);
         var attackAnimate = new cc.Animate(attackAnim);
-        // Repeat forever: play animation then decrement castle power
+        // Repeat forever: play animation then deduct attackPower points
         var attackSequence = cc.sequence(
             attackAnimate,
             cc.callFunc(function() {
                 if (this.gameLayer && typeof this.gameLayer.decrementCastlePower === 'function') {
-                    this.gameLayer.decrementCastlePower();
+                    for (var i = 0; i < this.attackPower; i++) {
+                        this.gameLayer.decrementCastlePower();
+                    }
                 }
             }, this)
         );

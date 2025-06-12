@@ -3,8 +3,9 @@
     {
       "name": "Wave 1",
       "events": [
-        { "time": 0, "type": "orc", "count": 3 },
-        { "time": 2000, "type": "orc", "count": 2 }
+        { "time": 0, "type": "big-orc", "count": 3 },
+        { "time": 4000, "type": "big-orc", "count": 1 },
+        { "time": 5000, "type": "orc", "count": 2 }
       ]
     },
     {
