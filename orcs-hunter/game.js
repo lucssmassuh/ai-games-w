@@ -27,6 +27,38 @@ var GameLayer = cc.Layer.extend({
         );
     },
 
+    // Castle power bar state and nodes
+    castlePower: 0,
+    maxCastlePower: 0,
+    powerBarBg: null,
+    powerBar: null,
+
+    // Update the castle power bar visuals
+    updatePowerBar: function() {
+        if (!this.powerBarBg || !this.powerBar) return;
+        this.powerBarBg.clear();
+        this.powerBar.clear();
+        var x = 10;
+        var h = 20;
+        var y = cc.winSize.height - h - 10;
+        var w = 200;
+        this.powerBarBg.drawRect(
+            cc.p(x, y), cc.p(x + w, y + h),
+            cc.color(0, 0, 0, 255), 1, cc.color(0, 0, 0, 255)
+        );
+        var pct = Math.max(0, this.castlePower) / this.maxCastlePower;
+        this.powerBar.drawRect(
+            cc.p(x + 1, y + 1), cc.p(x + 1 + (w - 2) * pct, y + h - 1),
+            cc.color(0, 255, 0, 255), 0, cc.color(0, 255, 0, 255)
+        );
+    },
+
+    // Decrease castle power by one and refresh bar
+    decrementCastlePower: function() {
+        this.castlePower = Math.max(0, this.castlePower - 1);
+        this.updatePowerBar();
+    },
+
     ctor: function () {
         this._super();
         
@@ -56,6 +88,14 @@ var GameLayer = cc.Layer.extend({
         this.castle.setPosition(20, 0); // Move castle 20 pixels to the right
         this.addChild(this.castle);
         console.log("Castle added to scene, position:", this.castle.getPosition());
+        // Initialize castle power and display its bar
+        this.maxCastlePower = 1000;
+        this.castlePower = this.maxCastlePower;
+        this.powerBarBg = new cc.DrawNode();
+        this.powerBar = new cc.DrawNode();
+        this.addChild(this.powerBarBg, 1000);
+        this.addChild(this.powerBar, 1000);
+        this.updatePowerBar();
 
 
         // Load the orc texture

@@ -4,13 +4,13 @@ var Orc = cc.Sprite.extend({
     WALK_SPEED: 20, // pixels per second
     // Sprite rows (0-indexed from bottom)
     WALK_ROW: 2,      // Third row from bottom for walking animation
-    ATTACK_ROW: 3,    // Second row from bottom for attack animation
-    DYING_ROW: 4,     // Bottom row for death animation frames
-    isDying: false,     // Track if orc is in dying state
+    ATTACK_ROW: 3,    // Fourth row from bottom for attack animation
+    DYING_ROW: 4,     // Top row for death animation frames
+    isDying: false,   // Track if orc is in dying state
     isAttacking: false, // Track if orc is in attacking state
     // Attack zone relative to left edge (px)
-    ATTACK_ZONE_MIN_X: 140,
-    ATTACK_ZONE_MAX_X: 170,
+    ATTACK_ZONE_MIN_X: 120,
+    ATTACK_ZONE_MAX_X: 160,
 
     // Constructor
     ctor: function(gameLayer) {
@@ -30,10 +30,8 @@ var Orc = cc.Sprite.extend({
         pos.x -= this.WALK_SPEED * dt;
         this.setPosition(pos);
 
-        // Start attacking when in the predefined attack zone (px)
-        if (!this.isAttacking &&
-            pos.x <= this.ATTACK_ZONE_MAX_X &&
-            pos.x >= this.ATTACK_ZONE_MIN_X) {
+        // Start attacking when reaching this orc's chosen attackX
+        if (!this.isAttacking && this.attackX !== undefined && pos.x <= this.attackX) {
             this.startAttack();
             return;
         }
@@ -103,6 +101,9 @@ var Orc = cc.Sprite.extend({
         // Start initial animation
         this.startAnimation();
 
+        // Randomize the exact stop position within the attack zone
+        this.attackX = this.ATTACK_ZONE_MIN_X +
+                      Math.random() * (this.ATTACK_ZONE_MAX_X - this.ATTACK_ZONE_MIN_X);
         return true;
     },
 
@@ -196,7 +197,7 @@ var Orc = cc.Sprite.extend({
         this.isAttacking = true;
         this.stopAllActions();
         var attackFrames = [];
-        // Play attack frames in reverse order for correct animation direction
+        // Build attack frames (reverse order) for correct direction
         for (var col = 9; col >= 0; col--) {
             var frame = cc.SpriteFrame.create(
                 this.texture,
@@ -212,7 +213,16 @@ var Orc = cc.Sprite.extend({
         }
         var attackAnim = new cc.Animation(attackFrames, this.ANIMATION_SPEED);
         var attackAnimate = new cc.Animate(attackAnim);
-        var repeat = new cc.RepeatForever(attackAnimate);
+        // Repeat forever: play animation then decrement castle power
+        var attackSequence = cc.sequence(
+            attackAnimate,
+            cc.callFunc(function() {
+                if (this.gameLayer && typeof this.gameLayer.decrementCastlePower === 'function') {
+                    this.gameLayer.decrementCastlePower();
+                }
+            }, this)
+        );
+        var repeat = new cc.RepeatForever(attackSequence);
         this.runAction(repeat, 2);
     },
     
