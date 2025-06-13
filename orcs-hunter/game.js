@@ -59,6 +59,37 @@ var GameLayer = cc.Layer.extend({
         this.updatePowerBar();
     },
 
+    /**
+     * Draw discrete health bars above orcs that have been hit (health < maxHealth).
+     */
+    drawOrcHealthBars: function() {
+        if (!this.orcHealthBarLayer) return;
+        this.orcHealthBarLayer.clear();
+        var barWidth = 20;
+        var barHeight = 4;
+        var barSpacing = 2;
+        for (var i = 0; i < this.orcs.length; i++) {
+            var orc = this.orcs[i];
+            if (typeof orc.health !== 'number' || orc.health >= orc.maxHealth || orc.health <= 0) continue;
+            var segments = orc.maxHealth;
+            var currentSegments = orc.health;
+            var segmentWidth = (barWidth - (segments - 1) * barSpacing) / segments;
+            var pos = orc.getPosition();
+            var startX = pos.x - barWidth / 2;
+            var startY = pos.y + (orc.frameHeight * orc.scaleFactor / 2) + 10;
+            for (var s = 0; s < segments; s++) {
+                var x1 = startX + s * (segmentWidth + barSpacing);
+                var y1 = startY;
+                var color = s < currentSegments ? cc.color(0, 255, 0, 255) : cc.color(128, 128, 128, 255);
+                this.orcHealthBarLayer.drawRect(
+                    cc.p(x1, y1),
+                    cc.p(x1 + segmentWidth, y1 + barHeight),
+                    color, 1, color
+                );
+            }
+        }
+    },
+
     ctor: function () {
         this._super();
         
@@ -95,6 +126,10 @@ var GameLayer = cc.Layer.extend({
         this.powerBar = new cc.DrawNode();
         this.addChild(this.powerBarBg, 1000);
         this.addChild(this.powerBar, 1000);
+
+        // Layer for drawing orcs' health bars
+        this.orcHealthBarLayer = new cc.DrawNode();
+        this.addChild(this.orcHealthBarLayer, 1000);
         this.updatePowerBar();
 
 
@@ -166,7 +201,7 @@ var GameLayer = cc.Layer.extend({
                     );
                     arr.removeFromParent();
                     this.arrows.splice(a, 1);
-                    orc.die();
+                    orc.takeDamage(1);
                     break;
                 }
             }
@@ -180,11 +215,14 @@ var GameLayer = cc.Layer.extend({
                     )) {
                     arr.removeFromParent();
                     this.arrows.splice(a, 1);
-                    dragon.die();
+                    dragon.takeDamage(1);
                     break;
                 }
             }
         }
+
+        // Draw orcs' health bars
+        this.drawOrcHealthBars();
     },
 
     startMoveDown: function () {

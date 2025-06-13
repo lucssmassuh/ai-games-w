@@ -14,6 +14,10 @@ var Dragon = cc.Sprite.extend({
     // Speed at which dragon falls when dying (pixels/sec)
     fallSpeed: 200,
 
+    // Health properties for dragon enemies (HP points)
+    maxHealth: 3,
+    health: 3,
+
     ctor: function(gameLayer) {
         // Initialize frames arrays
         this.frames = [];
@@ -117,6 +121,17 @@ var Dragon = cc.Sprite.extend({
         var deathAnim = new cc.Animation(this.deathFrames, 0.15);
         deathAnim.setLoops(cc.REPEAT_FOREVER);
         this.runAction(cc.animate(deathAnim));
+    },
+
+    /**
+     * Apply damage to the dragon: subtract health by amount, die if health <= 0.
+     * @param {number} amount - Damage amount
+     */
+    takeDamage: function(amount) {
+        this.health = Math.max(0, this.health - amount);
+        if (this.health <= 0) {
+            this.die();
+        }
     }
 });
 

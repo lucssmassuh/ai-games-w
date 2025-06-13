@@ -5,6 +5,10 @@ var BigOrc = Orc.extend({
     // Override attack power (2 points per attack loop)
     attackPower: 2,
 
+    // Override health for big orc enemies (HP points)
+    maxHealth: 4,
+    health: 4,
+
     /**
      * Initialize with its specific texture.
      * @returns {boolean} true if initialization succeeded

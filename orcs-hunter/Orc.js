@@ -9,6 +9,21 @@ var Orc = cc.Sprite.extend({
     isDying: false,   // Track if orc is in dying state
     isAttacking: false, // Track if orc is in attacking state
     attackPower: 1,     // Points of castle power drained per attack loop
+
+    // Health properties for orc enemies (HP points)
+    maxHealth: 2,
+    health: 2,
+
+    /**
+     * Apply damage to the orc: subtract health by amount, die if health <= 0.
+     * @param {number} amount - Damage amount
+     */
+    takeDamage: function(amount) {
+        this.health = Math.max(0, this.health - amount);
+        if (this.health <= 0) {
+            this.die();
+        }
+    },
     // Attack zone relative to left edge (px)
     ATTACK_ZONE_MIN_X: 120,
     ATTACK_ZONE_MAX_X: 160,
