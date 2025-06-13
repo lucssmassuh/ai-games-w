@@ -60,30 +60,31 @@ var GameLayer = cc.Layer.extend({
     },
 
     /**
-     * Draw discrete health bars above orcs that have been hit (health < maxHealth).
+     * Draw discrete health bars above enemies that have been hit (health < maxHealth).
+     * Applies to orcs (including big orcs) and dragons.
      */
-    drawOrcHealthBars: function() {
+    drawHealthBars: function() {
         if (!this.orcHealthBarLayer) return;
         this.orcHealthBarLayer.clear();
-        var barWidth = 20;
-        var barHeight = 4;
-        var barSpacing = 2;
-        for (var i = 0; i < this.orcs.length; i++) {
-            var orc = this.orcs[i];
-            if (typeof orc.health !== 'number' || orc.health >= orc.maxHealth || orc.health <= 0) continue;
-            var segments = orc.maxHealth;
-            var currentSegments = orc.health;
+        var barWidth = 20, barHeight = 0.5, barSpacing = 2;
+        var enemies = this.orcs.concat(this.dragons);
+        for (var i = 0; i < enemies.length; i++) {
+            var e = enemies[i];
+            if (typeof e.health !== 'number' || e.health >= e.maxHealth || e.health <= 0) continue;
+            var segments = e.maxHealth;
+            var currentSegments = e.health;
             var segmentWidth = (barWidth - (segments - 1) * barSpacing) / segments;
-            var pos = orc.getPosition();
+            var pos = e.getPosition();
+            var heightHalf = e.getContentSize().height * e.getScaleY() / 2;
             var startX = pos.x - barWidth / 2;
-            var startY = pos.y + (orc.frameHeight * orc.scaleFactor / 2) + 10;
+            var startY = pos.y + heightHalf + 10;
             for (var s = 0; s < segments; s++) {
                 var x1 = startX + s * (segmentWidth + barSpacing);
                 var y1 = startY;
-                var color = s < currentSegments ? cc.color(0, 255, 0, 255) : cc.color(128, 128, 128, 255);
+                var color = s < currentSegments ? cc.color(255, 0, 0, 255)
+                                              : cc.color(128, 128, 128, 255);
                 this.orcHealthBarLayer.drawRect(
-                    cc.p(x1, y1),
-                    cc.p(x1 + segmentWidth, y1 + barHeight),
+                    cc.p(x1, y1), cc.p(x1 + segmentWidth, y1 + barHeight),
                     color, 1, color
                 );
             }
@@ -221,8 +222,8 @@ var GameLayer = cc.Layer.extend({
             }
         }
 
-        // Draw orcs' health bars
-        this.drawOrcHealthBars();
+        // Draw health bars for hit enemies
+        this.drawHealthBars();
     },
 
     startMoveDown: function () {
