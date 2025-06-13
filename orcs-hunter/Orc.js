@@ -1,7 +1,7 @@
 var Orc = cc.Sprite.extend({
     // Animation properties
-    ANIMATION_SPEED: 0.13, // seconds per frame
-    WALK_SPEED: 15, // pixels per second
+    ANIMATION_SPEED: 0.1, // 0.2 seconds per frame
+    WALK_SPEED: 20, // pixels per second
     // Sprite rows (0-indexed from bottom)
     WALK_ROW: 2,      // Third row from bottom for walking animation
     ATTACK_ROW: 3,    // Fourth row from bottom for attack animation
@@ -49,11 +49,6 @@ var Orc = cc.Sprite.extend({
         }
     },
 
-    // Scale factor for the orc (1.0 for regular orcs, can be overridden by subclasses)
-    scaleFactor: 1.0,
-    // Frame crop amount (5px for regular orcs, 0 for big orcs)
-    frameCrop: 5,
-
     // Initialize with texture
     init: function(texture) {
         // Initialize sprite
@@ -64,9 +59,8 @@ var Orc = cc.Sprite.extend({
         this.frameWidth = texture.width / 10; // 10 columns
         this.frameHeight = texture.height / 5; // 5 rows
         
-        // Set scale
-        this.setScale(this.scaleFactor);
-
+        // Set scale to maintain original size
+        this.setScale(1);
 
         // Create frames from sprite sheet (10 columns x 5 rows)
         var frameWidth = this.frameWidth;
@@ -76,16 +70,16 @@ var Orc = cc.Sprite.extend({
         var row = this.WALK_ROW;
         var directionFrames = [];
         
-        // Create frames from the sprite sheet
+        // Use first 3 frames from the selected row for walking animation
         for (var col = 0; col < 10; col++) {
-            // Calculate frame position with crop
-            var x = col * frameWidth + (this.frameCrop / 2);
-            var y = row * frameHeight + (this.frameCrop / 2);
-            var width = frameWidth - this.frameCrop;
-            var height = frameHeight - this.frameCrop;
+            // Calculate frame position
+            var x = col * frameWidth;
+            var y = row * frameHeight;
+        // Regular orcs crop walking, attack, and death frames by 5px; big orcs don't crop
+            var crop = this.attackPower > 1 ? 0 : 5;
             var frame = cc.SpriteFrame.create(
                 texture,
-                cc.rect(x, y, width, height)
+                cc.rect(x, y, frameWidth, frameHeight - crop)
             );
             frame.setOffset(cc.p(0, crop));
             
@@ -208,18 +202,16 @@ var Orc = cc.Sprite.extend({
         var attackFrames = [];
         // Build attack frames (reverse order) for correct direction
         for (var col = 9; col >= 0; col--) {
-            // Regular orcs crop attack frames by 5px; big orcs don't crop
-            var crop = this.attackPower > 1 ? 0 : 5;
             var frame = cc.SpriteFrame.create(
                 this.texture,
                 cc.rect(
                     col * this.frameWidth,
                     this.ATTACK_ROW * this.frameHeight,
                     this.frameWidth,
-                    this.frameHeight - crop
+                    this.frameHeight - 5
                 )
             );
-            frame.setOffset(cc.p(0, crop));
+            frame.setOffset(cc.p(0, 5));
             attackFrames.push(frame);
         }
         var attackAnim = new cc.Animation(attackFrames, this.ANIMATION_SPEED);
