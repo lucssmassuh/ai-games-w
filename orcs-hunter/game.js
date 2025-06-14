@@ -296,6 +296,18 @@ var GameLayer = cc.Layer.extend({
         this.addChild(o, 3);
         this.orcs.push(o);
     },
+    spawnDeath: function() {
+        var baseY = this.castle.getOrcBaseY();
+        var baseX = cc.winSize.width + 50;
+        var d = new Death(this);
+        if (!d.init()) return;
+        var jitterX = baseX + (Math.random() * 40 - 20);
+        var jitterY = baseY + (Math.random() * 20 - 10);
+        d.setPosition(jitterX, jitterY);
+        this.addChild(d, 3);
+        this.orcs.push(d);
+    },
+
     spawnDragon: function() {
         var d = new cc.Dragon(this);
         var pos = d.getPosition();
@@ -332,6 +344,8 @@ var GameLayer = cc.Layer.extend({
                         this.spawnOrc();
                     } else if (evt.type === "big-orc") {
                         this.spawnBigOrc();
+                    } else if (evt.type === "death") {
+                        this.spawnDeath();
                     } else if (evt.type === "dragon") {
                         this.spawnDragon();
                     }

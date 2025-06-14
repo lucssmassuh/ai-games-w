@@ -3,27 +3,101 @@
     {
       "name": "Wave 1",
       "events": [
-        { "time": 0, "type": "big-orc", "count": 3 },
-        { "time": 4000, "type": "big-orc", "count": 1 },
-        { "time": 5000, "type": "orc", "count": 2 }
+        { "time": 0,    "type": "death",      "count": 3 },
+        { "time": 4000, "type": "orc",      "count": 1 },
+        { "time": 5000, "type": "orc",      "count": 2 }
       ]
     },
     {
       "name": "Wave 2",
       "events": [
-        { "time": 0, "type": "orc", "count": 5 },
-        { "time": 3000, "type": "dragon", "count": 1 },
-        { "time": 7000, "type": "orc", "count": 3 }
+        { "time": 0,    "type": "orc",      "count": 5 },
+        { "time": 3000, "type": "dragon",   "count": 1 },
+        { "time": 7000, "type": "big-orc",  "count": 3 }
       ]
     },
     {
       "name": "Wave 3",
       "events": [
-        { "time": 0, "type": "orc", "count": 3 },
-        { "time": 3000, "type": "dragon", "count": 1 },
-        { "time": 7000, "type": "orc", "count": 5 },
-        { "time": 8000, "type": "dragon", "count": 1 },
-        { "time": 9000, "type": "orc", "count": 8 }
+        { "time": 0,    "type": "orc",      "count": 3 },
+        { "time": 3000, "type": "dragon",   "count": 1 },
+        { "time": 7000, "type": "big-orc",  "count": 5 },
+        { "time": 8000, "type": "dragon",   "count": 1 },
+        { "time": 9000, "type": "orc",      "count": 8 }
+      ]
+    },
+    {
+      "name": "Wave 4",
+      "events": [
+        { "time": 0,    "type": "orc",      "count": 6 },
+        { "time": 3000, "type": "orc",      "count": 4 },
+        { "time": 6000, "type": "big-orc",  "count": 2 },
+        { "time": 9000, "type": "dragon",   "count": 1 }
+      ]
+    },
+    {
+      "name": "Wave 5",
+      "events": [
+        { "time": 0,    "type": "orc",      "count": 8 },
+        { "time": 3000, "type": "big-orc",  "count": 4 },
+        { "time": 6000, "type": "orc",      "count": 6 },
+        { "time": 9000, "type": "dragon",   "count": 1 },
+        { "time": 12000,"type": "big-orc",  "count": 3 }
+      ]
+    },
+    {
+      "name": "Wave 6",
+      "events": [
+        { "time": 0,    "type": "orc",      "count": 5 },
+        { "time": 3000, "type": "big-orc",  "count": 6 },
+        { "time": 6000, "type": "dragon",   "count": 2 },
+        { "time": 9000, "type": "orc",      "count": 10 },
+        { "time": 12000,"type": "big-orc",  "count": 4 },
+        { "time": 15000,"type": "dragon",   "count": 1 }
+      ]
+    },
+    {
+      "name": "Wave 7",
+      "events": [
+        { "time": 0,    "type": "big-orc",  "count": 8 },
+        { "time": 3000, "type": "orc",      "count": 12 },
+        { "time": 6000, "type": "dragon",   "count": 2 },
+        { "time": 9000, "type": "big-orc",  "count": 6 },
+        { "time": 12000,"type": "dragon",   "count": 2 },
+        { "time": 15000,"type": "orc",      "count": 8 }
+      ]
+    },
+    {
+      "name": "Wave 8",
+      "events": [
+        { "time": 0,    "type": "orc",      "count": 15 },
+        { "time": 3000, "type": "big-orc",  "count": 10 },
+        { "time": 6000, "type": "dragon",   "count": 3 },
+        { "time": 9000, "type": "orc",      "count": 10 },
+        { "time": 12000,"type": "big-orc",  "count": 8 },
+        { "time": 15000,"type": "dragon",   "count": 1 }
+      ]
+    },
+    {
+      "name": "Wave 9",
+      "events": [
+        { "time": 0,    "type": "big-orc",  "count": 12 },
+        { "time": 3000, "type": "dragon",   "count": 3 },
+        { "time": 6000, "type": "orc",      "count": 20 },
+        { "time": 9000, "type": "big-orc",  "count": 10 },
+        { "time": 12000,"type": "dragon",   "count": 2 },
+        { "time": 15000,"type": "orc",      "count": 15 }
+      ]
+    },
+    {
+      "name": "Wave 10",
+      "events": [
+        { "time": 0,    "type": "dragon",   "count": 5 },
+        { "time": 3000, "type": "big-orc",  "count": 15 },
+        { "time": 6000, "type": "dragon",   "count": 3 },
+        { "time": 9000, "type": "orc",      "count": 25 },
+        { "time": 12000,"type": "big-orc",  "count": 12 },
+        { "time": 15000,"type": "dragon",   "count": 2 }
       ]
     }
   ]
