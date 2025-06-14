@@ -6,8 +6,8 @@ var Death = Orc.extend({
     attackPower: 2,
 
     // Override health for death enemies (HP points)
-    maxHealth: 4,
-    health: 4,
+    maxHealth: 6,
+    health: 6,
 
     /**
      * Initialize with its specific texture.

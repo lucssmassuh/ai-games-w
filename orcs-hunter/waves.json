@@ -3,9 +3,8 @@
     {
       "name": "Wave 1",
       "events": [
-        { "time": 0,    "type": "death",      "count": 3 },
-        { "time": 4000, "type": "orc",      "count": 1 },
-        { "time": 5000, "type": "orc",      "count": 2 }
+        { "time": 1000, "type": "orc",      "count": 3 },
+        { "time": 3000, "type": "orc",      "count": 5 }
       ]
     },
     {
@@ -23,7 +22,7 @@
         { "time": 3000, "type": "dragon",   "count": 1 },
         { "time": 7000, "type": "big-orc",  "count": 5 },
         { "time": 8000, "type": "dragon",   "count": 1 },
-        { "time": 9000, "type": "orc",      "count": 8 }
+        { "time": 9000, "type": "death",      "count": 1 }
       ]
     },
     {
@@ -32,7 +31,8 @@
         { "time": 0,    "type": "orc",      "count": 6 },
         { "time": 3000, "type": "orc",      "count": 4 },
         { "time": 6000, "type": "big-orc",  "count": 2 },
-        { "time": 9000, "type": "dragon",   "count": 1 }
+        { "time": 9000, "type": "dragon",   "count": 1 },
+        { "time": 12000,"type": "death",    "count": 2 }
       ]
     },
     {
@@ -41,6 +41,7 @@
         { "time": 0,    "type": "orc",      "count": 8 },
         { "time": 3000, "type": "big-orc",  "count": 4 },
         { "time": 6000, "type": "orc",      "count": 6 },
+        { "time": 7000, "type": "death",   "count": 2 },
         { "time": 9000, "type": "dragon",   "count": 1 },
         { "time": 12000,"type": "big-orc",  "count": 3 }
       ]
@@ -51,6 +52,7 @@
         { "time": 0,    "type": "orc",      "count": 5 },
         { "time": 3000, "type": "big-orc",  "count": 6 },
         { "time": 6000, "type": "dragon",   "count": 2 },
+        { "time": 7000, "type": "death",   "count": 3 },
         { "time": 9000, "type": "orc",      "count": 10 },
         { "time": 12000,"type": "big-orc",  "count": 4 },
         { "time": 15000,"type": "dragon",   "count": 1 }
@@ -64,6 +66,7 @@
         { "time": 6000, "type": "dragon",   "count": 2 },
         { "time": 9000, "type": "big-orc",  "count": 6 },
         { "time": 12000,"type": "dragon",   "count": 2 },
+        { "time": 15000,"type": "death",   "count": 3 },
         { "time": 15000,"type": "orc",      "count": 8 }
       ]
     },
@@ -74,6 +77,7 @@
         { "time": 3000, "type": "big-orc",  "count": 10 },
         { "time": 6000, "type": "dragon",   "count": 3 },
         { "time": 9000, "type": "orc",      "count": 10 },
+        { "time": 12000,"type": "death",   "count": 3 },
         { "time": 12000,"type": "big-orc",  "count": 8 },
         { "time": 15000,"type": "dragon",   "count": 1 }
       ]
@@ -84,6 +88,7 @@
         { "time": 0,    "type": "big-orc",  "count": 12 },
         { "time": 3000, "type": "dragon",   "count": 3 },
         { "time": 6000, "type": "orc",      "count": 20 },
+        { "time": 7000, "type": "death",   "count": 4 },
         { "time": 9000, "type": "big-orc",  "count": 10 },
         { "time": 12000,"type": "dragon",   "count": 2 },
         { "time": 15000,"type": "orc",      "count": 15 }
@@ -95,6 +100,7 @@
         { "time": 0,    "type": "dragon",   "count": 5 },
         { "time": 3000, "type": "big-orc",  "count": 15 },
         { "time": 6000, "type": "dragon",   "count": 3 },
+        { "time": 7000, "type": "death",   "count": 4 },
         { "time": 9000, "type": "orc",      "count": 25 },
         { "time": 12000,"type": "big-orc",  "count": 12 },
         { "time": 15000,"type": "dragon",   "count": 2 }
