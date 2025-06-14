@@ -11,6 +11,13 @@ var Dragon = cc.Sprite.extend({
     timeElapsed: 0,
     // Track if dragon is dying (should fall)
     isDying: false,
+    // Track if dragon is in attacking state
+    isAttacking: false,
+    // Points of castle power drained per attack loop
+    attackPower: 8,
+    // Attack zone relative to left edge (px)
+    ATTACK_ZONE_MIN_X: 120,
+    ATTACK_ZONE_MAX_X: 160,
     // Speed at which dragon falls when dying (pixels/sec)
     fallSpeed: 200,
 
@@ -32,16 +39,20 @@ var Dragon = cc.Sprite.extend({
         this._super(texture);
         this.gameLayer = gameLayer;
 
+        // Sprite sheet dimensions (cols × rows)
         var cols = 3;
         var rows = 4;
-        var frameWidth = texture.width / cols;
-        var frameHeight = texture.height / rows;
-        // Extract only the last row for flapping animation
-        var y = (rows - 1) * frameHeight;
+        // Store texture and frame dimensions for animations
+        this.texture = texture;
+        this.frameWidth = texture.width / cols;
+        this.frameHeight = texture.height / rows;
+        // Extract flapping (flying) animation frames from top row (last row)
+        var y = (rows - 1) * this.frameHeight;
         for (var i = 0; i < cols; i++) {
             this.frames.push(
-                new cc.SpriteFrame(texture,
-                    cc.rect(i * frameWidth, y, frameWidth, frameHeight)
+                new cc.SpriteFrame(
+                    this.texture,
+                    cc.rect(i * this.frameWidth, y, this.frameWidth, this.frameHeight)
                 )
             );
         }
@@ -49,27 +60,30 @@ var Dragon = cc.Sprite.extend({
         // Initialize with the first frame and set up appearance
         this.setSpriteFrame(this.frames[0]);
         this.setAnchorPoint(0.5, 0.5);
-        this.setContentSize(cc.size(frameWidth, frameHeight));
+        this.setContentSize(cc.size(this.frameWidth, this.frameHeight));
 
-        // Prepare death animation frames from first row
+        // Prepare death animation frames from bottom row (first row)
         var deathY = 0;
         for (var j = 0; j < cols; j++) {
             this.deathFrames.push(
                 new cc.SpriteFrame(
-                    texture,
-                    cc.rect(j * frameWidth, deathY, frameWidth, frameHeight)
+                    this.texture,
+                    cc.rect(j * this.frameWidth, deathY, this.frameWidth, this.frameHeight)
                 )
             );
         }
 
-        // Start off-screen on the right, vertically centered
-        var startX = cc.winSize.width + frameWidth / 2;
-        var startY = cc.winSize.height / 2;
+        // Start off-screen on the right, a bit lower than center
+        var startX = cc.winSize.width + this.frameWidth / 2;
+        var startY = cc.winSize.height / 2 - 20;
         this.setPosition(startX, startY);
         this.startY = startY;
         
         // Scale down the dragon
         this.setScale(0.5);
+        // Randomize the exact stop position within the attack zone
+        this.attackX = this.ATTACK_ZONE_MIN_X +
+                      Math.random() * (this.ATTACK_ZONE_MAX_X - this.ATTACK_ZONE_MIN_X);
 
         // Run flapping animation loop
         var animation = new cc.Animation(this.frames, 0.15);
@@ -99,12 +113,21 @@ var Dragon = cc.Sprite.extend({
             return;
         }
 
+        if (this.isAttacking) {
+            return;
+        }
         // Normal flight: sine-wave vertical movement and leftward motion
         this.timeElapsed += dt;
         var pos = this.getPosition();
         pos.x -= this.speed * dt;
         pos.y = this.startY + this.amplitude * Math.sin(this.frequency * this.timeElapsed);
         this.setPosition(pos);
+
+        // Start attacking when reaching attack zone
+        if (!this.isAttacking && this.attackX !== undefined && pos.x <= this.attackX) {
+            this.startAttack();
+            return;
+        }
 
         // Remove when fully off-screen to the left
         if (pos.x < -this.getContentSize().width / 2) {
@@ -132,6 +155,47 @@ var Dragon = cc.Sprite.extend({
         if (this.health <= 0) {
             this.die();
         }
+    },
+
+    /**
+     * Enter attacking state: play attack animation and drain castle power.
+     */
+    startAttack: function() {
+        if (this.isAttacking) return;
+        this.isAttacking = true;
+        this.stopAllActions();
+        // Hover just above the hero's head
+        if (this.gameLayer && this.gameLayer.hero) {
+            var hero = this.gameLayer.hero;
+            var heroTop = hero.getPosition().y + hero.getContentSize().height * hero.getScaleY() / 2;
+            var hoverY = heroTop - 10;
+            this.setPosition(this.attackX, hoverY);
+        }
+        // Build attack animation frames from third row (index 2) of the sprite sheet
+        var attackFrames = [];
+        var attackRow = 2; // third row from bottom
+        for (var i = 0; i < 3; i++) {
+            attackFrames.push(
+                new cc.SpriteFrame(
+                    this.texture,
+                    cc.rect(i * this.frameWidth, attackRow * this.frameHeight,
+                            this.frameWidth, this.frameHeight)
+                )
+            );
+        }
+        var attackAnim = new cc.Animation(attackFrames, 0.15);
+        var attackAnimate = new cc.Animate(attackAnim);
+        var attackSequence = cc.sequence(
+            attackAnimate,
+            cc.callFunc(function() {
+                if (this.gameLayer && typeof this.gameLayer.decrementCastlePower === 'function') {
+                    for (var j = 0; j < this.attackPower; j++) {
+                        this.gameLayer.decrementCastlePower();
+                    }
+                }
+            }, this)
+        );
+        this.runAction(new cc.RepeatForever(attackSequence));
     }
 });
 
