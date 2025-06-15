@@ -308,6 +308,18 @@ var GameLayer = cc.Layer.extend({
         this.orcs.push(d);
     },
 
+    spawnWizzard: function() {
+        var baseY = this.castle.getOrcBaseY();
+        var baseX = cc.winSize.width + 50;
+        var w = new Wizzard(this);
+        if (!w.init()) return;
+        var jitterX = baseX + (Math.random() * 40 - 20);
+        var jitterY = baseY + (Math.random() * 20 - 10);
+        w.setPosition(jitterX, jitterY);
+        this.addChild(w, 3);
+        this.orcs.push(w);
+    },
+
     spawnDragon: function() {
         var d = new cc.Dragon(this);
         var pos = d.getPosition();
@@ -344,6 +356,8 @@ var GameLayer = cc.Layer.extend({
                         this.spawnOrc();
                     } else if (evt.type === "big-orc") {
                         this.spawnBigOrc();
+                    } else if (evt.type === "wizzard") {
+                        this.spawnWizzard();
                     } else if (evt.type === "death") {
                         this.spawnDeath();
                     } else if (evt.type === "dragon") {

@@ -17,6 +17,7 @@ in the /orcs-hunter folder there are files with javascript code that implement t
 /orcs-hunter/game.js contains the code for the game, which is a tower defense game where the player controls the elf to defend the castle from waves of orcs and dragons. The game uses Cocos 2D V3.13 sdk which is available at /orcs-hunter/cocos2d/cocos2d-js-v3.13.js.
 /orcs-hunter/project.json contains the project configuration.
 /orcs-hunter/waves.json contains the waves of enemies to be spawned.
+/orcs-hunter/Wizzard.js contains the code for the wizard enemy, which is a stronger variant based on BigOrc logic and is depicted by the /orcs-hunter/assets/wizzard.png file.
 
 ## Castle Wars
 *Agents used in the Castle Wars game*
