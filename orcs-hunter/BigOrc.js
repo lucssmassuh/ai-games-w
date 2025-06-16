@@ -2,6 +2,9 @@
 // A stronger variant of Orc that deals double power damage.
 
 var BigOrc = Orc.extend({
+    // Override movement speed (half speed)
+    WALK_SPEED: 10,
+
     // Override attack power (2 points per attack loop)
     attackPower: 2,
 

@@ -2,6 +2,9 @@
 // A variant of Orc that is similar to BigOrc but uses the death sprite.
 
 var Death = Orc.extend({
+    // Override movement speed (double speed)
+    WALK_SPEED: 40,
+
     // Override attack power (2 points per attack loop)
     attackPower: 2,
 
