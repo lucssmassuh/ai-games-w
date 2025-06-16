@@ -1,16 +1,16 @@
 // Wizzard.js
-// A stronger variant of Orc that deals double power damage, using the wizard sprite.
+// A powerful variant of Orc that deals triple power damage, using the wizard sprite.
 
 var Wizzard = Orc.extend({
     // Override movement speed (triple speed)
     WALK_SPEED: 60,
 
-    // Override attack power (2 points per attack loop)
-    attackPower: 2,
+    // Override attack power (3 points per attack loop)
+    attackPower: 3,
 
     // Override health for wizard enemies (HP points)
-    maxHealth: 4,
-    health: 4,
+    maxHealth: 6,
+    health: 6,
 
     /**
      * Initialize with its specific texture.

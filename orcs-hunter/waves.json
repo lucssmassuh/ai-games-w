@@ -4,8 +4,7 @@
       "name": "Wave 1",
       "events": [
         { "time": 1000, "type": "orc",      "count": 3 },
-        { "time": 3000, "type": "orc",      "count": 5 },
-        { "time": 4000, "type": "wizzard",      "count": 1 }
+        { "time": 3000, "type": "orc",      "count": 5 }
       ]
     },
     {
