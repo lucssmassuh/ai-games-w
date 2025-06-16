@@ -195,16 +195,18 @@ var GameLayer = cc.Layer.extend({
                                     orc.getBoundingBox(),
                                     arr.getBoundingBox()
                                   );
-                if (collision) {
-                    cc.log(
-                        'Collision detected: Arrow at (' + arr.getPosition().x + ',' + arr.getPosition().y +
-                        ') hit Orc at (' + orc.getPosition().x + ',' + orc.getPosition().y + ')'
-                    );
-                    arr.removeFromParent();
-                    this.arrows.splice(a, 1);
-                    orc.takeDamage(1);
-                    break;
-                }
+                    if (collision) {
+                        cc.log(
+                            'Collision detected: Arrow at (' + arr.getPosition().x + ',' + arr.getPosition().y +
+                            ') hit Orc at (' + orc.getPosition().x + ',' + orc.getPosition().y + ')'
+                        );
+                        var hitPos = arr.getPosition();
+                        arr.removeFromParent();
+                        this.arrows.splice(a, 1);
+                        this.spawnBlood(hitPos);
+                        orc.takeDamage(1);
+                        break;
+                    }
             }
             // Check collision with dragons
             for (var d = this.dragons.length - 1; d >= 0; d--) {
@@ -214,8 +216,10 @@ var GameLayer = cc.Layer.extend({
                         dragon.getBoundingBox(),
                         arr.getBoundingBox()
                     )) {
+                    var hitPosD = arr.getPosition();
                     arr.removeFromParent();
                     this.arrows.splice(a, 1);
+                    this.spawnBlood(hitPosD);
                     dragon.takeDamage(1);
                     break;
                 }
@@ -224,6 +228,12 @@ var GameLayer = cc.Layer.extend({
 
         // Draw health bars for hit enemies
         this.drawHealthBars();
+    },
+
+    spawnBlood: function(pos) {
+        var b = new Blood();
+        b.setPosition(pos);
+        this.addChild(b, 4);
     },
 
     startMoveDown: function () {
