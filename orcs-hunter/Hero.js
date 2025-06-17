@@ -222,11 +222,12 @@ var Hero = cc.Sprite.extend({
                         this.arrows.push(arr);
                     }
                 } else {
-                    var arr = new Arrow(angleRad, pos, speed);
+                    var arrowOptions = {};
                     if (info.type === 'explosive') {
-                        arr.explosive = true;
-                        arr.explosionRadius = 30;
+                        arrowOptions.explosive = true;
+                        arrowOptions.explosionRadius = 50; // Slightly larger explosion radius
                     }
+                    var arr = new Arrow(angleRad, pos, speed, arrowOptions);
                     this.parent.addChild(arr);
                     this.arrows.push(arr);
                 }
