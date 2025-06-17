@@ -22,7 +22,7 @@ in the /orcs-hunter folder there are files with javascript code that implement t
 ### Arrow Types and Selection
 Controls for arrow modes and purchasing:
 - Press **Tab** to cycle through the three arrow modes (highlighted icon shows current mode).
-- Press **1**, **2**, **3** to purchase one arrow of type Ordinary/Explosive/Triple for 1/6/3 coins (if you have enough coins).
+- Press **1**, **2**, **3** to purchase one arrow of type Ordinary/Explosive/Triple for 1/6/3 coins (if you have enough coins). You start with 20 coins.
 
 Icons appear in a 32×32 layout at the bottom-left, with a stock counter below each showing how many arrows you have of that type.
 

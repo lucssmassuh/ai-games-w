@@ -159,8 +159,8 @@ var GameLayer = cc.Layer.extend({
         this.hero.arrows = this.arrows;
         this.dragons = [];
 
-        // Score display and coin animation
-        this.score = 0;
+        // Score display and coin animation (initial coins for purchases)
+        this.score = 20;
         var coinTexture = cc.textureCache.addImage("assets/coin.png");
         var frameW = coinTexture.width / 8;
         var frameH = coinTexture.height;
@@ -181,7 +181,7 @@ var GameLayer = cc.Layer.extend({
         var uiX = cc.winSize.width - 10 - 200;
         var uiY = cc.winSize.height - 10;
         this.coinSprite.setPosition(uiX, uiY);
-        this.scoreLabel = new cc.LabelTTF("0", "Arial", 24);
+        this.scoreLabel = new cc.LabelTTF(this.score.toString(), "Arial", 24);
         this.addChild(this.scoreLabel, 1000);
         this.scoreLabel.setAnchorPoint(0, 1);
         // Place score text immediately to the right of the coin
@@ -189,6 +189,7 @@ var GameLayer = cc.Layer.extend({
             this.coinSprite.getPositionX() + 5,
             this.coinSprite.getPositionY()
         );
+        this.scoreLabel.setString(this.score.toString());
 
         // Arrow selection UI: icons at bottom-left (32×32)
         this.arrowTypes = [
@@ -226,6 +227,7 @@ var GameLayer = cc.Layer.extend({
         };
         this.updateArrowUI();
 
+        // Initialize arrow stock inventory (ordinary, explosive, triple)
         // Initialize arrow stock inventory (ordinary, explosive, triple)
         this.arrowStock = [20, 0, 0];
         this.arrowStockLabels = [];
@@ -277,40 +279,6 @@ var GameLayer = cc.Layer.extend({
 
     update: function (dt) {
 
-        // Handle arrow purchases via number keys (1,2,3)
-        if (this.keys[cc.KEY['1']] || this.keys[cc.KEY.num1]) {
-            var cost = this.arrowTypes[0].cost;
-            if (this.score >= cost) {
-                this.score -= cost;
-                this.scoreLabel.setString(this.score.toString());
-                this.arrowStock[0]++;
-                this.updateArrowStockUI();
-            }
-            this.keys[cc.KEY['1']] = false;
-            this.keys[cc.KEY.num1] = false;
-        }
-        if (this.keys[cc.KEY['2']] || this.keys[cc.KEY.num2]) {
-            var cost = this.arrowTypes[1].cost;
-            if (this.score >= cost) {
-                this.score -= cost;
-                this.scoreLabel.setString(this.score.toString());
-                this.arrowStock[1]++;
-                this.updateArrowStockUI();
-            }
-            this.keys[cc.KEY['2']] = false;
-            this.keys[cc.KEY.num2] = false;
-        }
-        if (this.keys[cc.KEY['3']] || this.keys[cc.KEY.num3]) {
-            var cost = this.arrowTypes[2].cost;
-            if (this.score >= cost) {
-                this.score -= cost;
-                this.scoreLabel.setString(this.score.toString());
-                this.arrowStock[2]++;
-                this.updateArrowStockUI();
-            }
-            this.keys[cc.KEY['3']] = false;
-            this.keys[cc.KEY.num3] = false;
-        }
         // Update arrows with motion, including gravity, rotation, and removal handled by Arrow.update
         for (var a = this.arrows.length - 1; a >= 0; a--) {
             var arr = this.arrows[a];
@@ -585,66 +553,73 @@ var GameLayer = cc.Layer.extend({
             }
         }.bind(this);
         this.schedule(checkWaveDone, 0.5);
+    },
+    // Keyboard input handling methods
+    onKeyPressed: function(keyCode, event) {
+        // Prevent default browser handling (e.g., Tab navigation)
+        if (event && event._event) {
+            event._event.preventDefault && event._event.preventDefault();
+            event._event.stopPropagation && event._event.stopPropagation();
+        }
+        this.keys[keyCode] = true;
+        if (keyCode === cc.KEY.tab) {
+            this.currentArrowType = (this.currentArrowType + 1) % this.arrowTypes.length;
+            this.updateArrowUI();
+        }
+    },
+
+    onKeyReleased: function(keyCode, event) {
+        console.log('Key released:', keyCode);
+        this.keys[keyCode] = false;
+        
+        if (keyCode === cc.KEY['1'] || keyCode === cc.KEY.num1) {
+            console.log('Trying to buy normal arrow');
+            var c1 = this.arrowTypes[0].cost;
+            console.log('Current score:', this.score, 'Cost:', c1);
+            if (this.score >= c1) {
+                console.log('Purchase successful');
+                this.score -= c1;
+                this.scoreLabel.setString(this.score.toString());
+                this.arrowStock[0]++;
+                this.updateArrowStockUI();
+                console.log('New arrow count:', this.arrowStock[0]);
+            } else {
+                console.log('Not enough score to purchase');
+            }
+        } else if (keyCode === cc.KEY['2'] || keyCode === cc.KEY.num2) {
+            console.log('Trying to buy explosive arrow');
+            var c2 = this.arrowTypes[1].cost;
+            if (this.score >= c2) {
+                this.score -= c2;
+                this.scoreLabel.setString(this.score.toString());
+                this.arrowStock[1]++;
+                this.updateArrowStockUI();
+            }
+        } else if (keyCode === cc.KEY['3'] || keyCode === cc.KEY.num3) {
+            console.log('Trying to buy triple arrow');
+            var c3 = this.arrowTypes[2].cost;
+            if (this.score >= c3) {
+                this.score -= c3;
+                this.scoreLabel.setString(this.score.toString());
+                this.arrowStock[2]++;
+                this.updateArrowStockUI();
+            }
+        }
+    },
+    
+    onEnter: function() {
+        this._super();
+        
+        // Enable keyboard input
+        cc.eventManager.addListener({
+            event: cc.EventListener.KEYBOARD,
+            onKeyPressed: this.onKeyPressed.bind(this),
+            onKeyReleased: this.onKeyReleased.bind(this)
+        }, this);
+        
+        this.scheduleUpdate();
     }
 });
-
-// Add keyboard input handling methods to GameLayer
-GameLayer.onKeyPressed = function(keyCode, event) {
-    // Prevent default browser handling (e.g., Tab navigation)
-    if (event && event._event) {
-        event._event.preventDefault && event._event.preventDefault();
-        event._event.stopPropagation && event._event.stopPropagation();
-    }
-    this.keys[keyCode] = true;
-    if (keyCode === cc.KEY.tab) {
-        this.currentArrowType = (this.currentArrowType + 1) % this.arrowTypes.length;
-        this.updateArrowUI();
-    } else if (keyCode === cc.KEY['1'] || keyCode === cc.KEY.num1) {
-        // Buy 1 ordinary arrow (cost 1 coin)
-        var cost1 = this.arrowTypes[0].cost;
-        if (this.score >= cost1) {
-            this.score -= cost1;
-            this.scoreLabel.setString(this.score.toString());
-            this.arrowStock[0]++;
-            this.updateArrowStockUI();
-        }
-    } else if (keyCode === cc.KEY['2'] || keyCode === cc.KEY.num2) {
-        // Buy 1 explosive arrow (cost 6 coins)
-        var cost2 = this.arrowTypes[1].cost;
-        if (this.score >= cost2) {
-            this.score -= cost2;
-            this.scoreLabel.setString(this.score.toString());
-            this.arrowStock[1]++;
-            this.updateArrowStockUI();
-        }
-    } else if (keyCode === cc.KEY['3'] || keyCode === cc.KEY.num3) {
-        // Buy 1 triple arrow (cost 3 coins)
-        var cost3 = this.arrowTypes[2].cost;
-        if (this.score >= cost3) {
-            this.score -= cost3;
-            this.scoreLabel.setString(this.score.toString());
-            this.arrowStock[2]++;
-            this.updateArrowStockUI();
-        }
-    }
-};
-
-GameLayer.onKeyReleased = function(keyCode, event) {
-    this.keys[keyCode] = false;
-};
-
-GameLayer.onEnter = function() {
-    this._super();
-    
-    // Enable keyboard input
-    cc.eventManager.addListener({
-        event: cc.EventListener.KEYBOARD,
-        onKeyPressed: this.onKeyPressed.bind(this),
-        onKeyReleased: this.onKeyReleased.bind(this)
-    }, this);
-    
-    this.scheduleUpdate();
-};
 
 var GameScene = cc.Scene.extend({
     onEnter: function () {
