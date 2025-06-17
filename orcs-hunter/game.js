@@ -158,6 +158,37 @@ var GameLayer = cc.Layer.extend({
         this.arrows = [];
         this.hero.arrows = this.arrows;
         this.dragons = [];
+
+        // Score display and coin animation
+        this.score = 0;
+        var coinTexture = cc.textureCache.addImage("assets/coin.png");
+        var frameW = coinTexture.width / 8;
+        var frameH = coinTexture.height;
+        this.coinFrames = [];
+        for (var i = 0; i < 8; i++) {
+            this.coinFrames.push(
+                new cc.SpriteFrame(
+                    coinTexture,
+                    cc.rect(i * frameW, 0, frameW, frameH)
+                )
+            );
+        }
+        this.coinSprite = new cc.Sprite(this.coinFrames[0]);
+        this.addChild(this.coinSprite, 1000);
+        this.coinSprite.setAnchorPoint(1, 1);
+        this.coinSprite.setScale(1.3);
+        // Position UI (coin + score) shifted 200px towards center from right edge
+        var uiX = cc.winSize.width - 10 - 200;
+        var uiY = cc.winSize.height - 10;
+        this.coinSprite.setPosition(uiX, uiY);
+        this.scoreLabel = new cc.LabelTTF("0", "Arial", 24);
+        this.addChild(this.scoreLabel, 1000);
+        this.scoreLabel.setAnchorPoint(0, 1);
+        // Place score text immediately to the right of the coin
+        this.scoreLabel.setPosition(
+            this.coinSprite.getPositionX() + 5,
+            this.coinSprite.getPositionY()
+        );
         
 
         // Set arrow z-order to be above hero but below orcs
@@ -195,7 +226,7 @@ var GameLayer = cc.Layer.extend({
                                     orc.getBoundingBox(),
                                     arr.getBoundingBox()
                                   );
-                    if (collision) {
+                if (collision) {
                         cc.log(
                             'Collision detected: Arrow at (' + arr.getPosition().x + ',' + arr.getPosition().y +
                             ') hit Orc at (' + orc.getPosition().x + ',' + orc.getPosition().y + ')'
@@ -205,6 +236,7 @@ var GameLayer = cc.Layer.extend({
                         this.arrows.splice(a, 1);
                         this.spawnBlood(hitPos);
                         orc.takeDamage(1);
+                        if (orc.health <= 0) this.incrementScore(orc.maxHealth);
                         break;
                     }
             }
@@ -221,6 +253,7 @@ var GameLayer = cc.Layer.extend({
                     this.arrows.splice(a, 1);
                     this.spawnBlood(hitPosD);
                     dragon.takeDamage(1);
+                    if (dragon.health <= 0) this.incrementScore(dragon.maxHealth);
                     break;
                 }
             }
@@ -234,6 +267,26 @@ var GameLayer = cc.Layer.extend({
         var b = new Blood();
         b.setPosition(pos);
         this.addChild(b, 4);
+    },
+
+    /**
+     * Increment score by a given amount and animate coin.
+     * @param {number} amount - Points to add for the kill
+     */
+    incrementScore: function(amount) {
+        this.score += amount;
+        this.scoreLabel.setString(this.score.toString());
+        if (!this.coinSprite.getNumberOfRunningActions()) {
+            var anim = new cc.Animation(this.coinFrames, 0.1);
+            var act = new cc.Animate(anim);
+            var seq = cc.sequence(
+                act,
+                cc.callFunc(function() {
+                    this.coinSprite.setSpriteFrame(this.coinFrames[0]);
+                }, this)
+            );
+            this.coinSprite.runAction(seq);
+        }
     },
 
     startMoveDown: function () {
