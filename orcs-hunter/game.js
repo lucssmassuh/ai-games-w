@@ -189,6 +189,76 @@ var GameLayer = cc.Layer.extend({
             this.coinSprite.getPositionX() + 5,
             this.coinSprite.getPositionY()
         );
+
+        // Arrow selection UI: icons at bottom-left (32×32)
+        this.arrowTypes = [
+            { type: 'normal',    icon: 'assets/a-one.png',      cost: 1 },
+            { type: 'explosive', icon: 'assets/a-explossive.png', cost: 6 },
+            { type: 'triple',    icon: 'assets/a-3x.png',       cost: 3 }
+        ];
+        this.currentArrowType = 0;
+        this.arrowIcons = [];
+        var iconPadding = 10;
+        var iconSize = 32;
+        // Place icons slightly above bottom to allow stock display below
+        var baseY = iconPadding * 2 + iconSize / 2;
+        for (var i = 0; i < this.arrowTypes.length; i++) {
+            var info = this.arrowTypes[i];
+            var tex = cc.textureCache.addImage(info.icon);
+            var icon = new cc.Sprite(tex);
+            icon.setScale(iconSize / icon.getContentSize().width,
+                          iconSize / icon.getContentSize().height);
+            icon.setPosition(
+                iconPadding + i * (iconSize + iconPadding) + iconSize / 2,
+                baseY
+            );
+            this.addChild(icon, 1000);
+            this.arrowIcons.push(icon);
+        }
+        this.updateArrowUI = function() {
+            for (var j = 0; j < this.arrowIcons.length; j++) {
+                this.arrowIcons[j].setColor(
+                    j === this.currentArrowType
+                        ? cc.color(255, 255, 255)
+                        : cc.color(128, 128, 128)
+                );
+            }
+        };
+        this.updateArrowUI();
+
+        // Initialize arrow stock inventory (ordinary, explosive, triple)
+        this.arrowStock = [20, 0, 0];
+        this.arrowStockLabels = [];
+        this.arrowStockBg = [];
+        var stockWidth = iconSize;
+        var stockHeight = 16;
+        var stockPadding = 2;
+        for (var k = 0; k < this.arrowIcons.length; k++) {
+            var ic = this.arrowIcons[k];
+            var x = ic.getPositionX();
+            // Draw background rectangle under icon
+            var bg = new cc.DrawNode();
+            var topY = baseY - iconSize / 2 - stockPadding;
+            bg.drawRect(
+                cc.p(x - stockWidth/2, topY - stockHeight),
+                cc.p(x + stockWidth/2, topY),
+                cc.color(0, 0, 0, 200), 0, cc.color(0, 0, 0, 200)
+            );
+            this.addChild(bg, 1000);
+            this.arrowStockBg.push(bg);
+            // Add label for stock count
+            var lbl = new cc.LabelTTF(this.arrowStock[k].toString(), "Arial", 12);
+            lbl.setColor(cc.color(255, 255, 255));
+            lbl.setPosition(x, topY - stockHeight/2);
+            this.addChild(lbl, 1001);
+            this.arrowStockLabels.push(lbl);
+        }
+        this.updateArrowStockUI = function() {
+            for (var m = 0; m < this.arrowStockLabels.length; m++) {
+                this.arrowStockLabels[m].setString(this.arrowStock[m].toString());
+            }
+        };
+        this.updateArrowStockUI();
         
 
         // Set arrow z-order to be above hero but below orcs
@@ -207,6 +277,40 @@ var GameLayer = cc.Layer.extend({
 
     update: function (dt) {
 
+        // Handle arrow purchases via number keys (1,2,3)
+        if (this.keys[cc.KEY['1']] || this.keys[cc.KEY.num1]) {
+            var cost = this.arrowTypes[0].cost;
+            if (this.score >= cost) {
+                this.score -= cost;
+                this.scoreLabel.setString(this.score.toString());
+                this.arrowStock[0]++;
+                this.updateArrowStockUI();
+            }
+            this.keys[cc.KEY['1']] = false;
+            this.keys[cc.KEY.num1] = false;
+        }
+        if (this.keys[cc.KEY['2']] || this.keys[cc.KEY.num2]) {
+            var cost = this.arrowTypes[1].cost;
+            if (this.score >= cost) {
+                this.score -= cost;
+                this.scoreLabel.setString(this.score.toString());
+                this.arrowStock[1]++;
+                this.updateArrowStockUI();
+            }
+            this.keys[cc.KEY['2']] = false;
+            this.keys[cc.KEY.num2] = false;
+        }
+        if (this.keys[cc.KEY['3']] || this.keys[cc.KEY.num3]) {
+            var cost = this.arrowTypes[2].cost;
+            if (this.score >= cost) {
+                this.score -= cost;
+                this.scoreLabel.setString(this.score.toString());
+                this.arrowStock[2]++;
+                this.updateArrowStockUI();
+            }
+            this.keys[cc.KEY['3']] = false;
+            this.keys[cc.KEY.num3] = false;
+        }
         // Update arrows with motion, including gravity, rotation, and removal handled by Arrow.update
         for (var a = this.arrows.length - 1; a >= 0; a--) {
             var arr = this.arrows[a];
@@ -226,17 +330,29 @@ var GameLayer = cc.Layer.extend({
                                     orc.getBoundingBox(),
                                     arr.getBoundingBox()
                                   );
-                if (collision) {
-                        cc.log(
-                            'Collision detected: Arrow at (' + arr.getPosition().x + ',' + arr.getPosition().y +
-                            ') hit Orc at (' + orc.getPosition().x + ',' + orc.getPosition().y + ')'
-                        );
+            if (collision) {
                         var hitPos = arr.getPosition();
                         arr.removeFromParent();
                         this.arrows.splice(a, 1);
-                        this.spawnBlood(hitPos);
-                        orc.takeDamage(1);
-                        if (orc.health <= 0) this.incrementScore(orc.maxHealth);
+                        if (arr.explosive) {
+                            this.spawnExplosion(hitPos);
+                            // Damage all enemies within explosion radius
+                            var enemies = this.orcs.concat(this.dragons);
+                            for (var j = enemies.length - 1; j >= 0; j--) {
+                                var e = enemies[j];
+                                if (e.isDying) continue;
+                                var ep = e.getPosition();
+                                if (cc.pDistance(ep, hitPos) <= arr.explosionRadius) {
+                                    e.takeDamage(1);
+                                    this.spawnBlood(ep);
+                                    if (e.health <= 0) this.incrementScore(e.maxHealth);
+                                }
+                            }
+                        } else {
+                            this.spawnBlood(hitPos);
+                            orc.takeDamage(1);
+                            if (orc.health <= 0) this.incrementScore(orc.maxHealth);
+                        }
                         break;
                     }
             }
@@ -244,16 +360,31 @@ var GameLayer = cc.Layer.extend({
             for (var d = this.dragons.length - 1; d >= 0; d--) {
                 var dragon = this.dragons[d];
                 if (dragon.isDying) continue;
-                if (cc.rectIntersectsRect(
+            if (cc.rectIntersectsRect(
                         dragon.getBoundingBox(),
                         arr.getBoundingBox()
                     )) {
                     var hitPosD = arr.getPosition();
                     arr.removeFromParent();
                     this.arrows.splice(a, 1);
-                    this.spawnBlood(hitPosD);
-                    dragon.takeDamage(1);
-                    if (dragon.health <= 0) this.incrementScore(dragon.maxHealth);
+                    if (arr.explosive) {
+                        this.spawnExplosion(hitPosD);
+                        var enemies = this.orcs.concat(this.dragons);
+                        for (var j = enemies.length - 1; j >= 0; j--) {
+                            var e = enemies[j];
+                            if (e.isDying) continue;
+                            var ep = e.getPosition();
+                            if (cc.pDistance(ep, hitPosD) <= arr.explosionRadius) {
+                                e.takeDamage(1);
+                                this.spawnBlood(ep);
+                                if (e.health <= 0) this.incrementScore(e.maxHealth);
+                            }
+                        }
+                    } else {
+                        this.spawnBlood(hitPosD);
+                        dragon.takeDamage(1);
+                        if (dragon.health <= 0) this.incrementScore(dragon.maxHealth);
+                    }
                     break;
                 }
             }
@@ -267,6 +398,20 @@ var GameLayer = cc.Layer.extend({
         var b = new Blood();
         b.setPosition(pos);
         this.addChild(b, 4);
+    },
+
+    /**
+     * Spawn explosion effect at given position (circle) and fade it out.
+     * @param {cc.Point} pos - Center of explosion
+     */
+    spawnExplosion: function(pos) {
+        var explosion = new cc.DrawNode();
+        explosion.drawDot(pos, 30, cc.color(255, 150, 0, 128));
+        this.addChild(explosion, 5);
+        explosion.runAction(cc.sequence(
+            cc.fadeOut(0.5),
+            cc.callFunc(function() { explosion.removeFromParent(); })
+        ));
     },
 
     /**
@@ -445,7 +590,43 @@ var GameLayer = cc.Layer.extend({
 
 // Add keyboard input handling methods to GameLayer
 GameLayer.onKeyPressed = function(keyCode, event) {
+    // Prevent default browser handling (e.g., Tab navigation)
+    if (event && event._event) {
+        event._event.preventDefault && event._event.preventDefault();
+        event._event.stopPropagation && event._event.stopPropagation();
+    }
     this.keys[keyCode] = true;
+    if (keyCode === cc.KEY.tab) {
+        this.currentArrowType = (this.currentArrowType + 1) % this.arrowTypes.length;
+        this.updateArrowUI();
+    } else if (keyCode === cc.KEY['1'] || keyCode === cc.KEY.num1) {
+        // Buy 1 ordinary arrow (cost 1 coin)
+        var cost1 = this.arrowTypes[0].cost;
+        if (this.score >= cost1) {
+            this.score -= cost1;
+            this.scoreLabel.setString(this.score.toString());
+            this.arrowStock[0]++;
+            this.updateArrowStockUI();
+        }
+    } else if (keyCode === cc.KEY['2'] || keyCode === cc.KEY.num2) {
+        // Buy 1 explosive arrow (cost 6 coins)
+        var cost2 = this.arrowTypes[1].cost;
+        if (this.score >= cost2) {
+            this.score -= cost2;
+            this.scoreLabel.setString(this.score.toString());
+            this.arrowStock[1]++;
+            this.updateArrowStockUI();
+        }
+    } else if (keyCode === cc.KEY['3'] || keyCode === cc.KEY.num3) {
+        // Buy 1 triple arrow (cost 3 coins)
+        var cost3 = this.arrowTypes[2].cost;
+        if (this.score >= cost3) {
+            this.score -= cost3;
+            this.scoreLabel.setString(this.score.toString());
+            this.arrowStock[2]++;
+            this.updateArrowStockUI();
+        }
+    }
 };
 
 GameLayer.onKeyReleased = function(keyCode, event) {

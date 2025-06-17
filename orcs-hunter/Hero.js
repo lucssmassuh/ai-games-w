@@ -197,31 +197,41 @@ var Hero = cc.Sprite.extend({
     
     shootArrow: function(angleRad, speed) {
         if (this.isShooting) return;
-        
+        var layer = this.parent;
+        var idx = layer.currentArrowType;
+        var info = layer.arrowTypes[idx];
+        if (layer.arrowStock[idx] <= 0) return;
+        layer.arrowStock[idx]--;
+        layer.updateArrowStockUI();
+
         this.isShooting = true;
-        
-        // Stop current actions but save the movement state
         var wasMoving = this.isMoving;
         this.stopAllActions();
-        
-        // Set shooting frames (frames 3,4)
+
         var shootAnim = new cc.Animation(this.shootFrames, 0.1);
         var animate = cc.animate(shootAnim);
-        
-        // Create sequence: play shoot animation, then return to appropriate state
         var sequence = cc.sequence(
             animate,
             cc.callFunc(function() {
-                // Create and fire the arrow with calculated speed
                 var pos = this.getPosition();
-                var arrow = new Arrow(angleRad, pos, speed);
-                this.parent.addChild(arrow);
-                this.arrows.push(arrow);
-                
-                // Reset shooting state
+                if (info.type === 'triple') {
+                    var spreads = [0, 0.1, -0.1];
+                    for (var k = 0; k < spreads.length; k++) {
+                        var arr = new Arrow(angleRad + spreads[k], pos, speed);
+                        this.parent.addChild(arr);
+                        this.arrows.push(arr);
+                    }
+                } else {
+                    var arr = new Arrow(angleRad, pos, speed);
+                    if (info.type === 'explosive') {
+                        arr.explosive = true;
+                        arr.explosionRadius = 30;
+                    }
+                    this.parent.addChild(arr);
+                    this.arrows.push(arr);
+                }
+
                 this.isShooting = false;
-                
-                // Return to walking animation if we were moving
                 if (wasMoving) {
                     if (this.direction === 'right') {
                         this.startMoveRight();
@@ -229,12 +239,10 @@ var Hero = cc.Sprite.extend({
                         this.startMoveLeft();
                     }
                 } else {
-                    // Return to standing frame if not moving
                     this.setSpriteFrame(this.frames[0]);
                 }
             }, this)
         );
-        
         this.runAction(sequence);
     },
     

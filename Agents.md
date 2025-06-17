@@ -19,6 +19,13 @@ in the /orcs-hunter folder there are files with javascript code that implement t
 /orcs-hunter/waves.json contains the waves of enemies to be spawned.
 /orcs-hunter/Wizzard.js contains the code for the wizard enemy, which is a stronger variant based on BigOrc logic and is depicted by the /orcs-hunter/assets/wizzard.png file.
 
+### Arrow Types and Selection
+Controls for arrow modes and purchasing:
+- Press **Tab** to cycle through the three arrow modes (highlighted icon shows current mode).
+- Press **1**, **2**, **3** to purchase one arrow of type Ordinary/Explosive/Triple for 1/6/3 coins (if you have enough coins).
+
+Icons appear in a 32×32 layout at the bottom-left, with a stock counter below each showing how many arrows you have of that type.
+
 ## Castle Wars
 *Agents used in the Castle Wars game*
 
