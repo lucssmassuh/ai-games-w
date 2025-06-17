@@ -581,7 +581,9 @@ var GameLayer = cc.Layer.extend({
                 this.score -= c1;
                 this.scoreLabel.setString(this.score.toString());
                 this.arrowStock[0]++;
+                this.currentArrowType = 0; // Select normal arrow
                 this.updateArrowStockUI();
+                this.updateArrowUI();
                 console.log('New arrow count:', this.arrowStock[0]);
             } else {
                 console.log('Not enough score to purchase');
@@ -593,7 +595,9 @@ var GameLayer = cc.Layer.extend({
                 this.score -= c2;
                 this.scoreLabel.setString(this.score.toString());
                 this.arrowStock[1]++;
+                this.currentArrowType = 1; // Select explosive arrow
                 this.updateArrowStockUI();
+                this.updateArrowUI();
             }
         } else if (keyCode === cc.KEY['3'] || keyCode === cc.KEY.num3) {
             console.log('Trying to buy triple arrow');
@@ -602,7 +606,9 @@ var GameLayer = cc.Layer.extend({
                 this.score -= c3;
                 this.scoreLabel.setString(this.score.toString());
                 this.arrowStock[2]++;
+                this.currentArrowType = 2; // Select triple arrow
                 this.updateArrowStockUI();
+                this.updateArrowUI();
             }
         }
     },
