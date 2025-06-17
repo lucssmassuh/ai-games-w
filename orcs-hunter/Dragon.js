@@ -164,16 +164,13 @@ var Dragon = cc.Sprite.extend({
         if (this.isAttacking) return;
         this.isAttacking = true;
         this.stopAllActions();
-        // Hover just above the hero's head
         if (this.gameLayer && this.gameLayer.hero) {
             var hero = this.gameLayer.hero;
             var heroTop = hero.getPosition().y + hero.getContentSize().height * hero.getScaleY() / 2;
-            var hoverY = heroTop - 10;
-            this.setPosition(this.attackX, hoverY);
+            this.setPosition(this.attackX, heroTop - 10);
         }
-        // Build attack animation frames from third row (index 2) of the sprite sheet
         var attackFrames = [];
-        var attackRow = 2; // third row from bottom
+        var attackRow = 2;
         for (var i = 0; i < 3; i++) {
             attackFrames.push(
                 new cc.SpriteFrame(
@@ -183,8 +180,7 @@ var Dragon = cc.Sprite.extend({
                 )
             );
         }
-        var attackAnim = new cc.Animation(attackFrames, 0.15);
-        var attackAnimate = new cc.Animate(attackAnim);
+        var attackAnimate = new cc.Animate(new cc.Animation(attackFrames, 0.15));
         var attackSequence = cc.sequence(
             attackAnimate,
             cc.callFunc(function() {
@@ -196,6 +192,21 @@ var Dragon = cc.Sprite.extend({
             }, this)
         );
         this.runAction(new cc.RepeatForever(attackSequence));
+    },
+
+    /**
+     * Override getBoundingBox to shrink dragon collision box by 50%.
+     */
+    getBoundingBox: function() {
+        var rect = this._super();
+        var width = rect.width * 0.5;
+        var height = rect.height * 0.5;
+        return cc.rect(
+            rect.x + (rect.width - width) / 2,
+            rect.y + (rect.height - height) / 2,
+            width,
+            height
+        );
     }
 });
 
