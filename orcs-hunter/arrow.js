@@ -6,6 +6,9 @@ var Arrow = cc.Sprite.extend({
     vx: 0,
     vy: 0,
     gravity: -400, // Gravity effect (pixels/second²)
+    landed: false, // Track if arrow has landed
+    explosive: false, // Whether this is an explosive arrow
+    explosionRadius: 0, // Radius of explosion effect
 
 
     ctor: function(angleRad, pos, speed) {
@@ -34,6 +37,9 @@ var Arrow = cc.Sprite.extend({
     
 
     update: function(dt) {
+        // If arrow has landed, don't update position/rotation
+        if (this.landed) return;
+        
         // Update position with velocity and gravity
         if (this.gravity) {
             this.vy += this.gravity * dt;
@@ -41,24 +47,45 @@ var Arrow = cc.Sprite.extend({
         
         // Calculate new position
         var pos = this.getPosition();
+        var newY = pos.y + this.vy * dt;
+        
+        // Check if arrow hits the ground at the bottom of the castle
+        // Using a lower value to match the visual bottom of the castle
+        var groundLevel = 150; // Adjusted to be lower than the previous 224
+        if (newY <= groundLevel) {
+            this.landed = true;
+            this.setPosition(pos.x, groundLevel);
+            this.vx = 0;
+            this.vy = 0;
+            
+            if (this.explosive) {
+                this.explode();
+            } else {
+                // Fade out and remove normal arrows
+                var fadeOut = cc.fadeOut(1.0);
+                var remove = cc.callFunc(this.removeFromParent, this);
+                this.runAction(cc.sequence(fadeOut, remove));
+            }
+            return;
+        }
+        
+        // Update position if not landed
         pos.x += this.vx * dt;
-        pos.y += this.vy * dt;
+        pos.y = newY;
         this.setPosition(pos);
         
         // Rotate arrow based on current velocity vector
-        var rad = Math.atan2(this.vy, this.vx);
-        var deg = 90 - (rad * 180 / Math.PI);
-        this.setRotation(deg);
+        if (this.vx !== 0 || this.vy !== 0) {
+            var rad = Math.atan2(this.vy, this.vx);
+            var deg = 90 - (rad * 180 / Math.PI);
+            this.setRotation(deg);
+        }
         
         // Update collision box
         this.updateCollisionBox();
         
-
         // Remove arrow when completely off-screen
         var margin = 100; // Extra margin before removing
-        var arrowWidth = this.width * this.getScaleX();
-        var arrowHeight = this.height * this.getScaleY();
-        
         if (pos.x < -margin || pos.x > cc.winSize.width + margin ||
             pos.y < -margin || pos.y > cc.winSize.height + margin) {
             this.removeFromParent();
@@ -91,6 +118,26 @@ var Arrow = cc.Sprite.extend({
             this.updateCollisionBox();
         }
         return this._collisionBox;
+    },
+    
+    // Create explosion effect for explosive arrows
+    explode: function() {
+        // Create explosion sprite or particle effect
+        var explosion = new cc.Sprite("assets/explosion.png"); // Make sure you have this asset
+        if (explosion) {
+            explosion.setPosition(this.getPosition());
+            explosion.setScale(0.5);
+            this.getParent().addChild(explosion, 10);
+            
+            // Fade and remove explosion
+            var fadeOut = cc.fadeOut(0.5);
+            var remove = cc.callFunc(explosion.removeFromParent, explosion);
+            explosion.runAction(cc.sequence(fadeOut, remove));
+        }
+        
+        // Add damage logic here if needed
+        // For now, just remove the arrow
+        this.removeFromParent();
     }
 });
 
