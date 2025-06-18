@@ -262,6 +262,13 @@ var GameLayer = cc.Layer.extend({
         };
         this.updateArrowStockUI();
         
+        // Schedule auto-loading of regular arrows (1 per 2 seconds)
+        this.schedule(function() {
+            if (this.arrowStock[0] < 20) {  // Max 20 regular arrows
+                this.arrowStock[0]++;
+                this.updateArrowStockUI();
+            }
+        }.bind(this), 2.0);  // Every 2.0 seconds
 
         // Set arrow z-order to be above hero but below orcs
         Arrow.zOrder = 1;
