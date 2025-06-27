@@ -32,6 +32,7 @@ var GameLayer = cc.Layer.extend({
     maxCastlePower: 0,
     powerBarBg: null,
     powerBar: null,
+    isGameOver: false,
 
     // Update the castle power bar visuals
     updatePowerBar: function() {
@@ -55,8 +56,28 @@ var GameLayer = cc.Layer.extend({
 
     // Decrease castle power by one and refresh bar
     decrementCastlePower: function() {
+        if (this.isGameOver) return;
         this.castlePower = Math.max(0, this.castlePower - 1);
         this.updatePowerBar();
+        if (this.castlePower <= 0) {
+            this.isGameOver = true;
+            this.onGameOver();
+        }
+    },
+
+    // Handle game over when castle health reaches zero
+    onGameOver: function() {
+        // Stop all scheduled callbacks and updates
+        this.unscheduleAllCallbacks();
+        this.unscheduleUpdate();
+
+        // Display Game Over text
+        var label = new cc.LabelTTF("Game Over", "Arial", 48);
+        label.setPosition(cc.winSize.width / 2, cc.winSize.height / 2);
+        this.addChild(label, 1001);
+        var restartLabel = new cc.LabelTTF("Press R to Restart", "Arial", 24);
+        restartLabel.setPosition(cc.winSize.width / 2, cc.winSize.height / 2 - 50);
+        this.addChild(restartLabel, 1001);
     },
 
     /**
@@ -578,7 +599,15 @@ var GameLayer = cc.Layer.extend({
     onKeyReleased: function(keyCode, event) {
         console.log('Key released:', keyCode);
         this.keys[keyCode] = false;
-        
+
+        // Allow restart after game over
+        if (this.isGameOver) {
+            if (keyCode === cc.KEY.r) {
+                cc.director.runScene(new GameScene());
+            }
+            return;
+        }
+
         if (keyCode === cc.KEY['1'] || keyCode === cc.KEY.num1) {
             console.log('Trying to buy normal arrow');
             var c1 = this.arrowTypes[0].cost;
