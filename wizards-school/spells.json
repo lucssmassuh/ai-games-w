@@ -1,0 +1,64 @@
+{
+  "spells": [
+    {
+      "id": "locomotor",
+      "name": "LOCOMOTOR",
+      "gestures": ["point_down","point_up", "point_right","point_left"],
+      "description": "Mueve el objeto del hechizo"
+    },
+    {
+      "id": "ascendio",
+      "name": "ASCENDIO",
+      "gestures": ["point_up", "point_bottom_right", "point_top_right"],
+      "description": "Eleva al hechicero en el aire"
+    },
+    {
+      "id": "stupefy",
+      "name": "STUPEFY",
+      "gestures": ["point_top_left","point_right", "point_left"],
+      "description": "Desmaya al sujeto del hechizo"
+    },
+    {
+      "id": "expelliarmus",
+      "name": "EXPELIARMUS",
+      "gestures": ["point_top_right", "point_top_left", "point_down"],
+      "description": "Desarma al oponente"
+    },
+    {
+      "id": "aparecium",
+      "name": "APARECIUM",
+      "gestures": ["point_up", "point_right", "point_left", "point_top_right"],
+      "description": "Muestra la tinta invicible"
+    },
+    {
+      "id": "leviosa",
+      "name": "WINGARDIUYM LEVIOSA",
+      "gestures": ["point_top_right", "point_up", "point_down"],
+      "description": "Hace levitar a los objetos"
+    },
+    {
+      "id": "silencio",
+      "name": "SILENCIO",
+      "gestures": ["point_up", "point_top_right", "point_bottom_right"],
+      "description": "Calla temporalmente al objeto del hechizo"
+    },
+    {
+      "id": "reparo",
+      "name": "REPARO",
+      "gestures": ["point_up", "point_top_right","point_right", "point_bottom_right","point_down","point_bottom_left","point_left","point_top_left","point_up","point_top_right"],
+      "description": "Arregla el objeto del hechizo"
+    },
+    {
+      "id": "descendo",
+      "name": "DESCENDO",
+      "gestures": ["point_bottom_right", "point_up","point_bottom_right"],
+      "description": "Baja al hechicero del aire"
+    },
+    {
+      "id": "alfonsis",
+      "name": "ALFONSIS",
+      "gestures": ["point_up", "point_down","point_right","point_left"],
+      "description": "Eplota todos los enemigos"
+    }
+  ]
+}
