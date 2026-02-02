@@ -4,7 +4,12 @@ A collection of interactive games and applications built with AI and web technol
 
 ## Features
 
-- Interactive Princess Paint application
+- **Castle Wars** - Physics-based artillery game with destructible castles
+- **Orcs Hunter** - Tower defense game with bow and arrow mechanics
+- **Princess Paint** - Interactive painting application
+- **Sky Ace** - Plane shooter game
+- **Robo Punch** - Fighting game
+- **Wizards School** - Magic-themed game
 - More AI-powered games coming soon
 
 ## Setup

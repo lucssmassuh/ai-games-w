@@ -27,7 +27,44 @@ Controls for arrow modes and purchasing:
 Icons appear in a 32×32 layout at the bottom-left, with a stock counter below each showing how many arrows you have of that type.
 
 ## Castle Wars
-*Agents used in the Castle Wars game*
+A physics-based artillery game where two players control cannons to destroy each other's castles.
+
+### Game Files
+- `/castle-wars/game.js` - Main game logic including physics, rendering, and particle effects
+- `/castle-wars/index.html` - Game entry point with canvas setup
+- `/castle-wars/castle-tileset.png` - Sprite sheet for castle structures
+- `/castle-wars/castle-wars.webp` - Game thumbnail
+
+### Game Mechanics
+- **Two-player artillery combat**: Players take turns firing cannons at opposing castles
+- **Physics-based projectiles**: Cannonballs follow realistic ballistic trajectories with gravity
+- **Destructible castles**: Castles are built from blocks that can be destroyed individually
+- **Power charging system**: Hold spacebar to charge shot power (visual indicator shows charge level)
+- **Angle adjustment**: Use arrow keys to aim the cannon barrel
+
+### Controls
+- **Arrow Keys**: Adjust cannon angle up/down
+- **Spacebar**: Hold to charge power, release to fire
+- **R**: Reset/restart game
+
+### Visual Effects System
+The game features a sophisticated particle effects system:
+
+#### Particle Classes
+- **`ExplosionParticle`**: Creates debris and fire particles on impact
+- **`FallingStone`**: Simulates castle blocks falling with rotation when destroyed
+- **`CannonSmokeParticle`**: Generates lingering smoke clouds after firing
+- **`TrailParticle`**: Adds smoke trails behind projectiles in flight
+- **`SparkParticle`**: Creates sparks that shoot out from cannon fire
+- **`MuzzleFlash`**: Enhanced muzzle flash with multi-layer gradients, bright core, and directional blast cone
+
+#### Effect Features
+- Realistic smoke that drifts and fades
+- Spark particles with gravity and air resistance
+- Layered muzzle flash (white core → yellow → orange → red)
+- Projectile smoke trails
+- Cannon recoil animation
+- Proper rendering order (smoke behind, sparks and flashes in front)
 
 ## Princess Paint
 *Agents used in the Princess Paint game*

@@ -71,6 +71,8 @@ let currentRound = 1;
 let explosions = []; // Array to store active explosions
 let fallingStones = []; // Array to store stones that are falling
 let muzzleFlashes = []; // Array to store active muzzle flashes
+let cannonSmoke = []; // Array to store lingering cannon smoke
+let projectileTrails = []; // Array to store smoke trails behind cannonballs
 
 // Get the cannon sound element
 const cannonSound = document.getElementById('cannonSound');
@@ -246,104 +248,191 @@ function drawCastle(castle) {
 
 function drawCatapult(catapult) {
     // Draw wheels
-    ctx.fillStyle = '#4A4A4A';
     const backWheelRadius = 12;
     const frontWheelRadius = 24;
-    const floorY = catapult.y; // Use catapult.y directly as floor level
+    const floorY = catapult.y;
     const backWheelY = floorY - backWheelRadius;
     const frontWheelY = floorY - frontWheelRadius;
-    
-    // Determine wheel positions based on which catapult it is
+
     const isRightCatapult = catapult === rightCatapult;
     const backWheelX = catapult.x + (isRightCatapult ? 10 : -10);
     const frontWheelX = catapult.x + (isRightCatapult ? -10 : 10);
-    
-    // Back wheel (smaller)
+
+    // Draw wooden wheel with metal rim - back wheel
+    ctx.fillStyle = '#8B4513'; // Wood color
     ctx.beginPath();
-    ctx.arc(backWheelX, backWheelY, backWheelRadius, 0, Math.PI * 2);
+    ctx.arc(backWheelX, backWheelY, backWheelRadius - 2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#333';
+    ctx.strokeStyle = '#2F2F2F';
+    ctx.lineWidth = 3;
     ctx.stroke();
-    
+    ctx.lineWidth = 1;
+
     // Draw back wheel spokes
-    ctx.strokeStyle = '#333';
+    ctx.strokeStyle = '#654321';
+    ctx.lineWidth = 2;
     for (let i = 0; i < 8; i++) {
         const angle = (i * Math.PI) / 4;
         ctx.beginPath();
-        ctx.moveTo(backWheelX + Math.cos(angle) * backWheelRadius, backWheelY + Math.sin(angle) * backWheelRadius);
-        ctx.lineTo(backWheelX - Math.cos(angle) * backWheelRadius, backWheelY - Math.sin(angle) * backWheelRadius);
+        ctx.moveTo(backWheelX, backWheelY);
+        ctx.lineTo(backWheelX + Math.cos(angle) * (backWheelRadius - 2), backWheelY + Math.sin(angle) * (backWheelRadius - 2));
         ctx.stroke();
     }
-    
-    // Draw base
-    ctx.fillStyle = '#4A4A4A';
-    ctx.fillRect(backWheelX - 30, backWheelY - 5, 60, 10);
-    
-    // Calculate recoil offset based on power
+    ctx.lineWidth = 1;
+
+    // Draw wooden carriage/base
+    ctx.fillStyle = '#654321';
+    ctx.beginPath();
+    ctx.moveTo(backWheelX - 35, backWheelY);
+    ctx.lineTo(backWheelX + 35, backWheelY);
+    ctx.lineTo(backWheelX + 30, backWheelY - 15);
+    ctx.lineTo(backWheelX - 30, backWheelY - 15);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#4A3728';
+    ctx.stroke();
+
+    // Calculate recoil offset
     let recoilOffset = 0;
+    let postFireRecoil = 0;
     if (catapult.charging) {
         const currentPower = Math.min((Date.now() - catapult.chargeStart) / 10, catapult.maxPower);
-        recoilOffset = (currentPower / catapult.maxPower) * 15; // Max 15 pixels of recoil
+        recoilOffset = (currentPower / catapult.maxPower) * 15;
     }
-    
+    // Post-fire recoil animation
+    if (catapult.fireTime && Date.now() - catapult.fireTime < 200) {
+        const elapsed = Date.now() - catapult.fireTime;
+        postFireRecoil = Math.sin(elapsed / 200 * Math.PI) * 8;
+    }
+
     // Draw cannon body with recoil
     ctx.save();
-    ctx.translate(backWheelX, backWheelY - 5);
+    ctx.translate(backWheelX, backWheelY - 10);
     ctx.rotate(catapult.angle * Math.PI / 180);
-    
-    // Cannon barrel
-    ctx.fillStyle = '#333';
-    ctx.fillRect(-recoilOffset, -5, 60, 10);
-    
-    // Cannon tip
-    ctx.fillStyle = '#666';
-    ctx.fillRect(60 - recoilOffset, -7, 15, 14);
-    
-    ctx.restore();
-    
-    // Front wheel (larger) - drawn last to appear in front
+
+    // Draw cannon barrel - tapered shape
+    const barrelLength = 65;
+    const baseWidth = 14;
+    const tipWidth = 10;
+
+    // Main barrel gradient (bronze/iron look)
+    const barrelGradient = ctx.createLinearGradient(0, -baseWidth/2, 0, baseWidth/2);
+    barrelGradient.addColorStop(0, '#4A4A4A');
+    barrelGradient.addColorStop(0.3, '#6B6B6B');
+    barrelGradient.addColorStop(0.5, '#5A5A5A');
+    barrelGradient.addColorStop(0.7, '#3A3A3A');
+    barrelGradient.addColorStop(1, '#2A2A2A');
+
+    // Draw tapered barrel
+    ctx.fillStyle = barrelGradient;
+    ctx.beginPath();
+    ctx.moveTo(-recoilOffset - postFireRecoil - 5, -baseWidth/2);
+    ctx.lineTo(barrelLength - recoilOffset - postFireRecoil, -tipWidth/2);
+    ctx.lineTo(barrelLength - recoilOffset - postFireRecoil, tipWidth/2);
+    ctx.lineTo(-recoilOffset - postFireRecoil - 5, baseWidth/2);
+    ctx.closePath();
+    ctx.fill();
+
+    // Barrel outline
+    ctx.strokeStyle = '#1A1A1A';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Metal reinforcement bands
+    ctx.fillStyle = '#3D3D3D';
+    const bandPositions = [5, 20, 35, 50];
+    for (const pos of bandPositions) {
+        const bandX = pos - recoilOffset - postFireRecoil;
+        const widthAtPos = baseWidth - (baseWidth - tipWidth) * (pos / barrelLength);
+        ctx.fillRect(bandX, -widthAtPos/2 - 1, 4, widthAtPos + 2);
+        // Band highlight
+        ctx.fillStyle = '#5A5A5A';
+        ctx.fillRect(bandX, -widthAtPos/2 - 1, 1, widthAtPos + 2);
+        ctx.fillStyle = '#3D3D3D';
+    }
+
+    // Muzzle ring (thicker ring at the tip)
     ctx.fillStyle = '#4A4A4A';
     ctx.beginPath();
-    ctx.arc(frontWheelX, frontWheelY, frontWheelRadius, 0, Math.PI * 2);
+    ctx.arc(barrelLength - recoilOffset - postFireRecoil + 2, 0, tipWidth/2 + 3, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#333';
+    ctx.fillStyle = '#2A2A2A';
+    ctx.beginPath();
+    ctx.arc(barrelLength - recoilOffset - postFireRecoil + 2, 0, tipWidth/2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Barrel bore (black hole at the tip)
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(barrelLength - recoilOffset - postFireRecoil + 3, 0, tipWidth/2 - 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cascabel (round knob at the back)
+    ctx.fillStyle = '#4A4A4A';
+    ctx.beginPath();
+    ctx.arc(-recoilOffset - postFireRecoil - 8, 0, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#2A2A2A';
     ctx.stroke();
-    
+
+    // Touch hole (fuse hole on top)
+    ctx.fillStyle = '#1A1A1A';
+    ctx.beginPath();
+    ctx.arc(10 - recoilOffset - postFireRecoil, -baseWidth/2 + 1, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+
+    // Front wheel (larger) - wooden with metal rim
+    ctx.fillStyle = '#8B4513';
+    ctx.beginPath();
+    ctx.arc(frontWheelX, frontWheelY, frontWheelRadius - 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#2F2F2F';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.lineWidth = 1;
+
+    // Hub
+    ctx.fillStyle = '#2F2F2F';
+    ctx.beginPath();
+    ctx.arc(frontWheelX, frontWheelY, 5, 0, Math.PI * 2);
+    ctx.fill();
+
     // Draw front wheel spokes
-    ctx.strokeStyle = '#333';
+    ctx.strokeStyle = '#654321';
+    ctx.lineWidth = 3;
     for (let i = 0; i < 8; i++) {
         const angle = (i * Math.PI) / 4;
         ctx.beginPath();
-        ctx.moveTo(frontWheelX + Math.cos(angle) * frontWheelRadius, frontWheelY + Math.sin(angle) * frontWheelRadius);
-        ctx.lineTo(frontWheelX - Math.cos(angle) * frontWheelRadius, frontWheelY - Math.sin(angle) * frontWheelRadius);
+        ctx.moveTo(frontWheelX, frontWheelY);
+        ctx.lineTo(frontWheelX + Math.cos(angle) * (frontWheelRadius - 3), frontWheelY + Math.sin(angle) * (frontWheelRadius - 3));
         ctx.stroke();
     }
-    
+    ctx.lineWidth = 1;
+
     // Draw power meter and trajectory prediction only when charging
     if (catapult.charging) {
-        // Calculate current power in real-time
         const currentPower = Math.min((Date.now() - catapult.chargeStart) / 10, catapult.maxPower);
-        
+
         // Draw power meter
         ctx.fillStyle = 'red';
-        ctx.fillRect(backWheelX - 20, backWheelY - 30, 40, 10);
+        ctx.fillRect(backWheelX - 20, backWheelY - 40, 40, 10);
         ctx.fillStyle = 'green';
-        ctx.fillRect(backWheelX - 20, backWheelY - 30, 40 * (currentPower / catapult.maxPower), 10);
-        
+        ctx.fillRect(backWheelX - 20, backWheelY - 40, 40 * (currentPower / catapult.maxPower), 10);
+
         // Draw power text
         ctx.fillStyle = 'white';
         ctx.font = '12px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(`Power: ${Math.round(currentPower)}`, backWheelX, backWheelY - 35);
+        ctx.fillText(`Power: ${Math.round(currentPower)}`, backWheelX, backWheelY - 45);
 
         // Draw trajectory prediction
         const angle = catapult.angle * Math.PI / 180;
-        const barrelLength = 60;
-        const startX = backWheelX + Math.cos(angle) * (barrelLength - recoilOffset);
-        const startY = backWheelY - 5 + Math.sin(angle) * (barrelLength - recoilOffset);
+        const startX = backWheelX + Math.cos(angle) * (65 - recoilOffset);
+        const startY = backWheelY - 10 + Math.sin(angle) * (65 - recoilOffset);
         const power = currentPower / 5;
-        
-        // Simulate trajectory for 1 second
+
         let x = startX;
         let y = startY;
         let vx = Math.cos(angle) * power;
@@ -353,42 +442,58 @@ function drawCatapult(catapult) {
         const fadeStartDistance = 200;
         const dotSpacing = 20;
         let distanceTraveled = 0;
-        
-        for (let t = 0; t < 60; t++) { // 60 frames = 1 second
+
+        for (let t = 0; t < 60; t++) {
             x += vx;
             y += vy;
             vy += gravity;
             distanceTraveled += Math.sqrt(vx * vx + vy * vy);
-            
-            // Stop if we hit the ground
+
             if (y > floorY) break;
-            
-            // Only draw a dot at specified intervals
+
             if (distanceTraveled >= dotSpacing) {
-                // Calculate opacity based on distance from middle of screen
                 let opacity = 1;
                 if (currentPlayer === 'left' && x > screenMiddle - fadeStartDistance) {
                     opacity = Math.max(0, 1 - (x - (screenMiddle - fadeStartDistance)) / 150);
                 } else if (currentPlayer === 'right' && x < screenMiddle + fadeStartDistance) {
                     opacity = Math.max(0, 1 - ((screenMiddle + fadeStartDistance) - x) / 150);
                 }
-                
-                // Draw dot
+
                 ctx.beginPath();
                 ctx.arc(x, y, 3, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.5})`;
                 ctx.fill();
-                
-                distanceTraveled = 0; // Reset distance counter
+
+                distanceTraveled = 0;
             }
         }
     }
 }
 
 function drawProjectile(projectile) {
+    // Add trail particles
+    if (Math.random() < 0.5) {
+        projectileTrails.push(new TrailParticle(projectile.x, projectile.y));
+    }
+
+    // Draw cannonball with shading
+    const gradient = ctx.createRadialGradient(
+        projectile.x - 2, projectile.y - 2, 0,
+        projectile.x, projectile.y, 6
+    );
+    gradient.addColorStop(0, '#4A4A4A');
+    gradient.addColorStop(0.5, '#2A2A2A');
+    gradient.addColorStop(1, '#000');
+
     ctx.beginPath();
-    ctx.arc(projectile.x, projectile.y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = '#000';
+    ctx.arc(projectile.x, projectile.y, 6, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    // Highlight
+    ctx.beginPath();
+    ctx.arc(projectile.x - 2, projectile.y - 2, 2, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
     ctx.fill();
 }
 
@@ -578,6 +683,101 @@ function updateFallingStones() {
     }
 }
 
+// Cannon smoke particle class (lingering smoke after firing)
+class CannonSmokeParticle {
+    constructor(x, y, angle) {
+        this.x = x;
+        this.y = y;
+        // Drift upward and slightly in the firing direction
+        this.vx = Math.cos(angle) * (Math.random() * 0.5) + (Math.random() - 0.5) * 0.3;
+        this.vy = -Math.random() * 0.8 - 0.3; // Drift upward
+        this.life = 1.0;
+        this.size = Math.random() * 15 + 10;
+        this.rotation = Math.random() * Math.PI * 2;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.05;
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy -= 0.005; // Slowly accelerate upward
+        this.life -= 0.008;
+        this.size += 0.3; // Expand as it rises
+        this.rotation += this.rotationSpeed;
+    }
+
+    draw(ctx) {
+        if (this.life <= 0) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.fillStyle = `rgba(150, 150, 150, ${this.life * 0.4})`;
+        ctx.beginPath();
+        // Draw irregular smoke shape
+        ctx.ellipse(0, 0, this.size, this.size * 0.7, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+// Projectile trail particle class
+class TrailParticle {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 0.5;
+        this.vy = (Math.random() - 0.5) * 0.5 - 0.2; // Slight upward drift
+        this.life = 1.0;
+        this.size = Math.random() * 4 + 2;
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life -= 0.03;
+        this.size *= 0.98;
+    }
+
+    draw(ctx) {
+        if (this.life <= 0) return;
+        ctx.fillStyle = `rgba(120, 120, 120, ${this.life * 0.5})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+// Spark particle class
+class SparkParticle {
+    constructor(x, y, angle) {
+        const spread = (Math.random() - 0.5) * 0.8;
+        const speed = Math.random() * 8 + 4;
+        this.x = x;
+        this.y = y;
+        this.vx = Math.cos(angle + spread) * speed;
+        this.vy = Math.sin(angle + spread) * speed;
+        this.life = 1.0;
+        this.size = Math.random() * 2 + 1;
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.15; // Gravity
+        this.vx *= 0.98; // Air resistance
+        this.life -= 0.05;
+    }
+
+    draw(ctx) {
+        if (this.life <= 0) return;
+        const brightness = Math.floor(255 * this.life);
+        ctx.fillStyle = `rgb(${brightness}, ${Math.floor(brightness * 0.6)}, 0)`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
 // Muzzle flash class
 class MuzzleFlash {
     constructor(x, y, angle) {
@@ -585,38 +785,67 @@ class MuzzleFlash {
         this.y = y;
         this.angle = angle;
         this.life = 1.0;
-        this.size = 25; // Increased from 15 to 25
+        this.size = 30;
+        this.sparks = [];
+        // Create sparks
+        const angleRad = angle * Math.PI / 180;
+        for (let i = 0; i < 12; i++) {
+            this.sparks.push(new SparkParticle(x, y, angleRad));
+        }
     }
 
     update() {
-        this.life -= 0.1;
-        this.size *= 0.9;
+        this.life -= 0.12;
+        this.size *= 0.85;
+        // Update sparks
+        for (let i = this.sparks.length - 1; i >= 0; i--) {
+            this.sparks[i].update();
+            if (this.sparks[i].life <= 0) {
+                this.sparks.splice(i, 1);
+            }
+        }
     }
 
     draw(ctx) {
+        // Draw sparks first (behind flash)
+        this.sparks.forEach(spark => spark.draw(ctx));
+
         if (this.life <= 0) return;
-        
+
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle * Math.PI / 180);
-        
-        // Draw flash with larger size
+
+        // Draw bright white core
+        const coreGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size * 0.3);
+        coreGradient.addColorStop(0, `rgba(255, 255, 255, ${this.life})`);
+        coreGradient.addColorStop(1, `rgba(255, 255, 200, ${this.life * 0.5})`);
+        ctx.fillStyle = coreGradient;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.size * 0.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw main flash
         const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
-        gradient.addColorStop(0, 'rgba(255, 255, 0, ' + this.life + ')');
-        gradient.addColorStop(0.5, 'rgba(255, 165, 0, ' + this.life * 0.7 + ')');
-        gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
-        
+        gradient.addColorStop(0, `rgba(255, 200, 50, ${this.life * 0.9})`);
+        gradient.addColorStop(0.3, `rgba(255, 150, 0, ${this.life * 0.7})`);
+        gradient.addColorStop(0.6, `rgba(255, 100, 0, ${this.life * 0.4})`);
+        gradient.addColorStop(1, 'rgba(255, 50, 0, 0)');
+
         ctx.fillStyle = gradient;
         ctx.beginPath();
         ctx.arc(0, 0, this.size, 0, Math.PI * 2);
         ctx.fill();
-        
-        // Draw smoke with larger size
-        ctx.fillStyle = 'rgba(100, 100, 100, ' + this.life * 0.5 + ')';
+
+        // Draw directional blast cone
+        ctx.fillStyle = `rgba(255, 200, 100, ${this.life * 0.3})`;
         ctx.beginPath();
-        ctx.arc(0, 0, this.size * 0.7, 0, Math.PI * 2);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(this.size * 1.5, -this.size * 0.4);
+        ctx.lineTo(this.size * 1.5, this.size * 0.4);
+        ctx.closePath();
         ctx.fill();
-        
+
         ctx.restore();
     }
 }
@@ -625,8 +854,28 @@ class MuzzleFlash {
 function updateMuzzleFlashes() {
     for (let i = muzzleFlashes.length - 1; i >= 0; i--) {
         muzzleFlashes[i].update();
-        if (muzzleFlashes[i].life <= 0) {
+        if (muzzleFlashes[i].life <= 0 && muzzleFlashes[i].sparks.length === 0) {
             muzzleFlashes.splice(i, 1);
+        }
+    }
+}
+
+// Update cannon smoke
+function updateCannonSmoke() {
+    for (let i = cannonSmoke.length - 1; i >= 0; i--) {
+        cannonSmoke[i].update();
+        if (cannonSmoke[i].life <= 0) {
+            cannonSmoke.splice(i, 1);
+        }
+    }
+}
+
+// Update projectile trails
+function updateProjectileTrails() {
+    for (let i = projectileTrails.length - 1; i >= 0; i--) {
+        projectileTrails[i].update();
+        if (projectileTrails[i].life <= 0) {
+            projectileTrails.splice(i, 1);
         }
     }
 }
@@ -750,6 +999,13 @@ function gameLoop() {
     updateExplosions();
     updateFallingStones();
     updateMuzzleFlashes();
+    updateCannonSmoke();
+    updateProjectileTrails();
+
+    // Draw smoke behind everything else
+    cannonSmoke.forEach(smoke => smoke.draw(ctx));
+    projectileTrails.forEach(trail => trail.draw(ctx));
+
     projectiles.forEach(drawProjectile);
     explosions.forEach(particle => particle.draw(ctx));
     fallingStones.forEach(stone => stone.draw(ctx));
@@ -834,6 +1090,8 @@ function gameLoop() {
             explosions = [];
             fallingStones = [];
             muzzleFlashes = [];
+            cannonSmoke = [];
+            projectileTrails = [];
             canShoot = true;
         });
     }
@@ -883,22 +1141,31 @@ document.addEventListener('keyup', (e) => {
             currentCatapult.charging = false;
             
             // Play cannon sound
-            cannonSound.currentTime = 0; // Reset sound to start
+            cannonSound.currentTime = 0;
             cannonSound.play();
-            
+
+            // Set fire time for recoil animation
+            currentCatapult.fireTime = Date.now();
+
             // Calculate position at the tip of the cannon barrel
             const angle = currentCatapult.angle * Math.PI / 180;
-            const barrelLength = 60; // Length of the barrel
+            const barrelLength = 65;
             const floorY = currentCatapult.y;
             const backWheelRadius = 12;
-            const cannonBaseY = floorY - backWheelRadius - 5;
-            
-            // Calculate the position of the cannon tip, adding extra length for the flash
-            const flashX = currentCatapult.x + (currentCatapult === rightCatapult ? 10 : -10) + Math.cos(angle) * (barrelLength + 20);
-            const flashY = cannonBaseY + Math.sin(angle) * (barrelLength + 20);
-            
+            const cannonBaseY = floorY - backWheelRadius - 10;
+            const backWheelX = currentCatapult.x + (currentCatapult === rightCatapult ? 10 : -10);
+
+            // Calculate the position of the cannon tip
+            const flashX = backWheelX + Math.cos(angle) * (barrelLength + 5);
+            const flashY = cannonBaseY + Math.sin(angle) * (barrelLength + 5);
+
             // Create muzzle flash at the tip
             muzzleFlashes.push(new MuzzleFlash(flashX, flashY, currentCatapult.angle));
+
+            // Create lingering smoke cloud
+            for (let i = 0; i < 8; i++) {
+                cannonSmoke.push(new CannonSmokeParticle(flashX, flashY, angle));
+            }
             
             const power = currentCatapult.power / 5;
             
