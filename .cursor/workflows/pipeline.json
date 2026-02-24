@@ -1,0 +1,20 @@
+{
+  "name": "Full Pipeline",
+  "description": "Run complete workflow: Product Owner → Architect → Coding",
+  "steps": [
+    {
+      "type": "command",
+      "command": "cursor-agent pipeline --link {{input.linearUrl}}",
+      "description": "Run full pipeline from ticket enhancement to PR creation"
+    }
+  ],
+  "inputs": [
+    {
+      "name": "linearUrl",
+      "description": "Linear ticket URL",
+      "type": "string",
+      "required": true
+    }
+  ]
+}
+

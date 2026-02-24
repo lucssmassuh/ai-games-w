@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,36 +12,43 @@
             padding: 20px;
             background-color: #f5f5f5;
         }
+
         .app-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
             padding: 20px;
         }
+
         .app-card {
             background: white;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s;
         }
+
         .app-card:hover {
             transform: translateY(-5px);
         }
+
         .app-icon {
             width: 100%;
             height: 300px;
             margin-bottom: 15px;
         }
+
         .app-title {
             font-size: 1.5em;
             margin: 0 0 10px 0;
             color: #333;
         }
+
         .app-description {
             color: #666;
             margin-bottom: 15px;
         }
+
         .launch-button {
             display: inline-block;
             padding: 10px 20px;
@@ -50,11 +58,13 @@
             border-radius: 4px;
             transition: background-color 0.2s;
         }
+
         .launch-button:hover {
             background-color: #45a049;
         }
     </style>
 </head>
+
 <body>
     <h1>🐼 EMI & 🐨 GUADA GAMES </h1>
     <div class="app-list" id="appList">
@@ -93,20 +103,26 @@
                 description: "Become a medieval chevalier and hunt orcs with your bow from the castle walls",
                 icon: "orcs-hunter/orcs-hunter.png",
                 path: "orcs-hunter"
+            },
+            {
+                name: "Handy Blocks",
+                description: "Arkanoid with hand magic — move your hand to control the paddle and break enchanted bricks",
+                icon: "handy-blocks/handy-blocks.jpg",
+                path: "handy-blocks"
             }
         ];
 
         function createAppCard(app) {
             const card = document.createElement('div');
             card.className = 'app-card';
-            
+
             card.innerHTML = `
                 <img src="${app.icon}" alt="${app.name}" class="app-icon">
                 <h2 class="app-title">${app.name}</h2>
                 <p class="app-description">${app.description}</p>
                 <a href="${app.path}/index.html" class="launch-button">Launch App</a>
             `;
-            
+
             return card;
         }
 
@@ -116,4 +132,5 @@
         });
     </script>
 </body>
+
 </html>

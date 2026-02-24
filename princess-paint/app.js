@@ -222,6 +222,33 @@ function handleMouseMove(e) {
 
 
 
+// Function to capture and download the canvas as an image
+function captureScreenshot() {
+    const canvasArea = document.querySelector('.canvas-area');
+    
+    html2canvas(canvasArea, {
+        backgroundColor: null, // Keep transparent background
+        scale: 2, // Higher scale for better quality
+        logging: false,
+        useCORS: true
+    }).then(canvas => {
+        // Create a download link
+        const link = document.createElement('a');
+        link.download = `princess-paint-${new Date().toISOString().slice(0, 10)}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        // Show notification
+        const notification = document.getElementById('screenshot-notification');
+        notification.style.display = 'block';
+        
+        // Hide notification after 3 seconds
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    });
+}
+
 // Initialize the app
 async function init() {
     drawing = document.getElementById('drawing');
@@ -233,6 +260,14 @@ async function init() {
     
     // Add mouse move event listener to the canvas area
     drawing.addEventListener('mousemove', handleMouseMove);
+    
+    // Add keyboard event listener for screenshots
+    document.addEventListener('keydown', (event) => {
+        if (event.code === 'Space') {
+            event.preventDefault(); // Prevent spacebar from scrolling the page
+            captureScreenshot();
+        }
+    });
 }
 
 // Start the app

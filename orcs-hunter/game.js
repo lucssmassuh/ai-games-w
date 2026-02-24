@@ -609,43 +609,14 @@ var GameLayer = cc.Layer.extend({
         }
 
         if (keyCode === cc.KEY['1'] || keyCode === cc.KEY.num1) {
-            console.log('Trying to buy normal arrow');
-            var c1 = this.arrowTypes[0].cost;
-            console.log('Current score:', this.score, 'Cost:', c1);
-            if (this.score >= c1) {
-                console.log('Purchase successful');
-                this.score -= c1;
-                this.scoreLabel.setString(this.score.toString());
-                this.arrowStock[0]++;
-                this.currentArrowType = 0; // Select normal arrow
-                this.updateArrowStockUI();
-                this.updateArrowUI();
-                console.log('New arrow count:', this.arrowStock[0]);
-            } else {
-                console.log('Not enough score to purchase');
-            }
+            this.currentArrowType = 0;
+            this.updateArrowUI();
         } else if (keyCode === cc.KEY['2'] || keyCode === cc.KEY.num2) {
-            console.log('Trying to buy explosive arrow');
-            var c2 = this.arrowTypes[1].cost;
-            if (this.score >= c2) {
-                this.score -= c2;
-                this.scoreLabel.setString(this.score.toString());
-                this.arrowStock[1]++;
-                this.currentArrowType = 1; // Select explosive arrow
-                this.updateArrowStockUI();
-                this.updateArrowUI();
-            }
+            this.currentArrowType = 1;
+            this.updateArrowUI();
         } else if (keyCode === cc.KEY['3'] || keyCode === cc.KEY.num3) {
-            console.log('Trying to buy triple arrow');
-            var c3 = this.arrowTypes[2].cost;
-            if (this.score >= c3) {
-                this.score -= c3;
-                this.scoreLabel.setString(this.score.toString());
-                this.arrowStock[2]++;
-                this.currentArrowType = 2; // Select triple arrow
-                this.updateArrowStockUI();
-                this.updateArrowUI();
-            }
+            this.currentArrowType = 2;
+            this.updateArrowUI();
         }
     },
     

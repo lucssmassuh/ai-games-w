@@ -10,6 +10,7 @@ This document provides an overview of the AI agents used across different games 
 - [Sky Ace](#sky-ace)
 - [Wizards School](#wizards-school)
 - [Pong](#pong)
+- [Handy Blocks](#handy-blocks)
 
 ## Orcs Hunter
 in the /orcs-hunter folder there are files with javascript code that implement the objects used in the game.
@@ -232,3 +233,38 @@ A classic two-player Pong game with modern visual effects.
 - Ball: 10 pixel diameter
 - Paddle speed: 5 pixels/frame
 - Ball speed: 4 pixels/frame
+
+## Handy Blocks
+An Arkanoid/Breakout game controlled by hand tracking via webcam. Move your hand left and right to steer the magic paddle and break enchanted bricks.
+
+### Game Files
+- `/handy-blocks/game.js` - Game logic, physics, hand tracking integration, and rendering
+- `/handy-blocks/index.html` - Game entry point with canvas and loading screen
+
+### Hand Tracking
+Uses the same TensorFlow.js handpose architecture as Wizards School:
+- Libraries: `@tensorflow-models/handpose@0.0.7`, `@tensorflow/tfjs-core@3.7.0`
+- Palm center is computed as the average X of landmarks [0, 5, 9, 13, 17] for stable tracking
+- Raw landmark X is mirrored (`1 - rawX / videoWidth`) to match the flipped webcam display
+- Webcam feed is drawn semi-transparently (35% opacity) as game background
+
+### Game Mechanics
+- **Brick grid**: 8 columns × 5 rows (40 bricks), colour-coded by row
+- **Paddle collision**: bounce angle varies based on where the ball hits (up to ±67.5°)
+- **Lives**: 3 lives; losing the ball costs one life
+- **Score**: +10 per brick destroyed
+- **Win condition**: all bricks cleared
+
+### Controls
+- **Hand (primary)**: palm X position controls paddle
+- **Mouse**: cursor position as fallback
+- **Touch**: drag finger across screen
+- **Arrow keys**: left/right to nudge paddle
+- **Space / Enter / Click / Tap**: start or restart game
+
+### Visual Features
+- Purple glowing paddle with gradient
+- Orange fireball with radial gradient and sparkle trail
+- Per-row brick hues: purple → blue → teal → yellow → red-orange
+- Particle burst on every brick hit and ball loss
+- Dark magical overlay on top of webcam background

@@ -14,16 +14,17 @@ resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
 // Game objects
+// Stone health: 0 = destroyed, 1 = heavily cracked, 2 = cracked, 3 = intact
 const leftCastle = {
     x: 0,
     y: 0,
     width: 140,
     height: 150,
     stones: [
-        [1,0,1,0,1,0,1],
-        [1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1]
+        [3,0,3,0,3,0,3],
+        [3,3,3,3,3,3,3],
+        [3,3,3,3,3,3,3],
+        [3,3,3,3,3,3,3]
     ],
     health: 100
 };
@@ -34,10 +35,10 @@ const rightCastle = {
     width: 140,
     height: 150,
     stones: [
-        [1,0,1,0,1,0,1],
-        [1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1]
+        [3,0,3,0,3,0,3],
+        [3,3,3,3,3,3,3],
+        [3,3,3,3,3,3,3],
+        [3,3,3,3,3,3,3]
     ],
     health: 100
 };
@@ -133,47 +134,57 @@ class ExplosionParticle {
 
 // Falling stone class
 class FallingStone {
-    constructor(castle, row, col, targetY) {
+    constructor(castle, row, col, targetY, health = 3) {
         this.castle = castle;
         this.row = row;
         this.col = col;
+        this.health = health;
         this.x = castle.x + col * (castle.width / 7);
         this.y = castle.y + row * (castle.height / 4);
         this.targetY = targetY;
-        this.vy = 0; // Initial vertical velocity
-        this.gravity = 0.2; // Gravity acceleration
-        this.delay = (row - 1) * 200; // Delay based on row position
+        this.vy = 0;
+        this.gravity = 0.3;
+        this.delay = (row - 1) * 200;
         this.startTime = Date.now();
         this.exploded = false;
+        this.rotation = 0;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.1;
     }
 
     update() {
-        // Check if delay has passed
         if (Date.now() - this.startTime < this.delay) {
-            return false; // Still in delay
+            return false;
         }
 
         if (this.y < this.targetY) {
-            this.vy += this.gravity; // Apply gravity
-            this.y += this.vy; // Update position based on velocity
-            
-            // Add a slight horizontal wobble
+            this.vy += this.gravity;
+            this.y += this.vy;
             this.x += (Math.random() - 0.5) * 0.5;
-            
-            return false; // Still falling
+            this.rotation += this.rotationSpeed;
+            return false;
         }
-        return true; // Reached target
+        return true;
     }
 
     draw(ctx) {
         const stoneWidth = this.castle.width / 7;
         const stoneHeight = this.castle.height / 4;
-        
-        ctx.fillStyle = '#808080';
-        ctx.fillRect(this.x, this.y, stoneWidth, stoneHeight);
-        
-        ctx.strokeStyle = '#606060';
-        ctx.strokeRect(this.x, this.y, stoneWidth, stoneHeight);
+
+        ctx.save();
+        ctx.translate(this.x + stoneWidth/2, this.y + stoneHeight/2);
+        ctx.rotate(this.rotation);
+
+        // Draw stone with damage-based color
+        const shade = 80 + this.health * 10;
+        ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
+        ctx.fillRect(-stoneWidth/2, -stoneHeight/2, stoneWidth, stoneHeight);
+
+        ctx.strokeStyle = '#505050';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-stoneWidth/2, -stoneHeight/2, stoneWidth, stoneHeight);
+        ctx.lineWidth = 1;
+
+        ctx.restore();
     }
 }
 
@@ -221,26 +232,86 @@ const clouds = [
 function drawCastle(castle) {
     const stoneWidth = castle.width / 7;
     const stoneHeight = castle.height / 4;
-    
+
     // Draw stones
     for (let row = 0; row < 4; row++) {
         for (let col = 0; col < 7; col++) {
-            if (castle.stones[row][col]) {
-                ctx.fillStyle = '#808080';
-                ctx.fillRect(
-                    castle.x + col * stoneWidth,
-                    castle.y + row * stoneHeight,
-                    stoneWidth,
-                    stoneHeight
-                );
-                
-                ctx.strokeStyle = '#606060';
-                ctx.strokeRect(
-                    castle.x + col * stoneWidth,
-                    castle.y + row * stoneHeight,
-                    stoneWidth,
-                    stoneHeight
-                );
+            const health = castle.stones[row][col];
+            if (health > 0) {
+                const stoneX = castle.x + col * stoneWidth;
+                const stoneY = castle.y + row * stoneHeight;
+
+                // Base stone color gets darker as damage increases
+                const shade = 80 + health * 10; // 90-110 range based on health
+                ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
+                ctx.fillRect(stoneX, stoneY, stoneWidth, stoneHeight);
+
+                // Stone texture - lighter top edge, darker bottom edge
+                ctx.fillStyle = `rgba(255, 255, 255, 0.15)`;
+                ctx.fillRect(stoneX, stoneY, stoneWidth, 2);
+                ctx.fillStyle = `rgba(0, 0, 0, 0.2)`;
+                ctx.fillRect(stoneX, stoneY + stoneHeight - 2, stoneWidth, 2);
+
+                // Mortar lines (border)
+                ctx.strokeStyle = '#505050';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(stoneX, stoneY, stoneWidth, stoneHeight);
+                ctx.lineWidth = 1;
+
+                // Draw cracks based on damage level
+                if (health <= 2) {
+                    ctx.strokeStyle = '#3A3A3A';
+                    ctx.lineWidth = 1.5;
+
+                    // First level of cracks (health = 2)
+                    ctx.beginPath();
+                    ctx.moveTo(stoneX + stoneWidth * 0.3, stoneY);
+                    ctx.lineTo(stoneX + stoneWidth * 0.4, stoneY + stoneHeight * 0.4);
+                    ctx.lineTo(stoneX + stoneWidth * 0.25, stoneY + stoneHeight * 0.7);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(stoneX + stoneWidth * 0.7, stoneY + stoneHeight);
+                    ctx.lineTo(stoneX + stoneWidth * 0.6, stoneY + stoneHeight * 0.5);
+                    ctx.stroke();
+                }
+
+                if (health <= 1) {
+                    // More severe cracks (health = 1)
+                    ctx.strokeStyle = '#2A2A2A';
+                    ctx.lineWidth = 2;
+
+                    // Large diagonal crack
+                    ctx.beginPath();
+                    ctx.moveTo(stoneX + stoneWidth * 0.1, stoneY + stoneHeight * 0.2);
+                    ctx.lineTo(stoneX + stoneWidth * 0.5, stoneY + stoneHeight * 0.5);
+                    ctx.lineTo(stoneX + stoneWidth * 0.8, stoneY + stoneHeight * 0.4);
+                    ctx.lineTo(stoneX + stoneWidth, stoneY + stoneHeight * 0.6);
+                    ctx.stroke();
+
+                    // Branching cracks
+                    ctx.beginPath();
+                    ctx.moveTo(stoneX + stoneWidth * 0.5, stoneY + stoneHeight * 0.5);
+                    ctx.lineTo(stoneX + stoneWidth * 0.45, stoneY + stoneHeight * 0.9);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(stoneX + stoneWidth * 0.8, stoneY);
+                    ctx.lineTo(stoneX + stoneWidth * 0.75, stoneY + stoneHeight * 0.3);
+                    ctx.lineTo(stoneX + stoneWidth * 0.85, stoneY + stoneHeight * 0.5);
+                    ctx.stroke();
+
+                    // Add some debris/chip marks
+                    ctx.fillStyle = '#4A4A4A';
+                    ctx.beginPath();
+                    ctx.arc(stoneX + stoneWidth * 0.2, stoneY + stoneHeight * 0.3, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(stoneX + stoneWidth * 0.7, stoneY + stoneHeight * 0.8, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.lineWidth = 1;
             }
         }
     }
@@ -515,11 +586,93 @@ function calculateCastleHealth(castle) {
     return totalStones > 0 ? (remainingStones / totalStones) * 100 : 0;
 }
 
+// Draw turn indicator above the current player's castle
+function drawTurnIndicator() {
+    const castle = currentPlayer === 'left' ? leftCastle : rightCastle;
+    const indicatorX = castle.x + castle.width / 2;
+    const indicatorY = castle.y - 40;
+
+    // Pulsing effect
+    const pulse = Math.sin(Date.now() / 200) * 0.3 + 0.7;
+
+    // Draw arrow pointing down
+    ctx.save();
+    ctx.translate(indicatorX, indicatorY);
+
+    // Arrow glow
+    ctx.shadowColor = '#FFD700';
+    ctx.shadowBlur = 15 * pulse;
+
+    // Arrow body
+    ctx.fillStyle = `rgba(255, 215, 0, ${pulse})`;
+    ctx.beginPath();
+    ctx.moveTo(0, 20);      // Arrow tip
+    ctx.lineTo(-15, 0);     // Left corner
+    ctx.lineTo(-6, 0);      // Left inner
+    ctx.lineTo(-6, -15);    // Left top
+    ctx.lineTo(6, -15);     // Right top
+    ctx.lineTo(6, 0);       // Right inner
+    ctx.lineTo(15, 0);      // Right corner
+    ctx.closePath();
+    ctx.fill();
+
+    // Arrow outline
+    ctx.strokeStyle = '#B8860B';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.restore();
+
+    // Draw "YOUR TURN" text
+    ctx.save();
+    ctx.font = `bold ${Math.min(canvas.width, canvas.height) * 0.018}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = `rgba(255, 215, 0, ${pulse})`;
+    ctx.shadowColor = '#000';
+    ctx.shadowBlur = 4;
+    ctx.fillText(currentPlayer === 'left' ? 'P1 TURN' : 'P2 TURN', indicatorX, indicatorY - 25);
+    ctx.restore();
+}
+
+// Draw control instructions under each castle
+function drawControlInstructions() {
+    const fontSize = Math.min(canvas.width, canvas.height) * 0.014;
+    const lineHeight = fontSize * 1.4;
+
+    ctx.save();
+    ctx.font = `${fontSize}px Arial`;
+    ctx.shadowColor = '#000';
+    ctx.shadowBlur = 3;
+
+    // Left castle (P1) instructions
+    const leftX = leftCastle.x + leftCastle.width / 2;
+    const leftY = canvas.height * 0.94;
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#FFD700';
+    ctx.fillText('P1 Controls', leftX, leftY);
+    ctx.fillStyle = '#FFF';
+    ctx.fillText('W/S - Aim', leftX, leftY + lineHeight);
+    ctx.fillText('Q - Shoot', leftX, leftY + lineHeight * 2);
+
+    // Right castle (P2) instructions
+    const rightX = rightCastle.x + rightCastle.width / 2;
+    const rightY = canvas.height * 0.94;
+
+    ctx.fillStyle = '#FFD700';
+    ctx.fillText('P2 Controls', rightX, rightY);
+    ctx.fillStyle = '#FFF';
+    ctx.fillText('O/L - Aim', rightX, rightY + lineHeight);
+    ctx.fillText('P - Shoot', rightX, rightY + lineHeight * 2);
+
+    ctx.restore();
+}
+
 function drawScore() {
     ctx.fillStyle = '#00008B';
     ctx.font = `${Math.min(canvas.width, canvas.height) * 0.02}px Arial`;
     ctx.textAlign = 'center';
-    
+
     // Always show round indicator
     ctx.fillText(`Round ${currentRound}`, canvas.width / 2, canvas.height * 0.1);
     
@@ -590,38 +743,52 @@ function updateProjectiles() {
         const checkCastleCollision = (castle, isLeftCastle) => {
             const stoneWidth = castle.width / 7;
             const stoneHeight = castle.height / 4;
-            
+
             for (let row = 0; row < 4; row++) {
                 for (let col = 0; col < 7; col++) {
-                    if (castle.stones[row][col]) {
+                    if (castle.stones[row][col] > 0) {
                         const stoneX = castle.x + col * stoneWidth;
                         const stoneY = castle.y + row * stoneHeight;
-                        
+
                         if (p.x > stoneX && p.x < stoneX + stoneWidth &&
                             p.y > stoneY && p.y < stoneY + stoneHeight) {
-                            // Create explosion for the hit stone
-                            createExplosion(stoneX + stoneWidth/2, stoneY + stoneHeight/2);
-                            castle.stones[row][col] = 0;
-                            castle.health -= 5;
-                            
-                            // Check and explode stones above with delay
-                            for (let aboveRow = row - 1; aboveRow >= 0; aboveRow--) {
-                                if (castle.stones[aboveRow][col]) {
-                                    const aboveStoneX = castle.x + col * stoneWidth;
-                                    const aboveStoneY = castle.y + aboveRow * stoneHeight;
-                                    const targetY = castle.y + row * stoneHeight;
-                                    
-                                    // Add falling stone
-                                    fallingStones.push(new FallingStone(castle, aboveRow, col, targetY));
-                                    
-                                    // Remove the stone from the castle
-                                    castle.stones[aboveRow][col] = 0;
-                                    castle.health -= 5;
-                                } else {
-                                    break; // Stop if we hit an empty space
+
+                            // Reduce stone health
+                            castle.stones[row][col]--;
+                            const newHealth = castle.stones[row][col];
+
+                            if (newHealth === 0) {
+                                // Stone destroyed - create full explosion
+                                createExplosion(stoneX + stoneWidth/2, stoneY + stoneHeight/2);
+                                castle.health -= 5;
+
+                                // Play impact sound
+                                if (impactSound) {
+                                    impactSound.currentTime = 0;
+                                    impactSound.play();
                                 }
+
+                                // Check and drop stones above with delay
+                                for (let aboveRow = row - 1; aboveRow >= 0; aboveRow--) {
+                                    const stoneHealth = castle.stones[aboveRow][col];
+                                    if (stoneHealth > 0) {
+                                        const targetY = castle.y + row * stoneHeight;
+
+                                        // Add falling stone with its current health
+                                        fallingStones.push(new FallingStone(castle, aboveRow, col, targetY, stoneHealth));
+
+                                        // Remove the stone from the castle
+                                        castle.stones[aboveRow][col] = 0;
+                                        castle.health -= 5;
+                                    } else {
+                                        break; // Stop if we hit an empty space
+                                    }
+                                }
+                            } else {
+                                // Stone damaged but not destroyed - create smaller debris effect
+                                createCrackEffect(stoneX + stoneWidth/2, stoneY + stoneHeight/2);
                             }
-                            
+
                             return true;
                         }
                     }
@@ -645,8 +812,24 @@ function updateProjectiles() {
             }
         }
 
-        // Remove if out of bounds
-        if (p.y > canvas.height || p.x < 0 || p.x > canvas.width) {
+        // Check if projectile hits the ground (short miss)
+        const groundLevel = canvas.height * 0.91;
+        if (p.y > groundLevel) {
+            // Create ground explosion
+            createGroundExplosion(p.x, groundLevel);
+
+            // Play impact sound
+            if (impactSound) {
+                impactSound.currentTime = 0;
+                impactSound.play();
+            }
+
+            projectiles.splice(i, 1);
+            continue;
+        }
+
+        // Remove if out of bounds (off screen left/right)
+        if (p.x < 0 || p.x > canvas.width) {
             projectiles.splice(i, 1);
         }
     }
@@ -666,6 +849,82 @@ function updateExplosions() {
 function createExplosion(x, y) {
     for (let j = 0; j < 15; j++) {
         explosions.push(new ExplosionParticle(x, y));
+    }
+}
+
+// Helper function to create crack/chip effect (smaller than explosion)
+function createCrackEffect(x, y) {
+    for (let j = 0; j < 6; j++) {
+        const particle = new ExplosionParticle(x, y);
+        particle.size *= 0.6; // Smaller particles
+        particle.vx *= 0.5; // Less velocity
+        particle.vy *= 0.5;
+        explosions.push(particle);
+    }
+}
+
+// Ground explosion particle class (dirt/debris)
+class GroundExplosionParticle {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        // Particles fly upward and outward
+        this.vx = (Math.random() - 0.5) * 8;
+        this.vy = -Math.random() * 8 - 2; // Upward velocity
+        this.life = 1.0;
+        this.size = Math.random() * 6 + 3;
+        this.rotation = Math.random() * Math.PI * 2;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.3;
+        // Brown/dirt colors
+        this.colorType = Math.random();
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.25; // Gravity
+        this.vx *= 0.99; // Air resistance
+        this.life -= 0.02;
+        this.rotation += this.rotationSpeed;
+    }
+
+    draw(ctx) {
+        if (this.life <= 0) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+
+        // Mix of brown dirt and grass colors
+        let color;
+        if (this.colorType < 0.5) {
+            // Brown dirt
+            color = `rgba(139, 69, 19, ${this.life})`;
+        } else if (this.colorType < 0.8) {
+            // Dark brown
+            color = `rgba(101, 67, 33, ${this.life})`;
+        } else {
+            // Green grass bits
+            color = `rgba(34, 139, 34, ${this.life})`;
+        }
+
+        ctx.fillStyle = color;
+        ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+        ctx.restore();
+    }
+}
+
+// Helper function to create ground explosion
+function createGroundExplosion(x, y) {
+    // Create dirt/debris particles
+    for (let j = 0; j < 20; j++) {
+        explosions.push(new GroundExplosionParticle(x, y));
+    }
+
+    // Also add some smoke particles
+    for (let j = 0; j < 8; j++) {
+        const particle = new ExplosionParticle(x, y);
+        particle.vy = -Math.abs(particle.vy) - 1; // Ensure upward motion
+        explosions.push(particle);
     }
 }
 
@@ -992,6 +1251,8 @@ function gameLoop() {
     drawScore();
     drawCastle(leftCastle);
     drawCastle(rightCastle);
+    drawTurnIndicator();
+    drawControlInstructions();
     drawCatapult(leftCatapult);
     drawCatapult(rightCatapult);
     
@@ -1067,18 +1328,18 @@ function gameLoop() {
         // Add click event listener to the banner
         banner.addEventListener('click', () => {
             banner.remove();
-            // Reset all game state
+            // Reset all game state (3 = full health for each stone)
             leftCastle.stones = [
-                [1,0,1,0,1,0,1],
-                [1,1,1,1,1,1,1],
-                [1,1,1,1,1,1,1],
-                [1,1,1,1,1,1,1]
+                [3,0,3,0,3,0,3],
+                [3,3,3,3,3,3,3],
+                [3,3,3,3,3,3,3],
+                [3,3,3,3,3,3,3]
             ];
             rightCastle.stones = [
-                [1,0,1,0,1,0,1],
-                [1,1,1,1,1,1,1],
-                [1,1,1,1,1,1,1],
-                [1,1,1,1,1,1,1]
+                [3,0,3,0,3,0,3],
+                [3,3,3,3,3,3,3],
+                [3,3,3,3,3,3,3],
+                [3,3,3,3,3,3,3]
             ];
             leftCastle.health = 100;
             rightCastle.health = 100;
@@ -1102,14 +1363,14 @@ function gameLoop() {
 // Controls
 document.addEventListener('keydown', (e) => {
     switch(e.key) {
-        case 'q':
+        case 'w':
             if (currentPlayer === 'left') {
-                leftCatapult.angle = Math.max(leftCatapult.angle - 5, -85); // Decrease angle (point down)
+                leftCatapult.angle = Math.max(leftCatapult.angle - 5, -85); // Decrease angle (point up)
             }
             break;
-        case 'a':
+        case 's':
             if (currentPlayer === 'left') {
-                leftCatapult.angle = Math.min(leftCatapult.angle + 5, 0); // Increase angle (point up)
+                leftCatapult.angle = Math.min(leftCatapult.angle + 5, 0); // Increase angle (point down)
             }
             break;
         case 'o':
@@ -1122,71 +1383,84 @@ document.addEventListener('keydown', (e) => {
                 rightCatapult.angle = Math.max(rightCatapult.angle - 5, 180);
             }
             break;
-        case ' ':
-            const currentCatapult = currentPlayer === 'left' ? leftCatapult : rightCatapult;
-            if (!currentCatapult.charging) {
-                currentCatapult.charging = true;
-                currentCatapult.chargeStart = Date.now();
+        case 'q':
+            // P1 shoot
+            if (currentPlayer === 'left' && !leftCatapult.charging) {
+                leftCatapult.charging = true;
+                leftCatapult.chargeStart = Date.now();
+            }
+            break;
+        case 'p':
+            // P2 shoot
+            if (currentPlayer === 'right' && !rightCatapult.charging) {
+                rightCatapult.charging = true;
+                rightCatapult.chargeStart = Date.now();
             }
             break;
     }
 });
 
 document.addEventListener('keyup', (e) => {
-    if (e.key === ' ') {
-        const currentCatapult = currentPlayer === 'left' ? leftCatapult : rightCatapult;
-        if (currentCatapult.charging) {
-            const chargeTime = Date.now() - currentCatapult.chargeStart;
-            currentCatapult.power = Math.min(chargeTime / 10, currentCatapult.maxPower);
-            currentCatapult.charging = false;
-            
-            // Play cannon sound
-            cannonSound.currentTime = 0;
-            cannonSound.play();
-
-            // Set fire time for recoil animation
-            currentCatapult.fireTime = Date.now();
-
-            // Calculate position at the tip of the cannon barrel
-            const angle = currentCatapult.angle * Math.PI / 180;
-            const barrelLength = 65;
-            const floorY = currentCatapult.y;
-            const backWheelRadius = 12;
-            const cannonBaseY = floorY - backWheelRadius - 10;
-            const backWheelX = currentCatapult.x + (currentCatapult === rightCatapult ? 10 : -10);
-
-            // Calculate the position of the cannon tip
-            const flashX = backWheelX + Math.cos(angle) * (barrelLength + 5);
-            const flashY = cannonBaseY + Math.sin(angle) * (barrelLength + 5);
-
-            // Create muzzle flash at the tip
-            muzzleFlashes.push(new MuzzleFlash(flashX, flashY, currentCatapult.angle));
-
-            // Create lingering smoke cloud
-            for (let i = 0; i < 8; i++) {
-                cannonSmoke.push(new CannonSmokeParticle(flashX, flashY, angle));
-            }
-            
-            const power = currentCatapult.power / 5;
-            
-            // Launch projectile from the tip
-            projectiles.push({
-                x: flashX,
-                y: flashY,
-                vx: Math.cos(angle) * power,
-                vy: Math.sin(angle) * power,
-                firedBy: currentPlayer // Track which player fired the projectile
-            });
-            
-            canShoot = false;
-            currentPlayer = currentPlayer === 'left' ? 'right' : 'left';
-            currentRound++;
-            setTimeout(() => {
-                canShoot = true;
-            }, 1000);
-        }
+    // P1 releases shoot key
+    if (e.key === 'q' && leftCatapult.charging) {
+        fireCannon(leftCatapult, 'left');
+    }
+    // P2 releases shoot key
+    if (e.key === 'p' && rightCatapult.charging) {
+        fireCannon(rightCatapult, 'right');
     }
 });
+
+function fireCannon(catapult, player) {
+    const chargeTime = Date.now() - catapult.chargeStart;
+    catapult.power = Math.min(chargeTime / 10, catapult.maxPower);
+    catapult.charging = false;
+
+    // Play cannon sound
+    cannonSound.currentTime = 0;
+    cannonSound.play();
+
+    // Set fire time for recoil animation
+    catapult.fireTime = Date.now();
+
+    // Calculate position at the tip of the cannon barrel
+    const angle = catapult.angle * Math.PI / 180;
+    const barrelLength = 65;
+    const floorY = catapult.y;
+    const backWheelRadius = 12;
+    const cannonBaseY = floorY - backWheelRadius - 10;
+    const backWheelX = catapult.x + (catapult === rightCatapult ? 10 : -10);
+
+    // Calculate the position of the cannon tip
+    const flashX = backWheelX + Math.cos(angle) * (barrelLength + 5);
+    const flashY = cannonBaseY + Math.sin(angle) * (barrelLength + 5);
+
+    // Create muzzle flash at the tip
+    muzzleFlashes.push(new MuzzleFlash(flashX, flashY, catapult.angle));
+
+    // Create lingering smoke cloud
+    for (let i = 0; i < 8; i++) {
+        cannonSmoke.push(new CannonSmokeParticle(flashX, flashY, angle));
+    }
+
+    const power = catapult.power / 5;
+
+    // Launch projectile from the tip
+    projectiles.push({
+        x: flashX,
+        y: flashY,
+        vx: Math.cos(angle) * power,
+        vy: Math.sin(angle) * power,
+        firedBy: player // Track which player fired the projectile
+    });
+
+    canShoot = false;
+    currentPlayer = currentPlayer === 'left' ? 'right' : 'left';
+    currentRound++;
+    setTimeout(() => {
+        canShoot = true;
+    }, 1000);
+}
 
 // Start game
 gameLoop(); 

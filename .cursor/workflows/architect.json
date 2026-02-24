@@ -1,0 +1,20 @@
+{
+  "name": "Architect Agent",
+  "description": "Create design documents and implementation plans with Linear subtasks",
+  "steps": [
+    {
+      "type": "command",
+      "command": "cursor-agent architect --ticket {{input.ticketId}}",
+      "description": "Run Architect agent to generate design document and create subtasks"
+    }
+  ],
+  "inputs": [
+    {
+      "name": "ticketId",
+      "description": "Linear ticket ID or URL",
+      "type": "string",
+      "required": true
+    }
+  ]
+}
+

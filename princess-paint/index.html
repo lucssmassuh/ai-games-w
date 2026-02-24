@@ -35,6 +35,12 @@
         </div>
     </div>
 
+    <!-- Add html2canvas library for screenshot functionality -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="app.js"></script>
+    <!-- Notification element for screenshot feedback -->
+    <div id="screenshot-notification" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 5px; z-index: 1000;">
+        Screenshot saved to your downloads!
+    </div>
 </body>
 </html>

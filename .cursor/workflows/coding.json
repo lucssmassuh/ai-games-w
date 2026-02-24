@@ -1,0 +1,26 @@
+{
+  "name": "Coding Agent",
+  "description": "Implement tasks, update Linear status, and create pull requests",
+  "steps": [
+    {
+      "type": "command",
+      "command": "cursor-agent coding --ticket {{input.ticketId}} --design-doc {{input.designDoc}}",
+      "description": "Run Coding agent to implement code and create PR"
+    }
+  ],
+  "inputs": [
+    {
+      "name": "ticketId",
+      "description": "Linear ticket ID or URL",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "designDoc",
+      "description": "Path to design document (optional)",
+      "type": "string",
+      "required": false
+    }
+  ]
+}
+

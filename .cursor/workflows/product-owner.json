@@ -1,0 +1,20 @@
+{
+  "name": "Product Owner Agent",
+  "description": "Enhance Linear tickets with structured requirements",
+  "steps": [
+    {
+      "type": "command",
+      "command": "cursor-agent po --link {{input.linearUrl}}",
+      "description": "Run Product Owner agent to gather requirements and update Linear ticket"
+    }
+  ],
+  "inputs": [
+    {
+      "name": "linearUrl",
+      "description": "Linear ticket URL",
+      "type": "string",
+      "required": true
+    }
+  ]
+}
+

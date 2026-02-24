@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcane Breaker</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Times New Roman', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #gameCanvas {
+            display: block;
+            cursor: none;
+        }
+
+        #webcam {
+            display: none;
+        }
+
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            background: #0a0015;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #cc88ff;
+            font-family: 'Times New Roman', serif;
+            z-index: 10;
+            gap: 20px;
+        }
+
+        #loading-screen h1 {
+            font-size: 3em;
+            margin: 0;
+            text-shadow: 0 0 30px #aa44ff;
+            letter-spacing: 4px;
+        }
+
+        #loading-screen p {
+            font-size: 1.2em;
+            color: #8888bb;
+            margin: 0;
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .loading-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6622cc, #cc44ff);
+            border-radius: 3px;
+            animation: loading-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes loading-pulse {
+            0%, 100% { width: 30%; margin-left: 0; }
+            50% { width: 60%; margin-left: 20%; }
+        }
+    </style>
+
+    <script src="https://unpkg.com/@tensorflow/tfjs-core@3.7.0/dist/tf-core.js"></script>
+    <script src="https://unpkg.com/@tensorflow/tfjs-converter@3.7.0/dist/tf-converter.js"></script>
+    <script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@3.7.0/dist/tf-backend-webgl.js"></script>
+    <script src="https://unpkg.com/@tensorflow-models/handpose@0.0.7/dist/handpose.js"></script>
+</head>
+<body>
+    <div id="loading-screen">
+        <h1>✨ ARCANE BREAKER</h1>
+        <p id="loading-status">Loading spell components...</p>
+        <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+    </div>
+
+    <video id="webcam" playsinline muted></video>
+    <canvas id="gameCanvas"></canvas>
+
+    <script src="game.js"></script>
+</body>
+</html>
