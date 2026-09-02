@@ -9,8 +9,9 @@ const server = http.createServer((req, res) => {
     const filePath = path.join(__dirname, url);
 
     // Handle app directories
-    if (url.startsWith('/princess-paint/') || url.startsWith('/castle-wars/') || 
-        url.startsWith('/robo-punch/') || url.startsWith('/knife-duel/')) {
+    if (url.startsWith('/princess-paint/') || url.startsWith('/castle-wars/') ||
+        url.startsWith('/robo-punch/') || url.startsWith('/knife-duel/') ||
+        url.startsWith('/sticky-bubbles/')) {
         const appPath = path.join(__dirname, url);
         fs.readFile(appPath, (err, content) => {
             if (err) {

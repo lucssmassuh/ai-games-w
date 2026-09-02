@@ -1,5 +1,15 @@
 {
   "projects": {
-    "default": "aigames-f7992"
-  }
+    "default": "aigames-delete-iy3p"
+  },
+  "targets": {
+    "aigames-f7992": {
+      "hosting": {
+        "emiguada": [
+          "emiguada"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

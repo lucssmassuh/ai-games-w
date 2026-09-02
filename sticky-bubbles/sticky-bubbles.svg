@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#1a0035"/>
+      <stop offset="100%" stop-color="#040010"/>
+    </radialGradient>
+    <!-- bubble gradients -->
+    <radialGradient id="b0" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="hsl(280,70%,88%)"/>
+      <stop offset="55%" stop-color="hsl(280,85%,55%)"/>
+      <stop offset="100%" stop-color="hsl(280,80%,25%)"/>
+    </radialGradient>
+    <radialGradient id="b1" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="hsl(200,70%,88%)"/>
+      <stop offset="55%" stop-color="hsl(200,85%,55%)"/>
+      <stop offset="100%" stop-color="hsl(200,80%,25%)"/>
+    </radialGradient>
+    <radialGradient id="b2" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="hsl(130,70%,88%)"/>
+      <stop offset="55%" stop-color="hsl(130,85%,55%)"/>
+      <stop offset="100%" stop-color="hsl(130,80%,25%)"/>
+    </radialGradient>
+    <radialGradient id="b3" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="hsl(50,70%,88%)"/>
+      <stop offset="55%" stop-color="hsl(50,85%,55%)"/>
+      <stop offset="100%" stop-color="hsl(50,80%,25%)"/>
+    </radialGradient>
+    <radialGradient id="b4" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="hsl(10,70%,88%)"/>
+      <stop offset="55%" stop-color="hsl(10,85%,55%)"/>
+      <stop offset="100%" stop-color="hsl(10,80%,25%)"/>
+    </radialGradient>
+    <radialGradient id="b5" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="hsl(330,70%,88%)"/>
+      <stop offset="55%" stop-color="hsl(330,85%,55%)"/>
+      <stop offset="100%" stop-color="hsl(330,80%,25%)"/>
+    </radialGradient>
+    <filter id="glow0"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glow1"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+
+  <!-- background -->
+  <rect width="800" height="600" fill="url(#bg)"/>
+
+  <!-- Row 0 (even) -->
+  <circle cx="52"  cy="70" r="24" fill="url(#b0)" filter="url(#glow0)"/>
+  <circle cx="104" cy="70" r="24" fill="url(#b2)" filter="url(#glow0)"/>
+  <circle cx="156" cy="70" r="24" fill="url(#b4)" filter="url(#glow0)"/>
+  <circle cx="208" cy="70" r="24" fill="url(#b1)" filter="url(#glow0)"/>
+  <circle cx="260" cy="70" r="24" fill="url(#b3)" filter="url(#glow0)"/>
+  <circle cx="312" cy="70" r="24" fill="url(#b5)" filter="url(#glow0)"/>
+  <circle cx="364" cy="70" r="24" fill="url(#b0)" filter="url(#glow0)"/>
+  <circle cx="416" cy="70" r="24" fill="url(#b2)" filter="url(#glow0)"/>
+  <circle cx="468" cy="70" r="24" fill="url(#b4)" filter="url(#glow0)"/>
+  <circle cx="520" cy="70" r="24" fill="url(#b1)" filter="url(#glow0)"/>
+  <circle cx="572" cy="70" r="24" fill="url(#b3)" filter="url(#glow0)"/>
+  <circle cx="624" cy="70" r="24" fill="url(#b5)" filter="url(#glow0)"/>
+  <circle cx="676" cy="70" r="24" fill="url(#b0)" filter="url(#glow0)"/>
+
+  <!-- Row 1 (odd, offset +26) -->
+  <circle cx="78"  cy="115" r="24" fill="url(#b3)" filter="url(#glow0)"/>
+  <circle cx="130" cy="115" r="24" fill="url(#b5)" filter="url(#glow0)"/>
+  <circle cx="182" cy="115" r="24" fill="url(#b0)" filter="url(#glow0)"/>
+  <circle cx="234" cy="115" r="24" fill="url(#b2)" filter="url(#glow0)"/>
+  <circle cx="286" cy="115" r="24" fill="url(#b4)" filter="url(#glow0)"/>
+  <circle cx="338" cy="115" r="24" fill="url(#b1)" filter="url(#glow0)"/>
+  <circle cx="390" cy="115" r="24" fill="url(#b3)" filter="url(#glow0)"/>
+  <circle cx="442" cy="115" r="24" fill="url(#b5)" filter="url(#glow0)"/>
+  <circle cx="494" cy="115" r="24" fill="url(#b0)" filter="url(#glow0)"/>
+  <circle cx="546" cy="115" r="24" fill="url(#b2)" filter="url(#glow0)"/>
+  <circle cx="598" cy="115" r="24" fill="url(#b4)" filter="url(#glow0)"/>
+  <circle cx="650" cy="115" r="24" fill="url(#b1)" filter="url(#glow0)"/>
+
+  <!-- Row 2 (even) -->
+  <circle cx="52"  cy="160" r="24" fill="url(#b5)" filter="url(#glow0)"/>
+  <circle cx="104" cy="160" r="24" fill="url(#b1)" filter="url(#glow0)"/>
+  <circle cx="156" cy="160" r="24" fill="url(#b3)" filter="url(#glow0)"/>
+  <circle cx="208" cy="160" r="24" fill="url(#b0)" filter="url(#glow0)"/>
+  <circle cx="260" cy="160" r="24" fill="url(#b2)" filter="url(#glow0)"/>
+  <circle cx="312" cy="160" r="24" fill="url(#b4)" filter="url(#glow0)"/>
+  <circle cx="364" cy="160" r="24" fill="url(#b1)" filter="url(#glow0)"/>
+  <circle cx="416" cy="160" r="24" fill="url(#b5)" filter="url(#glow0)"/>
+  <circle cx="468" cy="160" r="24" fill="url(#b3)" filter="url(#glow0)"/>
+  <circle cx="520" cy="160" r="24" fill="url(#b0)" filter="url(#glow0)"/>
+  <circle cx="572" cy="160" r="24" fill="url(#b2)" filter="url(#glow0)"/>
+  <circle cx="624" cy="160" r="24" fill="url(#b4)" filter="url(#glow0)"/>
+  <circle cx="676" cy="160" r="24" fill="url(#b5)" filter="url(#glow0)"/>
+
+  <!-- Row 3 (odd) -->
+  <circle cx="78"  cy="205" r="24" fill="url(#b2)" filter="url(#glow0)"/>
+  <circle cx="130" cy="205" r="24" fill="url(#b4)" filter="url(#glow0)"/>
+  <circle cx="182" cy="205" r="24" fill="url(#b5)" filter="url(#glow0)"/>
+  <circle cx="234" cy="205" r="24" fill="url(#b3)" filter="url(#glow0)"/>
+  <circle cx="286" cy="205" r="24" fill="url(#b0)" filter="url(#glow0)"/>
+  <circle cx="338" cy="205" r="24" fill="url(#b1)" filter="url(#glow0)"/>
+  <circle cx="390" cy="205" r="24" fill="url(#b2)" filter="url(#glow0)"/>
+  <circle cx="442" cy="205" r="24" fill="url(#b4)" filter="url(#glow0)"/>
+  <circle cx="494" cy="205" r="24" fill="url(#b3)" filter="url(#glow0)"/>
+  <circle cx="546" cy="205" r="24" fill="url(#b5)" filter="url(#glow0)"/>
+  <circle cx="598" cy="205" r="24" fill="url(#b0)" filter="url(#glow0)"/>
+  <circle cx="650" cy="205" r="24" fill="url(#b1)" filter="url(#glow0)"/>
+
+  <!-- partial rows fading out -->
+  <circle cx="52"  cy="250" r="24" fill="url(#b1)" opacity="0.7" filter="url(#glow1)"/>
+  <circle cx="104" cy="250" r="24" fill="url(#b3)" opacity="0.7" filter="url(#glow1)"/>
+  <circle cx="208" cy="250" r="24" fill="url(#b5)" opacity="0.7" filter="url(#glow1)"/>
+  <circle cx="312" cy="250" r="24" fill="url(#b0)" opacity="0.7" filter="url(#glow1)"/>
+  <circle cx="416" cy="250" r="24" fill="url(#b2)" opacity="0.7" filter="url(#glow1)"/>
+  <circle cx="572" cy="250" r="24" fill="url(#b4)" opacity="0.7" filter="url(#glow1)"/>
+  <circle cx="676" cy="250" r="24" fill="url(#b3)" opacity="0.7" filter="url(#glow1)"/>
+
+  <!-- shine dots on bubbles (top rows) -->
+  <ellipse cx="44"  cy="62" rx="8" ry="5" fill="rgba(255,255,255,0.55)" transform="rotate(-25,44,62)"/>
+  <ellipse cx="96"  cy="62" rx="8" ry="5" fill="rgba(255,255,255,0.55)" transform="rotate(-25,96,62)"/>
+  <ellipse cx="148" cy="62" rx="8" ry="5" fill="rgba(255,255,255,0.55)" transform="rotate(-25,148,62)"/>
+  <ellipse cx="200" cy="62" rx="8" ry="5" fill="rgba(255,255,255,0.55)" transform="rotate(-25,200,62)"/>
+  <ellipse cx="252" cy="62" rx="8" ry="5" fill="rgba(255,255,255,0.55)" transform="rotate(-25,252,62)"/>
+
+  <!-- shooter at bottom -->
+  <radialGradient id="shooter" cx="50%" cy="40%" r="60%">
+    <stop offset="0%" stop-color="#cc44ff"/>
+    <stop offset="100%" stop-color="#330066"/>
+  </radialGradient>
+  <circle cx="400" cy="545" r="26" fill="url(#shooter)" filter="url(#glow0)"/>
+  <!-- bubble in shooter -->
+  <circle cx="400" cy="515" r="22" fill="url(#b0)" filter="url(#glow0)"/>
+  <ellipse cx="392" cy="507" rx="7" ry="4.5" fill="rgba(255,255,255,0.6)" transform="rotate(-25,392,507)"/>
+
+  <!-- aim dashes -->
+  <line x1="400" y1="510" x2="400" y2="290" stroke="rgba(200,140,255,0.3)" stroke-width="2" stroke-dasharray="8 12"/>
+
+  <!-- title -->
+  <text x="400" y="430" text-anchor="middle" font-family="Times New Roman, serif" font-size="54" font-weight="bold" fill="#cc88ff" opacity="0.95" filter="url(#glow0)">🫧 STICKY BUBBLES</text>
+
+  <!-- bottom overlay fade -->
+  <rect x="0" y="460" width="800" height="140" fill="url(#bg)" opacity="0.6"/>
+</svg>
