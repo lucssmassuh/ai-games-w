@@ -70,3 +70,6 @@ node_modules/
 
 # Multi-agent system
 .subtask-*.marker
+
+# macOS
+.DS_Store
