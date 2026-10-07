@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<level width="8000" height="1200">	
+		<entity x="100" y="100" type="platform1"/>
+		<entity x="550" y="100" type="platform1"/>
+		<entity x="1000" y="100" type="platform1"/>
+		<entity x="1450" y="100" type="platform1"/>
+		<entity x="1900" y="100" type="platform1"/>
+		<entity x="2350" y="100" type="platform1"/>
+		<entity x="2800" y="150" type="platform2"/>
+		<entity x="3250" y="100" type="platform1"/>
+		<entity x="3700" y="100" type="platform1"/>
+		<entity x="4150" y="100" type="platform1"/>
+		<entity x="4600" y="100" type="platform1"/>
+		<entity x="5050" y="100" type="platform1"/>
+		<entity x="5500" y="100" type="platform1"/>
+		<entity x="5950" y="150" type="platform4"/>
+
+<entity x="270" y="400" type="coin"/>
+<entity x="290" y="410" type="coin"/>
+<entity x="310" y="420" type="coin"/>
+<entity x="330" y="410" type="coin"/>
+<entity x="350" y="400" type="coin"/>
+<entity x="720" y="400" type="coin"/>
+<entity x="740" y="410" type="coin"/>
+<entity x="760" y="420" type="coin"/>
+<entity x="780" y="410" type="coin"/>
+<entity x="800" y="400" type="coin"/>
+<entity x="1170" y="400" type="coin"/>
+<entity x="1190" y="410" type="coin"/>
+<entity x="1210" y="420" type="coin"/>
+<entity x="1230" y="410" type="coin"/>
+<entity x="1250" y="400" type="coin"/>
+<entity x="1620" y="400" type="coin"/>
+<entity x="1640" y="410" type="coin"/>
+<entity x="1660" y="420" type="coin"/>
+<entity x="1680" y="410" type="coin"/>
+<entity x="1700" y="400" type="coin"/>
+<entity x="2070" y="400" type="coin"/>
+<entity x="2090" y="410" type="coin"/>
+<entity x="2110" y="420" type="coin"/>
+<entity x="2130" y="410" type="coin"/>
+<entity x="2150" y="400" type="coin"/>
+<entity x="2520" y="400" type="coin"/>
+<entity x="2540" y="410" type="coin"/>
+<entity x="2560" y="420" type="coin"/>
+<entity x="2580" y="410" type="coin"/>
+<entity x="2600" y="400" type="coin"/>
+<entity x="3420" y="400" type="coin"/>
+<entity x="3440" y="410" type="coin"/>
+<entity x="3460" y="420" type="coin"/>
+<entity x="3480" y="410" type="coin"/>
+<entity x="3500" y="400" type="coin"/>
+<entity x="3870" y="400" type="coin"/>
+<entity x="3890" y="410" type="coin"/>
+<entity x="3910" y="420" type="coin"/>
+<entity x="3930" y="410" type="coin"/>
+<entity x="3950" y="400" type="coin"/>
+<entity x="4320" y="400" type="coin"/>
+<entity x="4340" y="410" type="coin"/>
+<entity x="4360" y="420" type="coin"/>
+<entity x="4380" y="410" type="coin"/>
+<entity x="4400" y="400" type="coin"/>
+<entity x="4770" y="400" type="coin"/>
+<entity x="4790" y="410" type="coin"/>
+<entity x="4810" y="420" type="coin"/>
+<entity x="4830" y="410" type="coin"/>
+<entity x="4850" y="400" type="coin"/>
+<entity x="5220" y="400" type="coin"/>
+<entity x="5240" y="410" type="coin"/>
+<entity x="5260" y="420" type="coin"/>
+<entity x="5280" y="410" type="coin"/>
+<entity x="5300" y="400" type="coin"/>
+<entity x="5670" y="400" type="coin"/>
+<entity x="5690" y="410" type="coin"/>
+<entity x="5710" y="420" type="coin"/>
+<entity x="5730" y="410" type="coin"/>
+<entity x="5750" y="400" type="coin"/>
+
+	<entity x="2620"   y="520" type="bomb"/>
+	<entity x="2620"   y="520" type="boss"/>
+	<entity x="6000"   y="520" type="boss2"/>
+
+		<entity x="2900" y="700" type="platform3"/>
+		<entity x="2800" y="700" type="platform3"/>	
+		<entity x="2700" y="700" type="platform3"/>
+		<entity x="2750" y="700" type="platform3"/>
+		<entity x="2850" y="700" type="platform3"/>	
+		<entity x="2790" y="700" type="platform3"/>
+
+		<entity x="6000" y="700" type="platform32"/>
+		<entity x="5900" y="700" type="platform32"/>	
+		<entity x="5800" y="700" type="platform32"/>
+		<entity x="5850" y="700" type="platform32"/>
+		<entity x="5950" y="700" type="platform32"/>	
+		<entity x="5890" y="700" type="platform32"/>
+
+		
+		<entity x="6300" y="200" type="levelComplete"/>
+		<entity x="60"   y="360" type="player"/>
+	
+</level>
