@@ -1,0 +1,51 @@
+{
+  "aliens": {
+    "squid": {
+      "file": "alien-squid.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 2
+    },
+    "crab": {
+      "file": "alien-crab.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 2
+    },
+    "insect": {
+      "file": "alien-insect.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 2
+    }
+  },
+  "player": {
+    "file": "player.png",
+    "width": 32,
+    "height": 32
+  },
+  "powerups": {
+    "fast": {
+      "file": "powerup-fast.png",
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frames": 8
+    },
+    "double": {
+      "file": "powerup-double.png",
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frames": 8
+    },
+    "piercing": {
+      "file": "powerup-piercing.png",
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frames": 8
+    }
+  },
+  "animation": {
+    "alienFps": 4,
+    "powerupFps": 10
+  }
+}

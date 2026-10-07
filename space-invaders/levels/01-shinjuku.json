@@ -1,0 +1,43 @@
+{
+  "id": 1,
+  "name": "SHINJUKU",
+  "subtitle": "First contact",
+  "hint": "The skyline is quiet. Keep it that way.",
+  "color": "#45f5e5",
+  "formation": {
+    "columns": 8,
+    "rows": [
+      "squid",
+      "crab",
+      "insect"
+    ],
+    "spacingX": 60,
+    "spacingY": 48,
+    "startY": 474
+  },
+  "movement": {
+    "speed": 25,
+    "descent": 18,
+    "acceleration": 1.5
+  },
+  "enemyFire": {
+    "interval": 1.5,
+    "bulletSpeed": 180,
+    "maxBullets": 3
+  },
+  "scores": {
+    "squid": 30,
+    "crab": 20,
+    "insect": 10,
+    "clearBonus": 250
+  },
+  "powerups": {
+    "dropChance": 0.16,
+    "duration": 10,
+    "types": [
+      "fast",
+      "double",
+      "piercing"
+    ]
+  }
+}

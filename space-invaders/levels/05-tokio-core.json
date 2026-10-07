@@ -1,0 +1,45 @@
+{
+  "id": 5,
+  "name": "TOKIO CORE",
+  "subtitle": "Last light",
+  "hint": "One final wave between the city and the dark.",
+  "color": "#ff4caa",
+  "formation": {
+    "columns": 11,
+    "rows": [
+      "squid",
+      "squid",
+      "crab",
+      "insect",
+      "insect"
+    ],
+    "spacingX": 60,
+    "spacingY": 48,
+    "startY": 474
+  },
+  "movement": {
+    "speed": 56,
+    "descent": 22,
+    "acceleration": 1.5
+  },
+  "enemyFire": {
+    "interval": 0.78,
+    "bulletSpeed": 270,
+    "maxBullets": 7
+  },
+  "scores": {
+    "squid": 30,
+    "crab": 20,
+    "insect": 10,
+    "clearBonus": 1250
+  },
+  "powerups": {
+    "dropChance": 0.16,
+    "duration": 10,
+    "types": [
+      "fast",
+      "double",
+      "piercing"
+    ]
+  }
+}

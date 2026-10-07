@@ -1,0 +1,45 @@
+{
+  "id": 4,
+  "name": "GINZA",
+  "subtitle": "Midnight offensive",
+  "hint": "Watch the lowest row. The city is counting on you.",
+  "color": "#ffd071",
+  "formation": {
+    "columns": 10,
+    "rows": [
+      "squid",
+      "crab",
+      "crab",
+      "insect",
+      "insect"
+    ],
+    "spacingX": 60,
+    "spacingY": 48,
+    "startY": 474
+  },
+  "movement": {
+    "speed": 48,
+    "descent": 21,
+    "acceleration": 1.5
+  },
+  "enemyFire": {
+    "interval": 0.9,
+    "bulletSpeed": 250,
+    "maxBullets": 6
+  },
+  "scores": {
+    "squid": 30,
+    "crab": 20,
+    "insect": 10,
+    "clearBonus": 1000
+  },
+  "powerups": {
+    "dropChance": 0.16,
+    "duration": 10,
+    "types": [
+      "fast",
+      "double",
+      "piercing"
+    ]
+  }
+}

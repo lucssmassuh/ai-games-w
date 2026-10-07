@@ -1,0 +1,44 @@
+{
+  "id": 2,
+  "name": "SHIBUYA",
+  "subtitle": "Crossfire crossing",
+  "hint": "More invaders. Less room for hesitation.",
+  "color": "#ff4caa",
+  "formation": {
+    "columns": 9,
+    "rows": [
+      "squid",
+      "crab",
+      "crab",
+      "insect"
+    ],
+    "spacingX": 60,
+    "spacingY": 48,
+    "startY": 474
+  },
+  "movement": {
+    "speed": 32,
+    "descent": 19,
+    "acceleration": 1.5
+  },
+  "enemyFire": {
+    "interval": 1.25,
+    "bulletSpeed": 205,
+    "maxBullets": 4
+  },
+  "scores": {
+    "squid": 30,
+    "crab": 20,
+    "insect": 10,
+    "clearBonus": 500
+  },
+  "powerups": {
+    "dropChance": 0.16,
+    "duration": 10,
+    "types": [
+      "fast",
+      "double",
+      "piercing"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "debugMode": 1,
+  "showFPS": false,
+  "frameRate": 60,
+  "id": "gameCanvas",
+  "renderMode": 1,
+  "engineDir": "vendor/cocos2d",
+  "modules": ["core", "shape-nodes"],
+  "jsList": ["src/cocos-game.js"]
+}
