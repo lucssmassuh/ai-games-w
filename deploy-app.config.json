@@ -1,0 +1,35 @@
+{
+  "appName": "aigames-delete",
+  "shape": "C",
+  "firebase": {
+    "projectId": "aigames-delete-iy3p"
+  },
+  "hosting": {
+    "publicDir": "public",
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "function": "api"
+      }
+    ]
+  },
+  "auth": {
+    "providers": [
+      "google"
+    ],
+    "scaffoldMode": "auto"
+  },
+  "firestore": {
+    "rulesFile": "firestore.rules"
+  },
+  "functions": {
+    "dir": "functions",
+    "region": "europe-west3",
+    "secrets": []
+  },
+  "secrets": null,
+  "build": {
+    "command": "npm run build",
+    "outputDir": "public"
+  }
+}
