@@ -169,13 +169,22 @@ function showPhotoNotice(message) {
     photoNoticeTimer = setTimeout(() => { notification.style.display = 'none'; }, 5000);
 }
 
-// Rasterize the current SVG, including painted fills, into a shareable PNG.
+// Rasterize the current SVG, including painted fills, into a shareable PNG tab.
 async function captureScreenshot() {
     const button = document.getElementById('photo-button');
     const svg = drawing.querySelector('svg');
     if (!svg || button.disabled) return;
+    // Open during the click, before awaiting image conversion, to avoid popup blocking.
+    const photoTab = window.open('about:blank', '_blank');
+    if (!photoTab) {
+        showPhotoNotice('Please allow new tabs for this site, then tap Photo again.');
+        return;
+    }
+    photoTab.opener = null;
+    photoTab.document.title = 'Your Princess Paint Photo';
+    photoTab.document.body.textContent = 'Preparing your photo…';
     button.disabled = true;
-    button.textContent = '📷 Saving…';
+    button.textContent = '📷 Preparing…';
     let sourceUrl;
     try {
         const copy = svg.cloneNode(true);
@@ -206,18 +215,21 @@ async function captureScreenshot() {
         const blob = await new Promise((resolve, reject) => canvas.toBlob(
             result => result ? resolve(result) : reject(new Error('Could not save photo')), 'image/png'
         ));
-        const downloadUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = `princess-paint-${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
-        link.href = downloadUrl;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(downloadUrl), 60000);
-        showPhotoNotice('Your photo download has started! Share the PNG from your downloads.');
+        if (photoTab.closed) return;
+        const photoUrl = URL.createObjectURL(blob);
+        photoTab.location.replace(photoUrl);
+        // Keep the image available for saving until its tab is closed.
+        const cleanup = setInterval(() => {
+            if (photoTab.closed) {
+                URL.revokeObjectURL(photoUrl);
+                clearInterval(cleanup);
+            }
+        }, 10000);
+        showPhotoNotice('Your photo is open in a new tab. Save or share the image from there.');
     } catch (error) {
         console.error(error);
-        showPhotoNotice('Could not save your photo. Please try again.');
+        if (!photoTab.closed) photoTab.close();
+        showPhotoNotice('Could not open your photo. Please try again.');
     } finally {
         if (sourceUrl) URL.revokeObjectURL(sourceUrl);
         button.disabled = false;
