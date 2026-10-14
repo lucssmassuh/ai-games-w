@@ -28,7 +28,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M2RSGV28"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-    <h1>Princess Paint</h1>
+    <header class="paint-header">
+        <h1>Princess Paint</h1>
+        <button id="photo-button" type="button" disabled>📷 Photo</button>
+    </header>
     <div class="container">
         <!-- Gallery -->
         <div class="gallery">
@@ -56,12 +59,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
     </div>
 
-    <!-- Add html2canvas library for screenshot functionality -->
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="app.js"></script>
     <!-- Notification element for screenshot feedback -->
-    <div id="screenshot-notification" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 5px; z-index: 1000;">
-        Screenshot saved to your downloads!
+    <div id="screenshot-notification" role="status" aria-live="polite" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 5px; z-index: 1000;">
+        Your photo download has started.
     </div>
 </body>
 </html>

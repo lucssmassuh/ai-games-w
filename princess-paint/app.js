@@ -84,82 +84,45 @@ function loadColors() {
         const button = document.createElement('button');
         button.className = 'color-button';
         button.style.backgroundColor = color;
-        button.onclick = () => selectColor(color);
+        button.onclick = (event) => selectColor(color, event.currentTarget);
         colorGrid.appendChild(button);
     });
 }
 
 // Load a painting
-function loadPainting(filename) {
-    fetch('drawings/' + filename)
-        .then(response => response.text())
-        .then(data => {
-            const emptyState = drawing.querySelector('.empty-state');
-            if (emptyState) {
-                emptyState.style.display = 'none';
-            }
-            
-            // Clear the drawing area
-            drawing.innerHTML = '';
-            
-            // Create a new SVG element
-            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.innerHTML = data;
-            
-            // Get the drawing container dimensions
-            const container = drawing.parentElement;
-            const containerWidth = container.clientWidth;
-            const containerHeight = container.clientHeight;
-            
-            // Calculate the SVG's bounding box
-            const bbox = svg.getBBox();
-            const svgWidth = bbox.width;
-            const svgHeight = bbox.height;
-            
-            // Calculate scaling factors to fit SVG while maintaining aspect ratio
-            const scaleX = containerWidth / svgWidth;
-            const scaleY = containerHeight / svgHeight;
-            const scale = Math.min(scaleX, scaleY) * 0.95; // 95% to add some padding
-            
-            // Calculate translation to center the SVG
-            const translateX = (containerWidth - svgWidth * scale) / 2;
-            const translateY = (containerHeight - svgHeight * scale) / 2;
-            
-            // Create a group element to apply transformations
-            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            g.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
-            
-            // Move all SVG content into the group
-            while (svg.firstChild) {
-                g.appendChild(svg.firstChild);
-            }
-            
-            // Set SVG dimensions to match container
-            svg.setAttribute('width', containerWidth);
-            svg.setAttribute('height', containerHeight);
-            
-            // Append the group to the SVG
-            svg.appendChild(g);
-            
-            // Append the SVG to the drawing area
-            drawing.appendChild(svg);
-            
-            // Wait for the SVG to be fully loaded
-            setTimeout(() => {
-                setupEventListeners();
-            }, 100);
-        });
+async function loadPainting(filename) {
+    const button = document.getElementById('photo-button');
+    button.disabled = true;
+    try {
+        const response = await fetch('drawings/' + filename);
+        if (!response.ok) throw new Error('Could not load drawing');
+        const xml = new DOMParser().parseFromString(await response.text(), 'image/svg+xml');
+        if (xml.querySelector('parsererror') || xml.documentElement.localName !== 'svg') {
+            throw new Error('Invalid SVG drawing');
+        }
+        const svg = document.importNode(xml.documentElement, true);
+        if (!svg.hasAttribute('viewBox')) {
+            const width = parseFloat(svg.getAttribute('width')) || 800;
+            const height = parseFloat(svg.getAttribute('height')) || 600;
+            svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        }
+        drawing.replaceChildren(svg);
+        setupEventListeners();
+        button.disabled = false;
+    } catch (error) {
+        console.error(error);
+        showPhotoNotice('Could not load the drawing. Please choose one again.');
+    }
 }
 
 // Select a color
-function selectColor(color) {
+function selectColor(color, button) {
     console.log('Color selected:', color);
     currentColor = color;
     const buttons = document.querySelectorAll('.color-button');
     buttons.forEach(button => {
         button.classList.remove('selected');
     });
-    const button = event.currentTarget;
     button.classList.add('selected');
 }
 
@@ -222,31 +185,69 @@ function handleMouseMove(e) {
 
 
 
-// Function to capture and download the canvas as an image
-function captureScreenshot() {
-    const canvasArea = document.querySelector('.canvas-area');
-    
-    html2canvas(canvasArea, {
-        backgroundColor: null, // Keep transparent background
-        scale: 2, // Higher scale for better quality
-        logging: false,
-        useCORS: true
-    }).then(canvas => {
-        // Create a download link
+let photoNoticeTimer;
+function showPhotoNotice(message) {
+    const notification = document.getElementById('screenshot-notification');
+    notification.textContent = message;
+    notification.style.display = 'block';
+    clearTimeout(photoNoticeTimer);
+    photoNoticeTimer = setTimeout(() => { notification.style.display = 'none'; }, 5000);
+}
+
+// Rasterize the current SVG, including painted fills, into a shareable PNG.
+async function captureScreenshot() {
+    const button = document.getElementById('photo-button');
+    const svg = drawing.querySelector('svg');
+    if (!svg || button.disabled) return;
+    button.disabled = true;
+    button.textContent = '📷 Saving…';
+    let sourceUrl;
+    try {
+        const copy = svg.cloneNode(true);
+        const viewBox = svg.viewBox.baseVal;
+        const ratio = viewBox.width / viewBox.height;
+        // Export at a consistent resolution independent of screen size.
+        const width = ratio >= 1 ? 1600 : Math.round(1600 * ratio);
+        const height = ratio >= 1 ? Math.round(1600 / ratio) : 1600;
+        copy.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        copy.setAttribute('width', width);
+        copy.setAttribute('height', height);
+        sourceUrl = URL.createObjectURL(new Blob(
+            [new XMLSerializer().serializeToString(copy)], { type: 'image/svg+xml;charset=utf-8' }
+        ));
+        const image = new Image();
+        await new Promise((resolve, reject) => {
+            image.onload = resolve;
+            image.onerror = () => reject(new Error('Could not create photo'));
+            image.src = sourceUrl;
+        });
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(image, 0, 0, width, height);
+        const blob = await new Promise((resolve, reject) => canvas.toBlob(
+            result => result ? resolve(result) : reject(new Error('Could not save photo')), 'image/png'
+        ));
+        const downloadUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.download = `princess-paint-${new Date().toISOString().slice(0, 10)}.png`;
-        link.href = canvas.toDataURL('image/png');
+        link.download = `princess-paint-${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
+        link.href = downloadUrl;
+        document.body.appendChild(link);
         link.click();
-        
-        // Show notification
-        const notification = document.getElementById('screenshot-notification');
-        notification.style.display = 'block';
-        
-        // Hide notification after 3 seconds
-        setTimeout(() => {
-            notification.style.display = 'none';
-        }, 3000);
-    });
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(downloadUrl), 60000);
+        showPhotoNotice('Your photo download has started! Share the PNG from your downloads.');
+    } catch (error) {
+        console.error(error);
+        showPhotoNotice('Could not save your photo. Please try again.');
+    } finally {
+        if (sourceUrl) URL.revokeObjectURL(sourceUrl);
+        button.disabled = false;
+        button.textContent = '📷 Photo';
+    }
 }
 
 // Initialize the app
@@ -256,14 +257,15 @@ async function init() {
     loadColors();
     
     // Create a new drawing by default
-    createNewDrawing();
+    await loadPainting('girl-svgrepo-com(1).svg');
+    document.getElementById('photo-button').addEventListener('click', captureScreenshot);
     
     // Add mouse move event listener to the canvas area
     drawing.addEventListener('mousemove', handleMouseMove);
     
     // Add keyboard event listener for screenshots
     document.addEventListener('keydown', (event) => {
-        if (event.code === 'Space') {
+        if (event.code === 'Space' && event.target === document.body && !event.repeat) {
             event.preventDefault(); // Prevent spacebar from scrolling the page
             captureScreenshot();
         }
