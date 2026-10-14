@@ -2,8 +2,6 @@
 let currentColor = '#FF0000'; // Default to red
 let drawing = null;
 let selectedElement = null;
-let cursorFill = null;
-let cursorColorIndicator = null;
 
 // Function to load paintings from drawings folder
 async function loadPaintings() {
@@ -119,6 +117,7 @@ async function loadPainting(filename) {
 function selectColor(color, button) {
     console.log('Color selected:', color);
     currentColor = color;
+    updateBrushCursor();
     const buttons = document.querySelectorAll('.color-button');
     buttons.forEach(button => {
         button.classList.remove('selected');
@@ -149,41 +148,17 @@ function setupEventListeners() {
     });
 }
 
-// Function to create and update the fill cursor
-function updateFillCursor(x, y) {
-    // Update the fill cursor
-    if (!cursorFill) {
-        cursorFill = document.createElement('div');
-        cursorFill.className = 'cursor-fill';
-        document.body.appendChild(cursorFill);
-    }
-    cursorFill.style.backgroundColor = currentColor;
-    cursorFill.style.left = x + 'px';
-    cursorFill.style.top = y + 'px';
-
-    // Update the color indicator
-    if (!cursorColorIndicator) {
-        cursorColorIndicator = document.createElement('div');
-        cursorColorIndicator.className = 'cursor-color-indicator';
-        document.body.appendChild(cursorColorIndicator);
-    }
-    cursorColorIndicator.style.backgroundColor = currentColor;
-    cursorColorIndicator.style.left = (x + 20) + 'px'; // Offset to the right
-    cursorColorIndicator.style.top = (y - 20) + 'px';  // Offset up
+// A native cursor keeps the paint tip at the actual click position, even
+// while scrolling, without floating elements or coordinate offsets.
+function updateBrushCursor() {
+    const brush = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+        <path d="M13 18 25 3Q28 0 30 3Q32 5 29 8L17 21Z" fill="#92552c" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+        <path d="m11 19 4-5 6 5-5 4Z" fill="#dae2ee" stroke="#25314b" stroke-width="1.2"/>
+        <path d="M13 20Q5 19 4 26L2 29Q10 31 15 25L16 23Z" fill="${currentColor}" stroke="#25314b" stroke-width="1.2" stroke-linejoin="round"/>
+        <path d="m6 25 4-2" stroke="#fff" stroke-opacity=".7" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>`;
+    drawing.style.cursor = `url("data:image/svg+xml,${encodeURIComponent(brush)}") 2 29, crosshair`;
 }
-
-// Handle mouse movement in the canvas area
-function handleMouseMove(e) {
-    const rect = drawing.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
-        updateFillCursor(e.clientX, e.clientY);
-    }
-}
-
-
 
 let photoNoticeTimer;
 function showPhotoNotice(message) {
@@ -260,8 +235,7 @@ async function init() {
     await loadPainting('girl-svgrepo-com(1).svg');
     document.getElementById('photo-button').addEventListener('click', captureScreenshot);
     
-    // Add mouse move event listener to the canvas area
-    drawing.addEventListener('mousemove', handleMouseMove);
+    updateBrushCursor();
     
     // Add keyboard event listener for screenshots
     document.addEventListener('keydown', (event) => {

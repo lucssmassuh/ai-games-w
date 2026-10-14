@@ -20,10 +20,12 @@ body {
 }
 
 .canvas-area {
+    position: relative;
     flex: 4;
     background: white;
     border-radius: 8px;
-    padding: 20px;
+    padding: 20px 20px 84px;
+    min-width: 0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     min-height: 500px;
     display: flex;
@@ -132,30 +134,6 @@ body {
 
 
 
-.cursor-fill {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 1000;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    opacity: 0.8;
-}
-
-.cursor-color-indicator {
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 1000;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    border: 2px solid white;
-    opacity: 0.9;
-    mix-blend-mode: difference;
-}
-
 .paint-header {
     display: flex;
     align-items: center;
@@ -165,6 +143,9 @@ body {
     padding: 0 20px;
 }
 #photo-button {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
     background: #863da6;
     color: white;
     border: none;
