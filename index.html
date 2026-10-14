@@ -21,6 +21,8 @@
         }
 
         .app-card {
+            display: flex;
+            flex-direction: column;
             background: white;
             border-radius: 8px;
             padding: 20px;
@@ -50,7 +52,11 @@
         }
 
         .launch-button {
-            display: inline-block;
+            margin-top: auto;
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
             padding: 10px 20px;
             background-color: #4CAF50;
             color: white;
@@ -101,7 +107,7 @@
             {
                 name: "Robo Punch",
                 description: "Fight your way through robot arenas with powerful punches",
-                icon: "robo-punch/robo-punch.webp",
+                icon: "robo-punch/robo-punch.png",
                 path: "robo-punch"
             },
             {
@@ -138,7 +144,7 @@
                 <img src="${app.icon}" alt="${app.name}" class="app-icon">
                 <h2 class="app-title">${app.name}</h2>
                 <p class="app-description">${app.description}</p>
-                <a href="${app.path}/index.html" class="launch-button">Launch App</a>
+                <a href="${app.path}/index.html" class="launch-button">PLAY</a>
             `;
 
             return card;
