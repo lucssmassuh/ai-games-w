@@ -6,9 +6,7 @@ import { MenuScene } from './scenes/menu.js';
 import { GameScene } from './scenes/game.js';
 
 const MANIFEST = {
-  splash: 'assets/gfx/splash.png',
-  menuBackground: 'assets/gfx/menu/menu_background2.png',
-  play: 'assets/gfx/menu/play.png',
+  poster: 'assets/gfx/mikael-tax-on-poster.png',
   calendar: 'assets/gfx/game/calendar.png',
   aguinaldo: 'assets/gfx/game/aguinaldo.png',
   bill: 'assets/gfx/game/bill.png',
@@ -34,6 +32,7 @@ class Game {
   }
 
   goToGame() {
+    this.ctx.canvas.setAttribute('aria-label', 'Mikael Tax-On. Tap or press Space to jump.');
     this.scene = new GameScene(this, this.level);
   }
 
@@ -54,6 +53,9 @@ async function boot() {
   ]);
 
   const game = new Game(canvas, { images: assets }, level);
+  game.render();
+  document.getElementById('loader').remove();
+  canvas.setAttribute('aria-label', 'Mikael Tax-On. Tap anywhere or press Space or Enter to start.');
 
   // Driven by setInterval rather than requestAnimationFrame: rAF is tied to
   // compositor paint timing, which some embedded/background browser
@@ -72,5 +74,9 @@ async function boot() {
 
 boot().catch((err) => {
   console.error(err);
-  document.body.innerHTML = `<pre style="color:red">${err.stack || err}</pre>`;
+  const loader = document.getElementById('loader');
+  if (loader) {
+    loader.querySelector('.loader-status').textContent = 'Could not load the game. Please refresh to try again.';
+    loader.classList.add('failed');
+  }
 });

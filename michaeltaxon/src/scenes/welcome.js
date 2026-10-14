@@ -1,0 +1,40 @@
+// Shared visual treatment for the loaded splash and ready screen.
+export function drawWelcome(ctx, poster) {
+  const { width, height } = ctx.canvas;
+  ctx.save();
+  ctx.fillStyle = '#07172f';
+  ctx.fillRect(0, 0, width, height);
+  ctx.drawImage(poster, 0, 0, height, height);
+  const shade = ctx.createLinearGradient(350, 0, 490, 0);
+  shade.addColorStop(0, 'rgba(7, 23, 47, 0)');
+  shade.addColorStop(1, '#07172f');
+  ctx.fillStyle = shade;
+  ctx.fillRect(350, 0, width - 350, height);
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#62dded';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.fillText('THE PAYDAY ESCAPE', 482, 86);
+  ctx.font = 'italic 900 46px sans-serif';
+  ctx.fillStyle = '#ffe34b';
+  ctx.fillText('MIKAEL', 478, 145);
+  ctx.fillStyle = '#beff43';
+  ctx.fillText('TAX-ON', 478, 193);
+  ctx.fillStyle = '#c1cede';
+  ctx.font = '17px sans-serif';
+  ctx.fillText('Run through the year.', 482, 236);
+  ctx.fillText('Make every peso count.', 482, 260);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 17px sans-serif';
+  ctx.globalAlpha = 0.8 + Math.sin(performance.now() / 600) * 0.2;
+  ctx.fillText('TAP ANYWHERE TO START', 482, 331);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#8fa6bf';
+  ctx.font = '13px sans-serif';
+  ctx.fillText('or press SPACE / ENTER', 482, 356);
+  ctx.fillStyle = '#263c55';
+  ctx.fillRect(482, 389, 270, 1);
+  ctx.fillStyle = '#8fa6bf';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('Tap to jump. Collect pesos. Dodge taxes.', 482, 416);
+  ctx.restore();
+}

@@ -11,7 +11,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GUADA GAMES</title>
+        <title>Free Family-Friendly Games, No Ads | Emi &amp; Guada Games</title>
+    <meta name="description" content="Discover free, family-friendly games at Emi &amp; Guada Games. Enjoy coloring, arcade adventures, and two-player games in your browser with no ads.">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Emi &amp; Guada Games">
+    <meta property="og:title" content="Free Family-Friendly Games, No Ads | Emi &amp; Guada Games">
+    <meta property="og:description" content="Discover free, family-friendly games at Emi &amp; Guada Games. Enjoy coloring, arcade adventures, and two-player games in your browser with no ads.">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Free Family-Friendly Games, No Ads | Emi &amp; Guada Games">
+    <meta name="twitter:description" content="Discover free, family-friendly games at Emi &amp; Guada Games. Enjoy coloring, arcade adventures, and two-player games in your browser with no ads.">
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "Emi & Guada Games", "description": "Discover free, family-friendly games at Emi & Guada Games. Enjoy coloring, arcade adventures, and two-player games in your browser with no ads.", "isFamilyFriendly": true, "isAccessibleForFree": true, "mainEntity": {"@type": "ItemList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Mikael Tax-On", "url": "/michaeltaxon/index.html"}, {"@type": "ListItem", "position": 2, "name": "Wizards School", "url": "/wizards-school/index.html"}, {"@type": "ListItem", "position": 3, "name": "Princess Paint", "url": "/princess-paint/index.html"}, {"@type": "ListItem", "position": 4, "name": "Castle Wars", "url": "/castle-wars/index.html"}, {"@type": "ListItem", "position": 5, "name": "Robo Punch", "url": "/robo-punch/index.html"}, {"@type": "ListItem", "position": 6, "name": "Orcs Hunter", "url": "/orcs-hunter/index.html"}, {"@type": "ListItem", "position": 7, "name": "Handy Blocks", "url": "/handy-blocks/index.html"}, {"@type": "ListItem", "position": 8, "name": "Tokio Invaders", "url": "/space-invaders/index.html"}, {"@type": "ListItem", "position": 9, "name": "Sticky Bubbles", "url": "/sticky-bubbles/index.html"}, {"@type": "ListItem", "position": 10, "name": "Pong", "url": "/pong/index.html"}]}}</script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,6 +30,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             background-color: #f5f5f5;
         }
 
+        header { max-width: 900px; margin: 0 auto; padding: 20px; text-align: center; }
+        header p { color: #444; line-height: 1.6; }
+        .site-name { font-weight: bold; }
+        .pong-art { display: grid; place-items: center; background: #0f3460; color: white; font-size: 100px; border-radius: 6px; }
+        .app-icon { object-fit: cover; }
         .app-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -83,89 +98,73 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M2RSGV28"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-    <h1>🐼 EMI & 🐨 GUADA GAMES </h1>
-    <div class="app-list" id="appList">
-        <!-- Apps will be dynamically added here -->
-    </div>
-
-    <script>
-        // Sample apps data - replace with your actual apps
-        const apps = [
-            {
-                name: "Mikael Tax-On",
-                description: "Run through the months of the year collecting pesos, jumping over gaps, and dodging bombs as payroll taxes chip away at your paycheck",
-                icon: "michaeltaxon/assets/gfx/mikael-tax-on-poster.png",
-                path: "michaeltaxon"
-            },
-            {
-                name: "Wizards School",
-                description: "Cast magical spells with hand gestures in this enchanting wizarding adventure",
-                icon: "wizards-school/wizards-school-poster.png",
-                path: "wizards-school"
-            },
-            {
-                name: "Princess Paint",
-                description: "Create beautiful artwork with magical princess colors",
-                icon: "princess-paint/princess-paint.webp",
-                path: "princess-paint"
-            },
-            {
-                name: "Castle Wars",
-                description: "Defend your castle against waves of enemies",
-                icon: "castle-wars/castle-wars.webp",
-                path: "castle-wars"
-            },
-            {
-                name: "Robo Punch",
-                description: "Fight your way through robot arenas with powerful punches",
-                icon: "robo-punch/robo-punch.png",
-                path: "robo-punch"
-            },
-            {
-                name: "Orcs Hunter",
-                description: "Become a medieval chevalier and hunt orcs with your bow from the castle walls",
-                icon: "orcs-hunter/orcs-hunter.png",
-                path: "orcs-hunter"
-            },
-            {
-                name: "Handy Blocks",
-                description: "Arkanoid with hand magic — move your hand to control the paddle and break enchanted bricks",
-                icon: "handy-blocks/handy-blocks.png",
-                path: "handy-blocks"
-            },
-            {
-                name: "Tokio Invaders",
-                description: "Defend five neon-lit Tokio districts from alien formations with rapid fire, double shot, and piercing power-ups",
-                icon: "space-invaders/tokio-invaders.png",
-                path: "space-invaders"
-            },
-            {
-                name: "Sticky Bubbles",
-                description: "Aim and shoot bubbles with your hand — match 3 or more to pop them in this enchanted bubble shooter",
-                icon: "sticky-bubbles/sticky-bubbles.png",
-                path: "sticky-bubbles"
-            }
-        ];
-
-        function createAppCard(app) {
-            const card = document.createElement('div');
-            card.className = 'app-card';
-
-            card.innerHTML = `
-                <img src="${app.icon}" alt="${app.name}" class="app-icon">
-                <h2 class="app-title">${app.name}</h2>
-                <p class="app-description">${app.description}</p>
-                <a href="${app.path}/index.html" class="launch-button">PLAY</a>
-            `;
-
-            return card;
-        }
-
-        const appList = document.getElementById('appList');
-        apps.forEach(app => {
-            appList.appendChild(createAppCard(app));
-        });
-    </script>
+    <header>
+        <p class="site-name">🐼 EMI &amp; 🐨 GUADA GAMES</p>
+        <h1>Free family-friendly games. No ads.</h1>
+        <p>Play together, get creative, and enjoy arcade adventures right in your browser. Every game is free to play, with no ads interrupting the fun.</p>
+    </header>
+    <main class="app-list" id="appList" aria-label="Free family-friendly games">
+        <article class="app-card">
+            <img src="michaeltaxon/assets/gfx/mikael-tax-on-poster.png" alt="Mikael Tax-On game artwork" class="app-icon" loading="lazy" decoding="async">
+            <h2 class="app-title">Mikael Tax-On</h2>
+            <p class="app-description">Run through the year, collect pesos, and jump over gaps in Mikael Tax-On. Play this free, family-friendly browser game with no ads.</p>
+            <a href="michaeltaxon/index.html" class="launch-button" aria-label="Play Mikael Tax-On">PLAY MIKAEL TAX-ON</a>
+        </article>
+        <article class="app-card">
+            <img src="wizards-school/wizards-school-poster.png" alt="Wizards School game artwork" class="app-icon" loading="lazy" decoding="async">
+            <h2 class="app-title">Wizards School</h2>
+            <p class="app-description">Cast spells with hand gestures in Wizards School. Explore this free, family-friendly browser activity with no ads. Webcam access is required.</p>
+            <a href="wizards-school/index.html" class="launch-button" aria-label="Play Wizards School">PLAY WIZARDS SCHOOL</a>
+        </article>
+        <article class="app-card">
+            <img src="princess-paint/princess-paint.webp" alt="Princess Paint game artwork" class="app-icon" loading="lazy" decoding="async">
+            <h2 class="app-title">Princess Paint</h2>
+            <p class="app-description">Color princess drawings and save your artwork with Princess Paint. Enjoy this free, family-friendly coloring game in your browser with no ads.</p>
+            <a href="princess-paint/index.html" class="launch-button" aria-label="Play Princess Paint">PLAY PRINCESS PAINT</a>
+        </article>
+        <article class="app-card">
+            <img src="castle-wars/castle-wars.webp" alt="Castle Wars game artwork" class="app-icon" loading="lazy" decoding="async">
+            <h2 class="app-title">Castle Wars</h2>
+            <p class="app-description">Challenge a friend in Castle Wars, a two-player cannon game with destructible castles. Play free in your browser with family-friendly fun and no ads.</p>
+            <a href="castle-wars/index.html" class="launch-button" aria-label="Play Castle Wars">PLAY CASTLE WARS</a>
+        </article>
+        <article class="app-card">
+            <img src="robo-punch/robo-punch.png" alt="Robo Punch game artwork" class="app-icon" loading="lazy" decoding="async">
+            <h2 class="app-title">Robo Punch</h2>
+            <p class="app-description">Challenge a friend to a spinning robot duel in Robo Punch. Enjoy this free, family-friendly two-player browser game with no ads.</p>
+            <a href="robo-punch/index.html" class="launch-button" aria-label="Play Robo Punch">PLAY ROBO PUNCH</a>
+        </article>
+        <article class="app-card">
+            <img src="orcs-hunter/orcs-hunter.png" alt="Orcs Hunter game artwork" class="app-icon" loading="lazy" decoding="async">
+            <h2 class="app-title">Orcs Hunter</h2>
+            <p class="app-description">Defend your castle from orcs and dragons with a bow and arrows in Orcs Hunter. Play this free, family-friendly fantasy browser game with no ads.</p>
+            <a href="orcs-hunter/index.html" class="launch-button" aria-label="Play Orcs Hunter">PLAY ORCS HUNTER</a>
+        </article>
+        <article class="app-card">
+            <img src="handy-blocks/handy-blocks.png" alt="Handy Blocks game artwork" class="app-icon" loading="lazy" decoding="async">
+            <h2 class="app-title">Handy Blocks</h2>
+            <p class="app-description">Break colorful bricks using hand tracking, mouse, or touch in Handy Blocks. Play this free, family-friendly browser arcade game with no ads.</p>
+            <a href="handy-blocks/index.html" class="launch-button" aria-label="Play Handy Blocks">PLAY HANDY BLOCKS</a>
+        </article>
+        <article class="app-card">
+            <img src="space-invaders/tokio-invaders.png" alt="Tokio Invaders game artwork" class="app-icon" loading="lazy" decoding="async">
+            <h2 class="app-title">Tokio Invaders</h2>
+            <p class="app-description">Defend neon-lit Tokio from aliens and collect power-ups in Tokio Invaders. Play this free, family-friendly browser arcade game with no ads.</p>
+            <a href="space-invaders/index.html" class="launch-button" aria-label="Play Tokio Invaders">PLAY TOKIO INVADERS</a>
+        </article>
+        <article class="app-card">
+            <img src="sticky-bubbles/sticky-bubbles.png" alt="Sticky Bubbles game artwork" class="app-icon" loading="lazy" decoding="async">
+            <h2 class="app-title">Sticky Bubbles</h2>
+            <p class="app-description">Aim, match colors, and pop bubbles with hand tracking in Sticky Bubbles. Play this free, family-friendly browser bubble shooter with no ads.</p>
+            <a href="sticky-bubbles/index.html" class="launch-button" aria-label="Play Sticky Bubbles">PLAY STICKY BUBBLES</a>
+        </article>
+        <article class="app-card">
+            <div class="app-icon pong-art" role="img" aria-label="Pong paddles and ball">▏ · ▕</div>
+            <h2 class="app-title">Pong</h2>
+            <p class="app-description">Play classic Pong with a friend using one keyboard. Enjoy this free, family-friendly two-player browser game with no ads.</p>
+            <a href="pong/index.html" class="launch-button" aria-label="Play Pong">PLAY PONG</a>
+        </article>
+    </main>
 </body>
 
 </html>

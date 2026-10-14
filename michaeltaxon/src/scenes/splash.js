@@ -1,3 +1,5 @@
+import { drawWelcome } from './welcome.js';
+
 export class SplashScene {
   constructor(game) {
     this.game = game;
@@ -6,22 +8,14 @@ export class SplashScene {
 
   update(dt) {
     this.elapsed += dt;
-    if (this.elapsed >= 2) {
-      this.game.goToMenu();
-    }
+    if (this.elapsed >= 0.6) this.game.goToMenu();
   }
 
-  onTap() {}
+  onTap() {
+    this.game.goToGame();
+  }
 
   render(ctx) {
-    const { images } = this.game.assets;
-    const { width, height } = ctx.canvas;
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, width, height);
-    const img = images.splash;
-    const scale = 1.5;
-    const w = img.width * scale;
-    const h = img.height * scale;
-    ctx.drawImage(img, width / 2 - w / 2, height / 2 - h / 2, w, h);
+    drawWelcome(ctx, this.game.assets.images.poster);
   }
 }

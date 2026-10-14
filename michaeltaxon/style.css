@@ -22,3 +22,38 @@ html, body {
   background: #1f6fe0;
   touch-action: none;
 }
+
+#stage { position: relative; background: radial-gradient(ellipse at center, #142e4c, #040b17 75%); }
+#game-canvas { background: #07172f; }
+#loader {
+  position: absolute;
+  width: min(100vw, calc(100vh * 800 / 480));
+  height: min(100vh, calc(100vw * 480 / 800));
+  overflow: hidden;
+  background: #07172f;
+  color: #c1cede;
+  font-family: Arial, sans-serif;
+  container-type: inline-size;
+}
+.loader-art {
+  position: absolute;
+  inset: 0 40% 0 0;
+  background: url('assets/gfx/mikael-tax-on-poster.png') center / cover;
+}
+.loader-art::after {
+  content: '';
+  position: absolute;
+  inset: 0 -2% 0 73%;
+  background: linear-gradient(90deg, transparent, #07172f);
+}
+.loader-copy { position: absolute; left: 60.25%; top: 16%; right: 4%; }
+.eyebrow { color: #62dded; font-size: 1.375cqw; font-weight: bold; letter-spacing: .12em; }
+.loader-copy h1 { margin: 3.7cqw 0 3cqw; font-size: 5.75cqw; line-height: 1.04; font-style: italic; font-weight: 900; color: #ffe34b; }
+.loader-copy h1 span { color: #beff43; }
+.loader-copy p { margin: 0; font-size: 2.125cqw; line-height: 1.45; }
+.loading-track { height: .5cqw; margin: 6cqw 0 1.8cqw; background: #263c55; overflow: hidden; border-radius: 1cqw; }
+.loading-track span { display: block; width: 40%; height: 100%; background: #beff43; animation: loading 1.2s ease-in-out infinite alternate; }
+.loader-status { font-size: 1.375cqw; letter-spacing: .08em; color: #8fa6bf; }
+.failed .loading-track span { animation: none; background: #ff806e; }
+@keyframes loading { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@media (prefers-reduced-motion: reduce) { .loading-track span { animation: none; width: 100%; } }

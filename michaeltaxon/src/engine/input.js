@@ -16,8 +16,7 @@ export function bindTap(canvas, onTap) {
   });
 
   // Keyboard equivalent of a tap: Space, Up Arrow or Enter. A key press has
-  // no x/y, so it's reported as `null` — scenes that need a point for hit
-  // testing (e.g. the menu's Play button) treat `null` as "activate".
+  // no x/y, so it's reported as `null` to activate the current scene.
   const TAP_KEYS = new Set(['Space', 'ArrowUp', 'Enter']);
   window.addEventListener('keydown', (e) => {
     if (!TAP_KEYS.has(e.code)) return;
