@@ -42,9 +42,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
     <canvas id="gameCanvas"></canvas>
+    <link rel="stylesheet" href="multiplayer.css">
+    <div id="network-status" role="status"><strong>Castle Wars</strong><span id="player-identity" hidden></span><span id="match-status">Choose a game</span><span id="room-tools" hidden><button id="copy-link">Copy invite link</button> <button id="leave" class="secondary">Leave room</button></span><span id="connection">Connecting…</span></div>
+    <section id="lobby"><div>
+      <p>ONLINE • TWO PLAYERS</p><h1>Castle Wars</h1>
+      <p>Create a game and send a friend the link, or join an open room below. P1 defends the left castle; P2 defends the right castle.</p>
+      <div class="actions"><button id="create" disabled>Create game</button><button id="local" class="secondary">Play on this device</button></div>
+      <form id="join-form" class="actions"><input id="room-code" aria-label="Room code or invite link" placeholder="Room code or invite link" required maxlength="300"><button id="join" disabled>Join game</button></form>
+      <p id="message" role="alert"></p><h2>Open games</h2><p>Rooms with 0/2 or 1/2 players are available. Disconnected seats become available after 90 seconds.</p><div id="rooms">Connecting to the lobby…</div>
+      <p><a href="../index.html">← All games</a></p>
+    </div></section>
+    <div id="mobile-controls"><button id="aim-up" data-key="w" aria-label="Aim up">Aim ↑</button><button id="aim-down" data-key="s" aria-label="Aim down">Aim ↓</button><button id="fire" data-key="q">Hold to fire</button></div>
     <audio id="cannonSound" src="https://assets.mixkit.co/active_storage/sfx/2579/2579-preview.mp3" preload="auto"></audio>
     <audio id="impactSound" src="https://assets.mixkit.co/active_storage/sfx/143/143-preview.mp3" preload="auto"></audio>
     <audio id="explosionSound" src="https://assets.mixkit.co/active_storage/sfx/2577/2577-preview.mp3" preload="auto"></audio>
     <script src="game.js"></script>
+    <script type="module" src="multiplayer.js"></script>
 </body>
 </html> 

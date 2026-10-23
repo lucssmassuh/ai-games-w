@@ -3,8 +3,8 @@ const ctx = canvas.getContext('2d');
 
 // Function to resize canvas to window size
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = 1440;
+    canvas.height = 900;
 }
 
 // Initial resize
@@ -94,6 +94,8 @@ function updatePositions() {
     leftCastle.height = baseSize * 1.2;
     rightCastle.width = baseSize;
     rightCastle.height = baseSize * 1.2;
+
+    rightCastle.x = canvas.width - rightCastle.width - canvas.width * 0.02;
 
     // Calculate position 9% from the bottom of the screen
     const bottomPosition = canvas.height * 0.91; // Changed from 0.93 to 0.91 for 9% from bottom
@@ -634,6 +636,24 @@ function drawTurnIndicator() {
     ctx.restore();
 }
 
+// Keep player identity next to the castle it controls, even while waiting.
+function drawPlayerIdentities() {
+    const ownSide = window.castleNetwork?.playerSide;
+    ctx.save();
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'center';
+    for (const [side, castle, number] of [['left', leftCastle, 1], ['right', rightCastle, 2]]) {
+        const label = ownSide ? (ownSide === side ? `YOU · P${number}` : `OPPONENT · P${number}`) : `P${number} · ${side.toUpperCase()}`;
+        const x = castle.x + castle.width / 2;
+        const y = castle.y - 100;
+        ctx.fillStyle = side === 'left' ? '#0c314c' : '#4c1928';
+        ctx.fillRect(x - 112, y - 22, 224, 36);
+        ctx.fillStyle = side === 'left' ? '#7dd3fc' : '#fda4af';
+        ctx.fillText(label, x, y + 3);
+    }
+    ctx.restore();
+}
+
 // Draw control instructions under each castle
 function drawControlInstructions() {
     const fontSize = Math.min(canvas.width, canvas.height) * 0.014;
@@ -765,7 +785,7 @@ function updateProjectiles() {
                                 // Play impact sound
                                 if (impactSound) {
                                     impactSound.currentTime = 0;
-                                    impactSound.play();
+                                    impactSound.play().catch(() => {});
                                 }
 
                                 // Check and drop stones above with delay
@@ -803,12 +823,14 @@ function updateProjectiles() {
             if (checkCastleCollision(rightCastle, false)) {
                 leftScore += 5;
                 projectiles.splice(i, 1);
+                continue;
             }
         } else {
             // Right player's projectile - only check left castle
             if (checkCastleCollision(leftCastle, true)) {
                 rightScore += 5;
                 projectiles.splice(i, 1);
+                continue;
             }
         }
 
@@ -821,7 +843,7 @@ function updateProjectiles() {
             // Play impact sound
             if (impactSound) {
                 impactSound.currentTime = 0;
-                impactSound.play();
+                impactSound.play().catch(() => {});
             }
 
             projectiles.splice(i, 1);
@@ -1200,7 +1222,7 @@ function shouldStoneFall(castle, index) {
     if (!stoneBelow) {
         // Play explosion sound when stone should fall
         explosionSound.currentTime = 0;
-        explosionSound.play();
+        explosionSound.play().catch(() => {});
         return true;
     }
     
@@ -1208,6 +1230,7 @@ function shouldStoneFall(castle, index) {
 }
 
 // Game loop
+let lastPhysicsTime = performance.now();
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
@@ -1252,11 +1275,16 @@ function gameLoop() {
     drawCastle(leftCastle);
     drawCastle(rightCastle);
     drawTurnIndicator();
+    drawPlayerIdentities();
     drawControlInstructions();
     drawCatapult(leftCatapult);
     drawCatapult(rightCatapult);
     
-    updateProjectiles();
+    const now = performance.now();
+    const steps = Math.min(12, Math.floor((now - lastPhysicsTime) / (1000 / 60)));
+    for (let step = 0; step < steps; step++) updateProjectiles();
+    lastPhysicsTime = steps === 12 ? now : lastPhysicsTime + steps * (1000 / 60);
+    window.castleNetwork?.settled();
     updateExplosions();
     updateFallingStones();
     updateMuzzleFlashes();
@@ -1295,9 +1323,10 @@ function gameLoop() {
     }
     
     // Only check for game over if there are no falling stones
-    if (fallingStones.length === 0 && (leftStonesRemaining === 0 || rightStonesRemaining === 0)) {
+    if (!window.castleNetwork?.online && !document.getElementById('game-over') && fallingStones.length === 0 && (leftStonesRemaining === 0 || rightStonesRemaining === 0)) {
         // Create and show banner
         const banner = document.createElement('div');
+        banner.id = 'game-over';
         banner.style.position = 'fixed';
         banner.style.top = '50%';
         banner.style.left = '50%';
@@ -1362,6 +1391,7 @@ function gameLoop() {
 
 // Controls
 document.addEventListener('keydown', (e) => {
+    if (e.target.matches?.('input, button') || !canShoot || projectiles.length || !window.castleNetwork?.canControl(currentPlayer)) return;
     switch(e.key) {
         case 'w':
             if (currentPlayer === 'left') {
@@ -1411,14 +1441,21 @@ document.addEventListener('keyup', (e) => {
     }
 });
 
-function fireCannon(catapult, player) {
+function fireCannon(catapult, player, replay = false, shotPower = null) {
+    if (!replay && window.castleNetwork?.online) {
+        const power = Math.min((Date.now() - catapult.chargeStart) / 10, catapult.maxPower);
+        catapult.charging = false;
+        window.castleNetwork.shoot(catapult.angle, power);
+        return;
+    }
+    if (!replay && (!canShoot || projectiles.length)) return;
     const chargeTime = Date.now() - catapult.chargeStart;
-    catapult.power = Math.min(chargeTime / 10, catapult.maxPower);
+    catapult.power = replay ? shotPower : Math.min(chargeTime / 10, catapult.maxPower);
     catapult.charging = false;
 
     // Play cannon sound
     cannonSound.currentTime = 0;
-    cannonSound.play();
+    cannonSound.play().catch(() => {});
 
     // Set fire time for recoil animation
     catapult.fireTime = Date.now();
@@ -1457,10 +1494,40 @@ function fireCannon(catapult, player) {
     canShoot = false;
     currentPlayer = currentPlayer === 'left' ? 'right' : 'left';
     currentRound++;
-    setTimeout(() => {
-        canShoot = true;
-    }, 1000);
+    if (!window.castleNetwork?.online) setTimeout(() => { canShoot = true; }, 1000);
 }
 
-// Start game
+// Network snapshots use a fixed battlefield and serialize only gameplay state.
+window.castleGame = {
+    cancelCharge() { leftCatapult.charging = rightCatapult.charging = false; },
+    snapshot() {
+        return JSON.stringify({ left: leftCastle.stones, right: rightCastle.stones,
+            leftScore, rightScore, currentPlayer, currentRound });
+    },
+    load(serialized) {
+        const state = JSON.parse(serialized);
+        leftCastle.stones = state.left;
+        rightCastle.stones = state.right;
+        ({ leftScore, rightScore, currentPlayer, currentRound } = state);
+        projectiles = []; fallingStones = []; explosions = [];
+        leftCatapult.charging = rightCatapult.charging = false;
+        canShoot = true;
+    },
+    replay(shot) {
+        this.load(shot.before);
+        updatePositions();
+        const cannon = shot.player === 'left' ? leftCatapult : rightCatapult;
+        cannon.angle = shot.angle;
+        cannon.chargeStart = Date.now() - shot.power * 10;
+        fireCannon(cannon, shot.player, true, shot.power);
+        lastPhysicsTime = performance.now();
+    },
+    get idle() { return projectiles.length === 0 && fallingStones.length === 0; },
+    get winner() {
+        if (leftCastle.stones.flat().every(v => !v)) return 'right';
+        if (rightCastle.stones.flat().every(v => !v)) return 'left';
+        return null;
+    }
+};
+window.castleNetwork = { online: false, canControl: () => false, settled() {} };
 gameLoop(); 

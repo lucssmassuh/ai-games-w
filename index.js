@@ -2,10 +2,11 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const server = http.createServer((req, res) => {
-    const url = req.url === '/' ? '/index.html' : req.url;
+    const pathname = new URL(req.url, 'http://localhost').pathname;
+    const url = pathname.endsWith('/') ? `${pathname}index.html` : pathname;
     const filePath = path.join(__dirname, url);
 
     // Serve the catalog page as root
@@ -40,7 +41,8 @@ function getContentType(url) {
     const ext = path.extname(url).toLowerCase();
     switch (ext) {
         case '.html': return 'text/html';
-        case '.js': return 'text/javascript';
+        case '.js':
+        case '.mjs': return 'text/javascript';
         case '.css': return 'text/css';
         case '.png': return 'image/png';
         case '.jpg': return 'image/jpeg';
@@ -50,5 +52,5 @@ function getContentType(url) {
 }
 
 server.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
+    console.log(`Server is running at http://localhost:${server.address().port}`);
 });

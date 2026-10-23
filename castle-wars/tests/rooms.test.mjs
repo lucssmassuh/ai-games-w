@@ -1,0 +1,25 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { activeSeat, occupancy, availableSide, roomCode, LEASE_MS } from '../rooms.mjs';
+const now = 100_000;
+const seat = (uid, age = 0) => ({ uid, seen: { toMillis: () => now - age } });
+test('empty, waiting, full and disconnected rooms report available seats', () => {
+    const room = { left: null, right: null };
+    assert.equal(occupancy(room, now), 0);
+    room.left = seat('alice');
+    assert.equal(occupancy(room, now), 1);
+    assert.equal(availableSide(room, 'bob', now), 'right');
+    room.right = seat('bob');
+    assert.equal(occupancy(room, now), 2);
+    assert.equal(availableSide(room, 'eve', now), undefined);
+    assert.equal(availableSide(room, 'alice', now), 'left');
+    room.left = seat('alice', LEASE_MS);
+    assert.equal(activeSeat(room.left, now), false);
+    assert.equal(occupancy(room, now), 1);
+    assert.equal(availableSide(room, 'eve', now), 'left');
+});
+test('room codes and invite URLs are validated', () => {
+    assert.equal(roomCode(' Room123 '), 'Room123');
+    assert.equal(roomCode('https://example.com/castle-wars/index.html?room=Room123'), 'Room123');
+    for (const value of ['', '../abc', 'https://example.com/', '<script>']) assert.throws(() => roomCode(value));
+});

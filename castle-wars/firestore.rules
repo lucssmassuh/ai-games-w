@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /castleRooms/{roomId} {
+      function signedIn() { return request.auth != null; }
+      function mine(seat) { return seat != null && seat.uid == request.auth.uid; }
+      function active(seat) { return seat != null && seat.seen > request.time - duration.value(90, 's'); }
+      function member() { return mine(resource.data.left) || mine(resource.data.right); }
+      function validSeat(seat) {
+        return seat == null || (seat.keys().hasOnly(['uid', 'seen']) && seat.uid is string && seat.seen is timestamp);
+      }
+      function valid() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['left', 'right', 'state', 'turn', 'phase', 'shot', 'revision', 'createdAt', 'updatedAt'])
+          && validSeat(d.left) && validSeat(d.right)
+          && (d.left == null || d.right == null || d.left.uid != d.right.uid)
+          && d.state is string && d.state.size() < 4096
+          && d.turn in ['left', 'right'] && d.phase in ['waiting', 'firing', 'finished']
+          && d.revision is int && d.revision >= 0 && d.updatedAt == request.time;
+      }
+      function seatChange(side, other) {
+        let before = resource.data[side];
+        let after = request.resource.data[side];
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly([side, 'updatedAt'])
+          && (mine(before) || (!active(before) && resource.data.phase != 'finished'))
+          && (after == null ? mine(before) : mine(after) && after.seen == request.time)
+          && !mine(resource.data[other]);
+      }
+      function startShot() {
+        let before = resource.data;
+        let after = request.resource.data;
+        let shot = after.shot;
+        return before.phase == 'waiting' && after.phase == 'firing'
+          && mine(before[before.turn]) && active(before.left) && active(before.right)
+          && after.diff(before).affectedKeys().hasOnly(['phase', 'shot', 'updatedAt'])
+          && shot.keys().hasOnly(['id', 'player', 'angle', 'power', 'before'])
+          && shot.id is string && shot.id.size() <= 40 && shot.player == before.turn
+          && shot.before == before.state && shot.power is number && shot.power >= 0 && shot.power <= 150
+          && shot.angle is number
+          && (shot.player == 'left' ? shot.angle >= -85 && shot.angle <= 0 : shot.angle >= 180 && shot.angle <= 265);
+      }
+      function finishShot() {
+        let before = resource.data;
+        let after = request.resource.data;
+        return member() && before.phase == 'firing' && after.phase in ['waiting', 'finished']
+          && after.diff(before).affectedKeys().hasOnly(['state', 'turn', 'phase', 'shot', 'revision', 'updatedAt'])
+          && after.shot == null && after.revision == before.revision + 1
+          && after.turn == (before.turn == 'left' ? 'right' : 'left');
+      }
+      allow read: if signedIn();
+      allow create: if signedIn() && valid() && mine(request.resource.data.left)
+        && request.resource.data.left.seen == request.time && request.resource.data.right == null
+        && request.resource.data.createdAt == request.time && request.resource.data.phase == 'waiting'
+        && request.resource.data.turn == 'left' && request.resource.data.shot == null && request.resource.data.revision == 0;
+      allow update: if signedIn() && valid() && resource.data.createdAt > request.time - duration.value(24, 'h')
+        && (seatChange('left', 'right') || seatChange('right', 'left') || startShot() || finishShot());
+      allow delete: if false;
+    }
+  }
+}
