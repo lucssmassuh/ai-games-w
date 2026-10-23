@@ -10,12 +10,18 @@ function client(uid) {
 }
 const alice = client('alice'), bob = client('bob'), eve = client('eve');
 const ref = db => doc(db, 'castleRooms', 'testroom');
-const seat = uid => ({ uid, seen: serverTimestamp() });
+const seat = uid => ({ uid, name: uid === 'alice' ? 'Alice' : 'Bob', seen: serverTimestamp() });
 const change = fields => ({ ...fields, updatedAt: serverTimestamp() });
 async function denied(action) { await assert.rejects(action, err => err.code === 'permission-denied'); }
 async function main() {
   await setDoc(ref(alice), { left: seat('alice'), right: null, state: '{}', turn: 'left', phase: 'waiting', shot: null, revision: 0, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  await denied(updateDoc(ref(bob), change({ right: { ...seat('bob'), name: '' } })));
+  await denied(updateDoc(ref(bob), change({ right: { ...seat('bob'), name: 'a'.repeat(25) } })));
+  await denied(updateDoc(ref(bob), change({ right: { ...seat('bob'), name: '   ' } })));
   await updateDoc(ref(bob), change({ right: seat('bob') }));
+  assert.equal((await getDoc(ref(alice))).data().right.name, 'Bob');
+  await updateDoc(ref(alice), change({ left: { ...seat('alice'), name: 'María' } }));
+  assert.equal((await getDoc(ref(bob))).data().left.name, 'María');
   assert.equal((await getDoc(ref(eve))).data().right.uid, 'bob');
   await denied(updateDoc(ref(eve), change({ right: seat('eve') })));
   await denied(updateDoc(ref(alice), change({ right: seat('alice') })));

@@ -47,6 +47,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <section id="lobby"><div>
       <p>ONLINE • TWO PLAYERS</p><h1>Castle Wars</h1>
       <p>Create a game and send a friend the link, or join an open room below. P1 defends the left castle; P2 defends the right castle.</p>
+      <label for="player-name">Your name</label>
+      <input id="player-name" name="player-name" placeholder="e.g. Lucas" autocomplete="nickname" maxlength="24" required aria-describedby="name-help">
+      <small id="name-help">Choose a name both players will see.</small>
       <div class="actions"><button id="create" disabled>Create game</button><button id="local" class="secondary">Play on this device</button></div>
       <form id="join-form" class="actions"><input id="room-code" aria-label="Room code or invite link" placeholder="Room code or invite link" required maxlength="300"><button id="join" disabled>Join game</button></form>
       <p id="message" role="alert"></p><h2>Open games</h2><p>Rooms with 0/2 or 1/2 players are available. Disconnected seats become available after 90 seconds.</p><div id="rooms">Connecting to the lobby…</div>

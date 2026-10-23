@@ -7,7 +7,8 @@ service cloud.firestore {
       function active(seat) { return seat != null && seat.seen > request.time - duration.value(90, 's'); }
       function member() { return mine(resource.data.left) || mine(resource.data.right); }
       function validSeat(seat) {
-        return seat == null || (seat.keys().hasOnly(['uid', 'seen']) && seat.uid is string && seat.seen is timestamp);
+        return seat == null || (seat.keys().hasOnly(['uid', 'name', 'seen']) && seat.uid is string && seat.seen is timestamp
+          && (!('name' in seat) || (seat.name is string && seat.name.size() >= 1 && seat.name.size() <= 24 && seat.name.matches('.*[^ ].*'))));
       }
       function valid() {
         let d = request.resource.data;

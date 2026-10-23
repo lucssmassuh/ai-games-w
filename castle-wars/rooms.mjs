@@ -17,3 +17,9 @@ export function roomCode(value) {
     if (!/^[A-Za-z0-9_-]{6,40}$/.test(code)) throw new Error('Enter a valid room code or invite link.');
     return code;
 }
+
+export function playerName(value) {
+    const name = value.replace(/[\u0000-\u001f\u007f]/g, '').trim().replace(/\s+/g, ' ');
+    if (!name || name.length > 24) throw new Error('Enter your name (1–24 characters).');
+    return name;
+}

@@ -643,13 +643,14 @@ function drawPlayerIdentities() {
     ctx.font = 'bold 20px Arial';
     ctx.textAlign = 'center';
     for (const [side, castle, number] of [['left', leftCastle, 1], ['right', rightCastle, 2]]) {
-        const label = ownSide ? (ownSide === side ? `YOU · P${number}` : `OPPONENT · P${number}`) : `P${number} · ${side.toUpperCase()}`;
+        const name = window.castleNetwork?.playerName?.(side);
+        const label = ownSide ? `${name} · ${ownSide === side ? 'YOU' : `P${number}`}` : `P${number} · ${side.toUpperCase()}`;
         const x = castle.x + castle.width / 2;
         const y = castle.y - 100;
         ctx.fillStyle = side === 'left' ? '#0c314c' : '#4c1928';
         ctx.fillRect(x - 112, y - 22, 224, 36);
         ctx.fillStyle = side === 'left' ? '#7dd3fc' : '#fda4af';
-        ctx.fillText(label, x, y + 3);
+        ctx.fillText(label, x, y + 3, 210);
     }
     ctx.restore();
 }
@@ -697,7 +698,7 @@ function drawScore() {
     ctx.fillText(`Round ${currentRound}`, canvas.width / 2, canvas.height * 0.1);
     
     // Draw left player score and stones
-    ctx.fillText(`Player 1: ${leftScore}`, canvas.width * 0.2, canvas.height * 0.1);
+    ctx.fillText(`${window.castleNetwork?.playerName?.('left') || 'Player 1'} (P1): ${leftScore}`, canvas.width * 0.2, canvas.height * 0.1);
     
     // Draw stone indicators for left player
     const stoneSize = Math.min(canvas.width, canvas.height) * 0.008;
@@ -727,7 +728,7 @@ function drawScore() {
     
     // Draw right player score and stones
     ctx.fillStyle = '#00008B';
-    ctx.fillText(`Player 2: ${rightScore}`, canvas.width * 0.8, canvas.height * 0.1);
+    ctx.fillText(`${window.castleNetwork?.playerName?.('right') || 'Player 2'} (P2): ${rightScore}`, canvas.width * 0.8, canvas.height * 0.1);
     
     // Count total stones for right player
     let totalRightStones = 0;

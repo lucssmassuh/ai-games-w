@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { activeSeat, occupancy, availableSide, roomCode, LEASE_MS } from '../rooms.mjs';
+import { activeSeat, occupancy, availableSide, roomCode, playerName, LEASE_MS } from '../rooms.mjs';
 const now = 100_000;
 const seat = (uid, age = 0) => ({ uid, seen: { toMillis: () => now - age } });
 test('empty, waiting, full and disconnected rooms report available seats', () => {
@@ -22,4 +22,10 @@ test('room codes and invite URLs are validated', () => {
     assert.equal(roomCode(' Room123 '), 'Room123');
     assert.equal(roomCode('https://example.com/castle-wars/index.html?room=Room123'), 'Room123');
     for (const value of ['', '../abc', 'https://example.com/', '<script>']) assert.throws(() => roomCode(value));
+});
+
+test('player names trim whitespace and support international names', () => {
+    assert.equal(playerName('  Lucas   Massuh  '), 'Lucas Massuh');
+    assert.equal(playerName('María 🌟'), 'María 🌟');
+    for (const name of ['', '   ', 'a'.repeat(25)]) assert.throws(() => playerName(name));
 });

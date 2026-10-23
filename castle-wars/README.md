@@ -2,6 +2,8 @@
 
 Online rooms use Cloud Firestore realtime listeners and anonymous Firebase Authentication in the existing `aigames-f7992` project. Public browser config is in `firebase-config.js`; the unrelated root config is not used.
 
+Players enter a name (1–24 characters) before creating or joining a room. Names are remembered in the browser tab and appear in the lobby, castle labels, scores, and turn status. Invite links ask new players for their name before joining.
+
 Players create a room, copy its invite link, or enter a room code/link. The lobby displays available rooms and live 0/2 or 1/2 occupancy. Seat transactions prevent a third player joining. Heartbeats run every 12 seconds; seats expire after 90 seconds without a heartbeat. Rooms expire after 24 hours and finished matches leave the lobby. Reloading in the same browser tab restores its anonymous identity and match. Explicit Leave releases the seat immediately; closing a tab releases it after the timeout.
 
 The battlefield uses fixed 1440×900 coordinates and 60 physics steps per second. Shots persist their pre-shot state and parameters so either participant can replay and finish after a disconnect. Turn, capacity and membership checks are enforced in Firestore rules. This is a casual game: clients calculate damage; the backend does not validate physics against cheating.

@@ -2,7 +2,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.2/firebas
 import { getAuth, signInAnonymously, setPersistence, browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js';
 import { getFirestore, collection, doc, query, orderBy, where, Timestamp, onSnapshot, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
-import { activeSeat, occupancy, availableSide, roomCode, ROOM_MS } from './rooms.mjs';
+import { activeSeat, occupancy, availableSide, roomCode, playerName, ROOM_MS } from './rooms.mjs';
 
 const $ = id => document.getElementById(id);
 const game = window.castleGame;
@@ -15,6 +15,23 @@ let lastState = null, listKey, finishRetryAt = 0;
 let shotId = null, finishing = false, pending = false, connected = false, local = false;
 let heartbeat, leaving = false, pulsePending = false;
 const message = text => { $('message').textContent = text; };
+try { $('player-name').value = sessionStorage.getItem('castle-player-name') || ''; } catch {}
+$('player-name').oninput = () => $('player-name').setCustomValidity('');
+function readName() {
+    const input = $('player-name');
+    try {
+        const name = playerName(input.value);
+        input.setCustomValidity(''); input.value = name;
+        try { sessionStorage.setItem('castle-player-name', name); } catch {}
+        return name;
+    } catch (err) {
+        input.setCustomValidity(err.message); input.reportValidity(); input.focus();
+        throw err;
+    }
+}
+function nameFor(player, data = room) {
+    return data?.[player]?.name || (player === 'left' ? 'Player 1' : 'Player 2');
+}
 function error(err) {
     console.error(err);
     if (roomRef) $('connection').textContent = err.message || 'Connection failed. Try again.';
@@ -33,7 +50,7 @@ function link(id) {
 function renderRooms() {
     const root = $('rooms');
     const open = rooms.filter(r => r.phase !== 'finished' && occupancy(r) < 2 && r.createdAt?.toMillis() > Date.now() - ROOM_MS);
-    const key = JSON.stringify([pending, connected, open.map(item => [item.id, occupancy(item)])]);
+    const key = JSON.stringify([pending, connected, open.map(item => [item.id, occupancy(item), item.left?.name, item.right?.name])]);
     if (key === listKey) return;
     listKey = key;
     root.replaceChildren();
@@ -41,7 +58,8 @@ function renderRooms() {
     for (const item of open) {
         const row = document.createElement('div'); row.className = 'room';
         const label = document.createElement('div');
-        label.textContent = `Room ${item.id}`;
+        const host = ['left', 'right'].find(player => activeSeat(item[player]));
+        label.textContent = host ? `${nameFor(host, item)}’s game` : `Room ${item.id}`;
         const count = document.createElement('small'); count.textContent = `${occupancy(item)}/2 players · Waiting for a challenger`;
         label.append(count);
         const button = document.createElement('button');
@@ -58,12 +76,12 @@ function renderMatch() {
     $('player-identity').hidden = false;
     $('player-identity').dataset.side = side;
     $('player-identity').textContent = side === 'left'
-        ? 'YOU ARE P1 · LEFT CASTLE · W/S aim · Hold Q to fire'
-        : 'YOU ARE P2 · RIGHT CASTLE · O/L aim · Hold P to fire';
+        ? `${nameFor(side)} (YOU) · P1 · LEFT CASTLE · W/S aim · Hold Q to fire`
+        : `${nameFor(side)} (YOU) · P2 · RIGHT CASTLE · O/L aim · Hold P to fire`;
     $('match-status').textContent = `Room ${roomRef.id} · ${count}/2 players · ` +
-        (room.phase === 'finished' ? `${game.winner === 'left' ? 'Player 1' : 'Player 2'} wins! Create a new room to play again.` :
+        (room.phase === 'finished' ? `${nameFor(game.winner)} wins! Create a new room to play again.` :
         count < 2 ? 'Waiting for an opponent — share the invite link' :
-        room.phase === 'firing' ? 'Cannonball in flight…' : room.turn === side ? 'Your turn' : "Opponent’s turn");
+        room.phase === 'firing' ? 'Cannonball in flight…' : room.turn === side ? 'Your turn' : `${nameFor(room.turn)}’s turn`);
     $('aim-up').dataset.key = side === 'right' ? 'o' : 'w';
     $('aim-down').dataset.key = side === 'right' ? 'l' : 's';
     $('fire').dataset.key = side === 'right' ? 'p' : 'q';
@@ -75,13 +93,14 @@ async function perform(action) {
     finally { busy(false); renderRooms(); }
 }
 async function joinRoom(id, create = false) {
+    const name = readName();
     if (roomRef) await leaveRoom();
     const ref = doc(db, 'castleRooms', id);
     await runTransaction(db, async tx => {
         const snapshot = await tx.get(ref);
         if (create) {
             if (snapshot.exists()) throw new Error('Room already exists. Try again.');
-            tx.set(ref, { left: { uid, seen: serverTimestamp() }, right: null,
+            tx.set(ref, { left: { uid, name, seen: serverTimestamp() }, right: null,
                 state: initial, turn: 'left', phase: 'waiting', shot: null, revision: 0,
                 createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
         } else {
@@ -90,7 +109,7 @@ async function joinRoom(id, create = false) {
             if (data.phase === 'finished' || data.createdAt.toMillis() < Date.now() - ROOM_MS) throw new Error('This game has ended or expired. Create a new one.');
             const seat = availableSide(data, uid);
             if (!seat) throw new Error('This room is full. Choose another open game.');
-            tx.update(ref, { [seat]: { uid, seen: serverTimestamp() }, updatedAt: serverTimestamp() });
+            tx.update(ref, { [seat]: { uid, name, seen: serverTimestamp() }, updatedAt: serverTimestamp() });
         }
     });
     roomRef = ref; shotId = null; lastState = null; local = false; $('copy-link').hidden = false;
@@ -120,12 +139,12 @@ async function joinRoom(id, create = false) {
 }
 async function pulse() {
     if (!roomRef || !side || !navigator.onLine || pulsePending) return;
-    const ref = roomRef;
+    const ref = roomRef, player = side;
     pulsePending = true;
     try {
         await runTransaction(db, async tx => {
             const snap = await tx.get(ref); const data = snap.data();
-            if (data?.[side]?.uid === uid) tx.update(ref, { [side]: { uid, seen: serverTimestamp() }, updatedAt: serverTimestamp() });
+            if (data?.[player]?.uid === uid) tx.update(ref, { [player]: { ...data[player], seen: serverTimestamp() }, updatedAt: serverTimestamp() });
         });
     } finally { pulsePending = false; }
 }
@@ -154,6 +173,7 @@ async function leaveRoom() {
 window.castleNetwork = {
     get online() { return !local; },
     get playerSide() { return local ? null : side; },
+    playerName(player) { return local ? null : nameFor(player); },
     canControl(player) {
         return local || !!(roomRef && connected && !pending && !finishing && room?.phase === 'waiting' &&
             occupancy(room) === 2 && side === player && room.turn === side && activeSeat(room[side]));
@@ -225,7 +245,11 @@ async function start() {
             busy(pending); renderRooms();
         }, err => { connected = false; error(err); $('connection').textContent = 'Online play unavailable'; });
         const invite = new URL(location.href).searchParams.get('room');
-        if (invite) await perform(() => joinRoom(roomCode(invite)));
+        if (invite) {
+            $('room-code').value = roomCode(invite);
+            if ($('player-name').value.trim()) await perform(() => joinRoom(roomCode(invite)));
+            else { message('Enter your name, then click Join game to meet your friend.'); $('player-name').focus(); }
+        }
     } catch (err) { error(err); $('connection').textContent = 'Online play unavailable'; }
 }
 start();
