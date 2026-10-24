@@ -1,3 +1,5 @@
+export const MAX_ROOMS = 10;
+export const ROOM_IDS = Array.from({ length: MAX_ROOMS }, (_, i) => `room${String(i + 1).padStart(2, '0')}`);
 export const LEASE_MS = 90_000;
 export const ROOM_MS = 24 * 60 * 60 * 1000;
 export function activeSeat(seat, now = Date.now()) {
@@ -22,4 +24,8 @@ export function playerName(value) {
     const name = value.replace(/[\u0000-\u001f\u007f]/g, '').trim().replace(/\s+/g, ' ');
     if (!name || name.length > 24) throw new Error('Enter your name (1–24 characters).');
     return name;
+}
+
+export function reusableRoom(room, now = Date.now()) {
+    return !room || room.phase === 'finished' || room.createdAt?.toMillis() <= now - ROOM_MS || occupancy(room, now) === 0;
 }

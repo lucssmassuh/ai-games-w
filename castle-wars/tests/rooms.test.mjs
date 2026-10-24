@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { activeSeat, occupancy, availableSide, roomCode, playerName, LEASE_MS } from '../rooms.mjs';
+import { activeSeat, occupancy, availableSide, roomCode, playerName, LEASE_MS, ROOM_IDS, reusableRoom, ROOM_MS } from '../rooms.mjs';
 const now = 100_000;
 const seat = (uid, age = 0) => ({ uid, seen: { toMillis: () => now - age } });
 test('empty, waiting, full and disconnected rooms report available seats', () => {
@@ -28,4 +28,15 @@ test('player names trim whitespace and support international names', () => {
     assert.equal(playerName('  Lucas   Massuh  '), 'Lucas Massuh');
     assert.equal(playerName('María 🌟'), 'María 🌟');
     for (const name of ['', '   ', 'a'.repeat(25)]) assert.throws(() => playerName(name));
+});
+
+test('ten room slots can only be reused when finished, expired or empty', () => {
+    assert.equal(ROOM_IDS.length, 10);
+    assert.equal(new Set(ROOM_IDS).size, 10);
+    const room = { phase: 'waiting', createdAt: { toMillis: () => now }, left: seat('alice'), right: null };
+    assert.equal(reusableRoom(room, now), false);
+    assert.equal(reusableRoom(null, now), true);
+    assert.equal(reusableRoom({ ...room, phase: 'finished' }, now), true);
+    assert.equal(reusableRoom({ ...room, left: null }, now), true);
+    assert.equal(reusableRoom(room, now + ROOM_MS), true);
 });

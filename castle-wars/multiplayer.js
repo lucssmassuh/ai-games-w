@@ -2,7 +2,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.2/firebas
 import { getAuth, signInAnonymously, setPersistence, browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js';
 import { getFirestore, collection, doc, query, orderBy, where, Timestamp, onSnapshot, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
-import { activeSeat, occupancy, availableSide, roomCode, playerName, ROOM_MS } from './rooms.mjs';
+import { activeSeat, occupancy, availableSide, roomCode, playerName, ROOM_MS, ROOM_IDS, reusableRoom } from './rooms.mjs';
 
 const $ = id => document.getElementById(id);
 const game = window.castleGame;
@@ -49,7 +49,7 @@ function link(id) {
 }
 function renderRooms() {
     const root = $('rooms');
-    const open = rooms.filter(r => r.phase !== 'finished' && occupancy(r) < 2 && r.createdAt?.toMillis() > Date.now() - ROOM_MS);
+    const open = rooms.filter(r => ROOM_IDS.includes(r.id) && r.phase !== 'finished' && occupancy(r) < 2 && r.createdAt?.toMillis() > Date.now() - ROOM_MS);
     const key = JSON.stringify([pending, connected, open.map(item => [item.id, occupancy(item), item.left?.name, item.right?.name])]);
     if (key === listKey) return;
     listKey = key;
@@ -95,11 +95,13 @@ async function perform(action) {
 async function joinRoom(id, create = false) {
     const name = readName();
     if (roomRef) await leaveRoom();
-    const ref = doc(db, 'castleRooms', id);
+    let ref = create ? null : doc(db, 'castleRooms', id);
     await runTransaction(db, async tx => {
-        const snapshot = await tx.get(ref);
+        const slots = create ? await Promise.all(ROOM_IDS.map(code => tx.get(doc(db, 'castleRooms', code)))) : [];
+        const snapshot = create ? slots.find(item => reusableRoom(item.exists() ? item.data() : null)) : await tx.get(ref);
         if (create) {
-            if (snapshot.exists()) throw new Error('Room already exists. Try again.');
+            if (!snapshot) throw new Error('All 10 rooms are in use. Join an open game or try again later.');
+            ref = snapshot.ref;
             tx.set(ref, { left: { uid, name, seen: serverTimestamp() }, right: null,
                 state: initial, turn: 'left', phase: 'waiting', shot: null, revision: 0,
                 createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
@@ -203,7 +205,7 @@ window.castleNetwork = {
         }).catch(err => { finishRetryAt = Date.now() + 3000; error(err); }).finally(() => { finishing = false; });
     }
 };
-$('create').onclick = () => perform(() => joinRoom(doc(collection(db, 'castleRooms')).id, true));
+$('create').onclick = () => perform(() => joinRoom(null, true));
 $('join-form').onsubmit = event => { event.preventDefault(); perform(() => joinRoom(roomCode($('room-code').value))); };
 $('leave').onclick = () => perform(leaveRoom);
 $('copy-link').onclick = async () => {

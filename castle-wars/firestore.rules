@@ -49,10 +49,15 @@ service cloud.firestore {
           && after.turn == (before.turn == 'left' ? 'right' : 'left');
       }
       allow read: if signedIn();
-      allow create: if signedIn() && valid() && mine(request.resource.data.left)
+      function slot() { return roomId.matches('room(0[1-9]|10)'); }
+      function newGame() { return slot() && valid() && mine(request.resource.data.left)
         && request.resource.data.left.seen == request.time && request.resource.data.right == null
         && request.resource.data.createdAt == request.time && request.resource.data.phase == 'waiting'
-        && request.resource.data.turn == 'left' && request.resource.data.shot == null && request.resource.data.revision == 0;
+        && request.resource.data.turn == 'left' && request.resource.data.shot == null && request.resource.data.revision == 0; }
+      allow create: if signedIn() && newGame();
+      allow update: if signedIn() && request.resource.data.createdAt == request.time
+        && (resource.data.phase == 'finished' || resource.data.createdAt <= request.time - duration.value(24, 'h')
+          || (!active(resource.data.left) && !active(resource.data.right))) && newGame();
       allow update: if signedIn() && valid() && resource.data.createdAt > request.time - duration.value(24, 'h')
         && (seatChange('left', 'right') || seatChange('right', 'left') || startShot() || finishShot());
       allow delete: if false;

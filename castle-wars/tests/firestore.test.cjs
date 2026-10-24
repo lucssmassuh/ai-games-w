@@ -9,12 +9,19 @@ function client(uid) {
   clients.push({ app, db }); return db;
 }
 const alice = client('alice'), bob = client('bob'), eve = client('eve');
-const ref = db => doc(db, 'castleRooms', 'testroom');
+const ref = db => doc(db, 'castleRooms', 'room01');
 const seat = uid => ({ uid, name: uid === 'alice' ? 'Alice' : 'Bob', seen: serverTimestamp() });
 const change = fields => ({ ...fields, updatedAt: serverTimestamp() });
 async function denied(action) { await assert.rejects(action, err => err.code === 'permission-denied'); }
 async function main() {
   await setDoc(ref(alice), { left: seat('alice'), right: null, state: '{}', turn: 'left', phase: 'waiting', shot: null, revision: 0, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  const fresh = () => ({ left: seat('alice'), right: null, state: '{}', turn: 'left', phase: 'waiting', shot: null, revision: 0, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  await denied(setDoc(doc(alice, 'castleRooms', 'room11'), fresh()));
+  await denied(setDoc(ref(alice), fresh()));
+  for (let i = 2; i <= 10; i++) await setDoc(doc(alice, 'castleRooms', `room${String(i).padStart(2, '0')}`), fresh());
+  const reusable = doc(alice, 'castleRooms', 'room10');
+  await updateDoc(reusable, change({ left: null }));
+  await setDoc(reusable, fresh());
   await denied(updateDoc(ref(bob), change({ right: { ...seat('bob'), name: '' } })));
   await denied(updateDoc(ref(bob), change({ right: { ...seat('bob'), name: 'a'.repeat(25) } })));
   await denied(updateDoc(ref(bob), change({ right: { ...seat('bob'), name: '   ' } })));
