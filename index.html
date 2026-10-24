@@ -48,11 +48,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
+            transition: transform .6s cubic-bezier(.33,1,.68,1), box-shadow .6s ease;
         }
 
-        .app-card:hover {
+        .app-card:hover, .app-card:focus-within {
             transform: translateY(-5px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, .12);
         }
 
         .app-icon {
@@ -83,11 +84,59 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             color: white;
             text-decoration: none;
             border-radius: 4px;
-            transition: background-color 0.2s;
+            transition: background-color .2s ease, transform .3s cubic-bezier(.34,1.56,.64,1);
         }
 
         .launch-button:hover {
             background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .launch-button:active { transform: scale(.97); }
+        .launch-button:focus-visible { outline: 3px solid #236b27; outline-offset: 4px; }
+
+        /* Twain-inspired word entrances, soft reveals, and spring easing. */
+        .motion-word { display: inline-block; }
+        .motion-intro .motion-word {
+            animation: word-enter .9s cubic-bezier(.33,1,.68,1) both;
+            animation-delay: calc(70ms * var(--word-index));
+        }
+        .motion-intro .site-name, .motion-intro .intro-copy {
+            animation: soft-enter 1s cubic-bezier(.33,1,.68,1) both;
+        }
+        .motion-intro .intro-copy { animation-delay: .35s; }
+        .app-card.motion-pending {
+            opacity: 0;
+            translate: 0 36px;
+            filter: blur(6px);
+        }
+        .app-card.motion-enter {
+            animation: card-enter .9s cubic-bezier(.33,1,.68,1) both;
+            animation-delay: var(--reveal-delay, 0ms);
+        }
+        @keyframes word-enter {
+            from { opacity: 0; transform: translateY(.65em); filter: blur(8px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+        @keyframes soft-enter {
+            from { opacity: 0; transform: translateY(16px); filter: blur(4px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+        @keyframes card-enter {
+            from { opacity: 0; translate: 0 36px; filter: blur(6px); }
+            to { opacity: 1; translate: 0 0; filter: blur(0); }
+        }
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            .app-list { grid-template-columns: minmax(0, 1fr); padding: 8px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .motion-intro .motion-word, .motion-intro .site-name,
+            .motion-intro .intro-copy, .app-card.motion-enter { animation: none; }
+            .app-card.motion-pending { opacity: 1; translate: none; filter: none; }
+            .app-card, .launch-button { transition: none; }
+            .app-card:hover, .app-card:focus-within, .launch-button:hover,
+            .launch-button:active { transform: none; }
         }
     </style>
 </head>
@@ -100,7 +149,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <header>
         <p class="site-name">🐼 EMI &amp; 🐨 GUADA GAMES</p>
         <h1>Free family-friendly games. No ads.</h1>
-        <p>Play together, get creative, and enjoy arcade adventures right in your browser. Every game is free to play, with no ads interrupting the fun.</p>
+        <p class="intro-copy">Play together, get creative, and enjoy arcade adventures right in your browser. Every game is free to play, with no ads interrupting the fun.</p>
     </header>
     <main class="app-list" id="appList" aria-label="Free family-friendly games">
         <article class="app-card">
@@ -158,6 +207,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <a href="sticky-bubbles/index.html" class="launch-button" aria-label="Play Sticky Bubbles">PLAY STICKY BUBBLES</a>
         </article>
     </main>
+    <script src="home-motion.js"></script>
 </body>
 
 </html>
