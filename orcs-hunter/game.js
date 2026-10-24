@@ -220,10 +220,10 @@ var GameLayer = cc.Layer.extend({
         ];
         this.currentArrowType = 0;
         this.arrowIcons = [];
-        var iconPadding = 10;
+        var iconPadding = 38;
         var iconSize = 32;
         // Place icons slightly above bottom to allow stock display below
-        var baseY = iconPadding * 2 + iconSize / 2;
+        var baseY = 58;
         for (var i = 0; i < this.arrowTypes.length; i++) {
             var info = this.arrowTypes[i];
             var tex = cc.textureCache.addImage(info.icon);
@@ -248,7 +248,6 @@ var GameLayer = cc.Layer.extend({
         };
         this.updateArrowUI();
 
-        // Initialize arrow stock inventory (ordinary, explosive, triple)
         // Initialize arrow stock inventory (ordinary, explosive, triple)
         this.arrowStock = [20, 0, 0];
         this.arrowStockLabels = [];
@@ -283,6 +282,20 @@ var GameLayer = cc.Layer.extend({
         };
         this.updateArrowStockUI();
         
+        var shop = new cc.Menu();
+        shop.setPosition(0, 0);
+        this.addChild(shop, 1002);
+        this.arrowTypes.forEach(function(info, index) {
+            var label = new cc.LabelTTF((index + 1) + ': Buy ' + info.cost + 'c', 'Arial', 12);
+            var button = new cc.MenuItemLabel(label, function() { this.buyArrow(index); }, this);
+            button.setPosition(this.arrowIcons[index].getPositionX(), 15);
+            shop.addChild(button);
+        }, this);
+        this.shopMessage = new cc.LabelTTF('Tab: select arrow | 1/2/3 or click: buy', 'Arial', 13);
+        this.shopMessage.setAnchorPoint(0, 0.5);
+        this.shopMessage.setPosition(10, 95);
+        this.addChild(this.shopMessage, 1001);
+
         // Schedule auto-loading of regular arrows (1 per 2 seconds)
         this.schedule(function() {
             if (this.arrowStock[0] < 20) {  // Max 20 regular arrows
@@ -582,6 +595,23 @@ var GameLayer = cc.Layer.extend({
         }.bind(this);
         this.schedule(checkWaveDone, 0.5);
     },
+    buyArrow: function(index) {
+        if (this.isGameOver || !Number.isInteger(index) || !this.arrowTypes[index]) return false;
+        var info = this.arrowTypes[index];
+        this.currentArrowType = index;
+        this.updateArrowUI();
+        if (this.score < info.cost) {
+            this.shopMessage.setString('Not enough coins: need ' + info.cost + '.');
+            return false;
+        }
+        this.score -= info.cost;
+        this.arrowStock[index]++;
+        this.scoreLabel.setString(this.score.toString());
+        this.updateArrowStockUI();
+        this.shopMessage.setString('Bought ' + info.type + ' arrow (-' + info.cost + ' coin' + (info.cost === 1 ? '' : 's') + ').');
+        return true;
+    },
+
     // Keyboard input handling methods
     onKeyPressed: function(keyCode, event) {
         // Prevent default browser handling (e.g., Tab navigation)
@@ -590,14 +620,13 @@ var GameLayer = cc.Layer.extend({
             event._event.stopPropagation && event._event.stopPropagation();
         }
         this.keys[keyCode] = true;
-        if (keyCode === cc.KEY.tab) {
+        if (!this.isGameOver && keyCode === cc.KEY.tab) {
             this.currentArrowType = (this.currentArrowType + 1) % this.arrowTypes.length;
             this.updateArrowUI();
         }
     },
 
     onKeyReleased: function(keyCode, event) {
-        console.log('Key released:', keyCode);
         this.keys[keyCode] = false;
 
         // Allow restart after game over
@@ -608,16 +637,9 @@ var GameLayer = cc.Layer.extend({
             return;
         }
 
-        if (keyCode === cc.KEY['1'] || keyCode === cc.KEY.num1) {
-            this.currentArrowType = 0;
-            this.updateArrowUI();
-        } else if (keyCode === cc.KEY['2'] || keyCode === cc.KEY.num2) {
-            this.currentArrowType = 1;
-            this.updateArrowUI();
-        } else if (keyCode === cc.KEY['3'] || keyCode === cc.KEY.num3) {
-            this.currentArrowType = 2;
-            this.updateArrowUI();
-        }
+        var index = keyCode >= 49 && keyCode <= 51 ? keyCode - 49 :
+            keyCode >= 97 && keyCode <= 99 ? keyCode - 97 : -1;
+        if (index !== -1) this.buyArrow(index);
     },
     
     onEnter: function() {
