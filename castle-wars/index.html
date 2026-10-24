@@ -43,6 +43,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
     <canvas id="gameCanvas"></canvas>
     <link rel="stylesheet" href="multiplayer.css">
+    <link rel="stylesheet" href="medieval.css">
     <div id="network-status" role="status"><strong>Castle Wars</strong><span id="player-identity" hidden></span><span id="match-status">Choose a game</span><span id="room-tools" hidden><button id="copy-link">Copy invite link</button> <button id="leave" class="secondary">Leave room</button></span><span id="connection">Connecting…</span></div>
     <section id="lobby"><div>
       <p>ONLINE • TWO PLAYERS</p><h1>Castle Wars</h1>
@@ -59,7 +60,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <audio id="cannonSound" src="https://assets.mixkit.co/active_storage/sfx/2579/2579-preview.mp3" preload="auto"></audio>
     <audio id="impactSound" src="https://assets.mixkit.co/active_storage/sfx/143/143-preview.mp3" preload="auto"></audio>
     <audio id="explosionSound" src="https://assets.mixkit.co/active_storage/sfx/2577/2577-preview.mp3" preload="auto"></audio>
+    <script src="vendor/cocos2d-js-v3.13.js"></script>
+    <script src="pixel-renderer.js"></script>
     <script src="game.js"></script>
+    <script src="local-play.js"></script>
     <script type="module" src="multiplayer.js"></script>
 </body>
 </html> 

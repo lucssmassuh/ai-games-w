@@ -27,3 +27,18 @@ From the repository root:
 node --test castle-wars/tests/game.test.cjs castle-wars/tests/rooms.test.mjs castle-wars/tests/server.test.cjs
 firebase emulators:exec --only firestore --project demo-castle-wars --config castle-wars/firebase.json 'node castle-wars/tests/firestore.test.cjs'
 ```
+
+### Medieval pixel-art presentation
+
+`pixel-renderer.js` runs a Cocos2d-JS 3.13 canvas scene at the simulation's fixed
+1440×900 resolution. Castle blocks use the existing pixel tileset; bronze cannon
+parts are small code-authored sprite textures. Block visibility and damage tint
+follow the simulation state. The generated landscape lives in `assets/`, and
+`medieval.css` styles the lobby and controls with a locally bundled Press Start 2P
+font (license included). Nearest-neighbor texture filtering keeps sprites crisp.
+
+Physics, shot replay, collision bounds, and multiplayer state remain in `game.js`.
+Its transparent offscreen canvas is a live Cocos sprite for HUD and transient
+particles, avoiding a second simulation. `local-play.js` makes same-device play
+available before Firebase's remote modules finish loading. The online controller
+adopts that local mode when it becomes ready.

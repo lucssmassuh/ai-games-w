@@ -12,7 +12,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 let uid, roomRef, room, side, unsubscribe, listUnsubscribe, rooms = [];
 let lastState = null, listKey, finishRetryAt = 0;
-let shotId = null, finishing = false, pending = false, connected = false, local = false;
+let shotId = null, finishing = false, pending = false, connected = false, local = !!window.castleOfflineLocal;
 let heartbeat, leaving = false, pulsePending = false;
 const message = text => { $('message').textContent = text; };
 try { $('player-name').value = sessionStorage.getItem('castle-player-name') || ''; } catch {}
@@ -81,7 +81,7 @@ function renderMatch() {
     $('match-status').textContent = `Room ${roomRef.id} · ${count}/2 players · ` +
         (room.phase === 'finished' ? `${nameFor(game.winner)} wins! Create a new room to play again.` :
         count < 2 ? 'Waiting for an opponent — share the invite link' :
-        room.phase === 'firing' ? 'Cannonball in flight…' : room.turn === side ? 'Your turn' : `${nameFor(room.turn)}’s turn`);
+        room.phase === 'firing' ? 'Cannonball in flight…' : 'Ready');
     $('aim-up').dataset.key = side === 'right' ? 'o' : 'w';
     $('aim-down').dataset.key = side === 'right' ? 'l' : 's';
     $('fire').dataset.key = side === 'right' ? 'p' : 'q';
@@ -215,6 +215,7 @@ $('local').onclick = () => {
     $('match-status').textContent = 'Same device · P1: W/S + Q · P2: O/L + P';
     $('room-tools').hidden = false; $('copy-link').hidden = true;
 };
+window.castleMultiplayerReady = true;
 // Pointer controls work on touch screens and release safely if a pointer is cancelled.
 for (const button of document.querySelectorAll('#mobile-controls button')) {
     let key, repeat;

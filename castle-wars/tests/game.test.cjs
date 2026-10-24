@@ -17,7 +17,9 @@ function game(width, height) {
         requestAnimationFrame: callback => { frame = callback; }, setTimeout() {} });
     vm.runInContext(fs.readFileSync(require.resolve('../game.js'), 'utf8'), context);
     window.castleNetwork = { online: true, canControl: () => false, settled() {} };
-    return { api: window.castleGame, canvas, listeners, step() { now += 1000 / 60; frame(); } };
+    return { api: window.castleGame, canvas, listeners,
+        geometry() { return vm.runInContext('({width: leftCastle.width, height: leftCastle.height, y: leftCastle.y, rows: leftCastle.stones.length, columns: leftCastle.stones[0].length})', context); },
+        step() { now += 1000 / 60; frame(); } };
 }
 test('persisted shots produce identical results across screen sizes and can be resumed', () => {
     const desktop = game(1920, 1080), mobile = game(390, 844);
@@ -42,4 +44,22 @@ test('players outside a live turn cannot charge or fire using keyboard controls'
     instance.listeners.keyup({ key: 'q' });
     assert.equal(instance.api.snapshot(), before);
     assert.equal(instance.api.idle, true);
+});
+
+test('castle bricks stay square and grounded in new and saved layouts', () => {
+    const instance = game(1440, 900);
+    let shape = instance.geometry();
+    assert.equal(shape.rows, 9);
+    assert.equal(shape.columns, 7);
+    assert.equal(shape.width / shape.columns, shape.height / shape.rows);
+    assert.equal(shape.y + shape.height, instance.canvas.height * .91);
+    const saved = JSON.parse(instance.api.snapshot());
+    saved.left = saved.left.slice(0, 4);
+    saved.right = saved.right.slice(0, 4);
+    instance.api.load(JSON.stringify(saved));
+    instance.step();
+    shape = instance.geometry();
+    assert.equal(shape.rows, 4);
+    assert.equal(shape.width / shape.columns, shape.height / shape.rows);
+    assert.equal(shape.y + shape.height, instance.canvas.height * .91);
 });

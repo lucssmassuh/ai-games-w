@@ -1,4 +1,5 @@
-const canvas = document.getElementById('gameCanvas');
+// Keep simulation coordinates fixed; Cocos presents the composited battlefield.
+const canvas = window.cc ? document.createElement('canvas') : document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 // Function to resize canvas to window size
@@ -13,6 +14,11 @@ resizeCanvas();
 // Add resize event listener
 window.addEventListener('resize', resizeCanvas);
 
+function createCastleStones() {
+    return Array.from({length: 9}, (_, row) =>
+        Array.from({length: 7}, (_, col) => row === 0 && col % 2 ? 0 : 3));
+}
+
 // Game objects
 // Stone health: 0 = destroyed, 1 = heavily cracked, 2 = cracked, 3 = intact
 const leftCastle = {
@@ -20,12 +26,7 @@ const leftCastle = {
     y: 0,
     width: 140,
     height: 150,
-    stones: [
-        [3,0,3,0,3,0,3],
-        [3,3,3,3,3,3,3],
-        [3,3,3,3,3,3,3],
-        [3,3,3,3,3,3,3]
-    ],
+    stones: createCastleStones(),
     health: 100
 };
 
@@ -34,12 +35,7 @@ const rightCastle = {
     y: 0,
     width: 140,
     height: 150,
-    stones: [
-        [3,0,3,0,3,0,3],
-        [3,3,3,3,3,3,3],
-        [3,3,3,3,3,3,3],
-        [3,3,3,3,3,3,3]
-    ],
+    stones: createCastleStones(),
     health: 100
 };
 
@@ -91,9 +87,11 @@ function updatePositions() {
     // Update castle sizes - making them 50% bigger
     const baseSize = Math.min(canvas.width, canvas.height) * 0.22;
     leftCastle.width = baseSize;
-    leftCastle.height = baseSize * 1.2;
+    leftCastle.height = baseSize / leftCastle.stones[0].length * leftCastle.stones.length;
+    leftCastle.y = canvas.height * .91 - leftCastle.height;
     rightCastle.width = baseSize;
-    rightCastle.height = baseSize * 1.2;
+    rightCastle.height = baseSize / rightCastle.stones[0].length * rightCastle.stones.length;
+    rightCastle.y = canvas.height * .91 - rightCastle.height;
 
     rightCastle.x = canvas.width - rightCastle.width - canvas.width * 0.02;
 
@@ -141,8 +139,8 @@ class FallingStone {
         this.row = row;
         this.col = col;
         this.health = health;
-        this.x = castle.x + col * (castle.width / 7);
-        this.y = castle.y + row * (castle.height / 4);
+        this.x = castle.x + col * (castle.width / castle.stones[0].length);
+        this.y = castle.y + row * (castle.height / castle.stones.length);
         this.targetY = targetY;
         this.vy = 0;
         this.gravity = 0.3;
@@ -169,8 +167,8 @@ class FallingStone {
     }
 
     draw(ctx) {
-        const stoneWidth = this.castle.width / 7;
-        const stoneHeight = this.castle.height / 4;
+        const stoneWidth = this.castle.width / this.castle.stones[0].length;
+        const stoneHeight = this.castle.height / this.castle.stones.length;
 
         ctx.save();
         ctx.translate(this.x + stoneWidth/2, this.y + stoneHeight/2);
@@ -232,12 +230,13 @@ const clouds = [
 
 // Draw functions
 function drawCastle(castle) {
-    const stoneWidth = castle.width / 7;
-    const stoneHeight = castle.height / 4;
+    if (window.castleRenderer) return;
+    const stoneWidth = castle.width / castle.stones[0].length;
+    const stoneHeight = castle.height / castle.stones.length;
 
     // Draw stones
-    for (let row = 0; row < 4; row++) {
-        for (let col = 0; col < 7; col++) {
+    for (let row = 0; row < castle.stones.length; row++) {
+        for (let col = 0; col < castle.stones[row].length; col++) {
             const health = castle.stones[row][col];
             if (health > 0) {
                 const stoneX = castle.x + col * stoneWidth;
@@ -331,6 +330,20 @@ function drawCatapult(catapult) {
     const backWheelX = catapult.x + (isRightCatapult ? 10 : -10);
     const frontWheelX = catapult.x + (isRightCatapult ? -10 : 10);
 
+    // Calculate recoil offset
+    let recoilOffset = 0;
+    let postFireRecoil = 0;
+    if (catapult.charging) {
+        const currentPower = Math.min((Date.now() - catapult.chargeStart) / 10, catapult.maxPower);
+        recoilOffset = (currentPower / catapult.maxPower) * 15;
+    }
+    // Post-fire recoil animation
+    if (catapult.fireTime && Date.now() - catapult.fireTime < 200) {
+        const elapsed = Date.now() - catapult.fireTime;
+        postFireRecoil = Math.sin(elapsed / 200 * Math.PI) * 8;
+    }
+
+    if (!window.castleRenderer) {
     // Draw wooden wheel with metal rim - back wheel
     ctx.fillStyle = '#8B4513'; // Wood color
     ctx.beginPath();
@@ -364,19 +377,6 @@ function drawCatapult(catapult) {
     ctx.fill();
     ctx.strokeStyle = '#4A3728';
     ctx.stroke();
-
-    // Calculate recoil offset
-    let recoilOffset = 0;
-    let postFireRecoil = 0;
-    if (catapult.charging) {
-        const currentPower = Math.min((Date.now() - catapult.chargeStart) / 10, catapult.maxPower);
-        recoilOffset = (currentPower / catapult.maxPower) * 15;
-    }
-    // Post-fire recoil animation
-    if (catapult.fireTime && Date.now() - catapult.fireTime < 200) {
-        const elapsed = Date.now() - catapult.fireTime;
-        postFireRecoil = Math.sin(elapsed / 200 * Math.PI) * 8;
-    }
 
     // Draw cannon body with recoil
     ctx.save();
@@ -484,6 +484,8 @@ function drawCatapult(catapult) {
     }
     ctx.lineWidth = 1;
 
+    }
+
     // Draw power meter and trajectory prediction only when charging
     if (catapult.charging) {
         const currentPower = Math.min((Date.now() - catapult.chargeStart) / 10, catapult.maxPower);
@@ -496,7 +498,7 @@ function drawCatapult(catapult) {
 
         // Draw power text
         ctx.fillStyle = 'white';
-        ctx.font = '12px Arial';
+        ctx.font = '12px "Press Start 2P"';
         ctx.textAlign = 'center';
         ctx.fillText(`Power: ${Math.round(currentPower)}`, backWheelX, backWheelY - 45);
 
@@ -589,68 +591,27 @@ function calculateCastleHealth(castle) {
 }
 
 // Draw turn indicator above the current player's castle
-function drawTurnIndicator() {
-    const castle = currentPlayer === 'left' ? leftCastle : rightCastle;
-    const indicatorX = castle.x + castle.width / 2;
-    const indicatorY = castle.y - 40;
-
-    // Pulsing effect
-    const pulse = Math.sin(Date.now() / 200) * 0.3 + 0.7;
-
-    // Draw arrow pointing down
-    ctx.save();
-    ctx.translate(indicatorX, indicatorY);
-
-    // Arrow glow
-    ctx.shadowColor = '#FFD700';
-    ctx.shadowBlur = 15 * pulse;
-
-    // Arrow body
-    ctx.fillStyle = `rgba(255, 215, 0, ${pulse})`;
-    ctx.beginPath();
-    ctx.moveTo(0, 20);      // Arrow tip
-    ctx.lineTo(-15, 0);     // Left corner
-    ctx.lineTo(-6, 0);      // Left inner
-    ctx.lineTo(-6, -15);    // Left top
-    ctx.lineTo(6, -15);     // Right top
-    ctx.lineTo(6, 0);       // Right inner
-    ctx.lineTo(15, 0);      // Right corner
-    ctx.closePath();
-    ctx.fill();
-
-    // Arrow outline
-    ctx.strokeStyle = '#B8860B';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.restore();
-
-    // Draw "YOUR TURN" text
-    ctx.save();
-    ctx.font = `bold ${Math.min(canvas.width, canvas.height) * 0.018}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.fillStyle = `rgba(255, 215, 0, ${pulse})`;
-    ctx.shadowColor = '#000';
-    ctx.shadowBlur = 4;
-    ctx.fillText(currentPlayer === 'left' ? 'P1 TURN' : 'P2 TURN', indicatorX, indicatorY - 25);
-    ctx.restore();
-}
-
-// Keep player identity next to the castle it controls, even while waiting.
+// The active player's name is the only turn indicator.
 function drawPlayerIdentities() {
-    const ownSide = window.castleNetwork?.playerSide;
     ctx.save();
-    ctx.font = 'bold 20px Arial';
+    ctx.font = '12px "Press Start 2P"';
     ctx.textAlign = 'center';
     for (const [side, castle, number] of [['left', leftCastle, 1], ['right', rightCastle, 2]]) {
-        const name = window.castleNetwork?.playerName?.(side);
-        const label = ownSide ? `${name} · ${ownSide === side ? 'YOU' : `P${number}`}` : `P${number} · ${side.toUpperCase()}`;
+        const label = window.castleNetwork?.playerName?.(side) || `Player ${number}`;
+        const active = currentPlayer === side;
         const x = castle.x + castle.width / 2;
-        const y = castle.y - 100;
-        ctx.fillStyle = side === 'left' ? '#0c314c' : '#4c1928';
-        ctx.fillRect(x - 112, y - 22, 224, 36);
-        ctx.fillStyle = side === 'left' ? '#7dd3fc' : '#fda4af';
+        const y = castle.y - 50;
+        ctx.fillStyle = side === 'left' ? '#183242' : '#47252b';
+        ctx.fillRect(x - 112, y - 22, 224, 40);
+        if (active) {
+            ctx.shadowColor = '#ffe09a';
+            ctx.shadowBlur = 16;
+            ctx.strokeStyle = '#e4c688';
+            ctx.strokeRect(x - 112, y - 22, 224, 40);
+        }
+        ctx.fillStyle = active ? '#fff1bb' : '#b9b3a1';
         ctx.fillText(label, x, y + 3, 210);
+        ctx.shadowBlur = 0;
     }
     ctx.restore();
 }
@@ -661,7 +622,7 @@ function drawControlInstructions() {
     const lineHeight = fontSize * 1.4;
 
     ctx.save();
-    ctx.font = `${fontSize}px Arial`;
+    ctx.font = `${fontSize}px "Press Start 2P"`;
     ctx.shadowColor = '#000';
     ctx.shadowBlur = 3;
 
@@ -690,18 +651,24 @@ function drawControlInstructions() {
 }
 
 function drawScore() {
-    ctx.fillStyle = '#00008B';
-    ctx.font = `${Math.min(canvas.width, canvas.height) * 0.02}px Arial`;
+    ctx.fillStyle = '#25291f';
+    ctx.fillRect(24, 55, canvas.width - 48, 90);
+    ctx.strokeStyle = '#a28653';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(24, 55, canvas.width - 48, 90);
+    ctx.lineWidth = 1;
+    ctx.fillStyle = '#e3c88b';
+    ctx.font = `${Math.min(canvas.width, canvas.height) * 0.02}px "Press Start 2P"`;
     ctx.textAlign = 'center';
 
     // Always show round indicator
     ctx.fillText(`Round ${currentRound}`, canvas.width / 2, canvas.height * 0.1);
     
     // Draw left player score and stones
-    ctx.fillText(`${window.castleNetwork?.playerName?.('left') || 'Player 1'} (P1): ${leftScore}`, canvas.width * 0.2, canvas.height * 0.1);
+    ctx.fillText(`${window.castleNetwork?.playerName?.('left') || 'Player 1'} (P1): ${leftScore}`, canvas.width * 0.2, canvas.height * 0.1, canvas.width * .32);
     
     // Draw stone indicators for left player
-    const stoneSize = Math.min(canvas.width, canvas.height) * 0.008;
+    const stoneSize = Math.min(7.2, 235 / (Math.max(leftCastle.stones.flat().length, rightCastle.stones.flat().length) * 1.3));
     const stoneSpacing = stoneSize * 0.3;
     const startY = canvas.height * 0.12;
     
@@ -722,13 +689,13 @@ function drawScore() {
     // Draw stones in a single row for left player
     for (let i = 0; i < totalLeftStones; i++) {
         const x = startX + i * (stoneSize + stoneSpacing);
-        ctx.fillStyle = '#006400';
+        ctx.fillStyle = '#9caf70';
         ctx.fillRect(x, startY, stoneSize, stoneSize);
     }
     
     // Draw right player score and stones
-    ctx.fillStyle = '#00008B';
-    ctx.fillText(`${window.castleNetwork?.playerName?.('right') || 'Player 2'} (P2): ${rightScore}`, canvas.width * 0.8, canvas.height * 0.1);
+    ctx.fillStyle = '#e3c88b';
+    ctx.fillText(`${window.castleNetwork?.playerName?.('right') || 'Player 2'} (P2): ${rightScore}`, canvas.width * 0.8, canvas.height * 0.1, canvas.width * .32);
     
     // Count total stones for right player
     let totalRightStones = 0;
@@ -747,7 +714,7 @@ function drawScore() {
     // Draw stones in a single row for right player
     for (let i = 0; i < totalRightStones; i++) {
         const x = rightStartX + i * (stoneSize + stoneSpacing);
-        ctx.fillStyle = '#006400';
+        ctx.fillStyle = '#9caf70';
         ctx.fillRect(x, startY, stoneSize, stoneSize);
     }
 }
@@ -762,11 +729,11 @@ function updateProjectiles() {
 
         // Check collision with castles
         const checkCastleCollision = (castle, isLeftCastle) => {
-            const stoneWidth = castle.width / 7;
-            const stoneHeight = castle.height / 4;
+            const stoneWidth = castle.width / castle.stones[0].length;
+            const stoneHeight = castle.height / castle.stones.length;
 
-            for (let row = 0; row < 4; row++) {
-                for (let col = 0; col < 7; col++) {
+            for (let row = 0; row < castle.stones.length; row++) {
+                for (let col = 0; col < castle.stones[row].length; col++) {
                     if (castle.stones[row][col] > 0) {
                         const stoneX = castle.x + col * stoneWidth;
                         const stoneY = castle.y + row * stoneHeight;
@@ -957,8 +924,8 @@ function updateFallingStones() {
         const stone = fallingStones[i];
         if (stone.update()) {
             // Stone has reached its target, create explosion
-            const stoneWidth = stone.castle.width / 7;
-            const stoneHeight = stone.castle.height / 4;
+            const stoneWidth = stone.castle.width / stone.castle.stones[0].length;
+            const stoneHeight = stone.castle.height / stone.castle.stones.length;
             createExplosion(stone.x + stoneWidth/2, stone.y + stoneHeight/2);
             fallingStones.splice(i, 1);
         }
@@ -1238,6 +1205,7 @@ function gameLoop() {
     // Update positions based on current canvas size
     updatePositions();
     
+    if (!window.castleRenderer) {
     // Draw sky
     const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
     skyGradient.addColorStop(0, '#87CEEB');
@@ -1262,7 +1230,7 @@ function gameLoop() {
     // Green grass (extended to mountains)
     const grassGradient = ctx.createLinearGradient(0, canvas.height * 0.4, 0, canvas.height * 0.85);
     grassGradient.addColorStop(0, '#228B22');
-    grassGradient.addColorStop(1, '#006400');
+    grassGradient.addColorStop(1, '#9caf70');
     ctx.fillStyle = grassGradient;
     ctx.fillRect(0, canvas.height * 0.4, canvas.width, canvas.height * 0.45);
     
@@ -1272,10 +1240,11 @@ function gameLoop() {
     drawMountain(canvas.width * 0.2, canvas.width * 0.2, canvas.height * 0.3);
     drawMountain(canvas.width * 0.6, canvas.width * 0.2, canvas.height * 0.3);
     
+    }
+
     drawScore();
     drawCastle(leftCastle);
     drawCastle(rightCastle);
-    drawTurnIndicator();
     drawPlayerIdentities();
     drawControlInstructions();
     drawCatapult(leftCatapult);
@@ -1338,9 +1307,9 @@ function gameLoop() {
         banner.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
         banner.style.zIndex = '1000';
         banner.style.textAlign = 'center';
-        banner.style.fontFamily = 'Arial, sans-serif';
+        banner.style.fontFamily = '"Press Start 2P", sans-serif';
         banner.style.fontSize = '16px';
-        banner.style.color = '#00008B';
+        banner.style.color = '#e3c88b';
         banner.style.cursor = 'pointer';
         
         const winner = leftStonesRemaining === 0 ? 'Player 2' : 'Player 1';
@@ -1359,18 +1328,8 @@ function gameLoop() {
         banner.addEventListener('click', () => {
             banner.remove();
             // Reset all game state (3 = full health for each stone)
-            leftCastle.stones = [
-                [3,0,3,0,3,0,3],
-                [3,3,3,3,3,3,3],
-                [3,3,3,3,3,3,3],
-                [3,3,3,3,3,3,3]
-            ];
-            rightCastle.stones = [
-                [3,0,3,0,3,0,3],
-                [3,3,3,3,3,3,3],
-                [3,3,3,3,3,3,3],
-                [3,3,3,3,3,3,3]
-            ];
+            leftCastle.stones = createCastleStones();
+            rightCastle.stones = createCastleStones();
             leftCastle.health = 100;
             rightCastle.health = 100;
             leftScore = 0;
@@ -1387,7 +1346,7 @@ function gameLoop() {
         });
     }
     
-    requestAnimationFrame(gameLoop);
+    if (!window.castleRenderer) requestAnimationFrame(gameLoop);
 }
 
 // Controls
@@ -1531,4 +1490,9 @@ window.castleGame = {
     }
 };
 window.castleNetwork = { online: false, canControl: () => false, settled() {} };
-gameLoop(); 
+if (window.cc) {
+    window.startCastleRenderer({canvas, tick: gameLoop,
+        castles: [leftCastle, rightCastle], cannons: [leftCatapult, rightCatapult]});
+} else {
+    gameLoop();
+}
