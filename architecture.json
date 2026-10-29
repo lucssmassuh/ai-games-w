@@ -1,0 +1,240 @@
+{
+  "id": "graph-1793112431030-c4fkug",
+  "type": "directed",
+  "label": "Games",
+  "nodes": {
+    "node_1793112433437_1": {
+      "label": "emiguadagames.web.app",
+      "description": "AI-built collection of browser games (Castle Wars, Orcs Hunter, Princess Paint, and more) — static HTML/CSS/JS, served via Firebase Hosting.",
+      "nodeType": "component",
+      "repos": [
+        {
+          "name": "ai-games-w",
+          "url": "https://github.com/lucssmassuh/ai-games-w"
+        }
+      ]
+    },
+    "node_castle_wars": {
+      "label": "Castle Wars",
+      "description": "Two-player cannon game with destructible castles.",
+      "nodeType": "component",
+      "repos": [
+        {
+          "name": "castle-wars",
+          "url": "https://github.com/lucssmassuh/ai-games-w/tree/main/castle-wars"
+        }
+      ]
+    },
+    "node_orcs_hunter": {
+      "label": "Orcs Hunter",
+      "description": "Tower-defense game — bow and arrows vs orcs and dragons.",
+      "nodeType": "component",
+      "repos": [
+        {
+          "name": "orcs-hunter",
+          "url": "https://github.com/lucssmassuh/ai-games-w/tree/main/orcs-hunter"
+        }
+      ]
+    },
+    "node_tokio_invaders": {
+      "label": "Tokio Invaders",
+      "description": "Arcade shooter — defend neon-lit Tokio from aliens.",
+      "nodeType": "component",
+      "repos": [
+        {
+          "name": "space-invaders",
+          "url": "https://github.com/lucssmassuh/ai-games-w/tree/main/space-invaders"
+        }
+      ]
+    },
+    "node_wizards_school": {
+      "label": "Wizards School",
+      "description": "Cast spells with hand gestures via webcam.",
+      "nodeType": "component",
+      "repos": [
+        {
+          "name": "wizards-school",
+          "url": "https://github.com/lucssmassuh/ai-games-w/tree/main/wizards-school"
+        }
+      ]
+    },
+    "node_handy_blocks": {
+      "label": "Handy Blocks",
+      "description": "Brick-breaker using hand tracking, mouse, or touch.",
+      "nodeType": "component",
+      "repos": [
+        {
+          "name": "handy-blocks",
+          "url": "https://github.com/lucssmassuh/ai-games-w/tree/main/handy-blocks"
+        }
+      ]
+    },
+    "node_sticky_bubbles": {
+      "label": "Sticky Bubbles",
+      "description": "Bubble shooter aimed with hand tracking.",
+      "nodeType": "component",
+      "repos": [
+        {
+          "name": "sticky-bubbles",
+          "url": "https://github.com/lucssmassuh/ai-games-w/tree/main/sticky-bubbles"
+        }
+      ]
+    },
+    "node_michaeltaxon": {
+      "label": "Mikael Tax-On",
+      "description": "Endless runner — collect pesos, jump over gaps.",
+      "nodeType": "component",
+      "repos": [
+        {
+          "name": "michaeltaxon",
+          "url": "https://github.com/lucssmassuh/ai-games-w/tree/main/michaeltaxon"
+        }
+      ]
+    },
+    "node_princess_paint": {
+      "label": "Princess Paint",
+      "description": "Coloring app — color drawings and save artwork.",
+      "nodeType": "component",
+      "repos": [
+        {
+          "name": "princess-paint",
+          "url": "https://github.com/lucssmassuh/ai-games-w/tree/main/princess-paint"
+        }
+      ]
+    },
+    "node_robo_punch": {
+      "label": "Robo Punch",
+      "description": "Two-player spinning-robot duel game.",
+      "nodeType": "component",
+      "repos": [
+        {
+          "name": "robo-punch",
+          "url": "https://github.com/lucssmassuh/ai-games-w/tree/main/robo-punch"
+        }
+      ]
+    },
+    "node_cocos2d": {
+      "label": "Cocos2d",
+      "description": "2D game engine (cocos2d-js v3.13) powering the canvas-based games.",
+      "nodeType": "tool",
+      "toolKeys": [
+        "cocos2d"
+      ]
+    },
+    "node_tensorflowjs": {
+      "label": "TensorFlow.js",
+      "description": "In-browser hand tracking (handpose + fingerpose models).",
+      "nodeType": "tool",
+      "toolKeys": [
+        "tensorflowjs"
+      ]
+    }
+  },
+  "edges": [
+    {
+      "id": "edge_auto_1",
+      "source": "node_1793112433437_1",
+      "target": "node_castle_wars",
+      "relation": "contains",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_2",
+      "source": "node_castle_wars",
+      "target": "node_cocos2d",
+      "relation": "depends-on",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_3",
+      "source": "node_1793112433437_1",
+      "target": "node_orcs_hunter",
+      "relation": "contains",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_4",
+      "source": "node_orcs_hunter",
+      "target": "node_cocos2d",
+      "relation": "depends-on",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_5",
+      "source": "node_1793112433437_1",
+      "target": "node_tokio_invaders",
+      "relation": "contains",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_6",
+      "source": "node_tokio_invaders",
+      "target": "node_cocos2d",
+      "relation": "depends-on",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_7",
+      "source": "node_1793112433437_1",
+      "target": "node_wizards_school",
+      "relation": "contains",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_8",
+      "source": "node_wizards_school",
+      "target": "node_tensorflowjs",
+      "relation": "depends-on",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_9",
+      "source": "node_1793112433437_1",
+      "target": "node_handy_blocks",
+      "relation": "contains",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_10",
+      "source": "node_handy_blocks",
+      "target": "node_tensorflowjs",
+      "relation": "depends-on",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_11",
+      "source": "node_1793112433437_1",
+      "target": "node_sticky_bubbles",
+      "relation": "contains",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_12",
+      "source": "node_sticky_bubbles",
+      "target": "node_tensorflowjs",
+      "relation": "depends-on",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_13",
+      "source": "node_1793112433437_1",
+      "target": "node_michaeltaxon",
+      "relation": "contains",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_14",
+      "source": "node_1793112433437_1",
+      "target": "node_princess_paint",
+      "relation": "contains",
+      "directed": true
+    },
+    {
+      "id": "edge_auto_15",
+      "source": "node_1793112433437_1",
+      "target": "node_robo_punch",
+      "relation": "contains",
+      "directed": true
+    }
+  ]
+}

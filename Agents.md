@@ -3,14 +3,19 @@
 This document provides an overview of the AI agents used across different games in this project.
 
 ## Table of Contents
+- [Architecture](#architecture)
 - [Orcs Hunter](#orcs-hunter)
 - [Castle Wars](#castle-wars)
 - [Princess Paint](#princess-paint)
 - [Robo Punch](#robo-punch)
-- [Sky Ace](#sky-ace)
 - [Wizards School](#wizards-school)
-- [Pong](#pong)
 - [Handy Blocks](#handy-blocks)
+- [Tokio Invaders](#tokio-invaders)
+- [Sticky Bubbles](#sticky-bubbles)
+- [Mikael Tax-On](#mikael-tax-on)
+
+## Architecture
+@architecture.json
 
 ## Orcs Hunter
 in the /orcs-hunter folder there are files with javascript code that implement the objects used in the game.
@@ -136,34 +141,6 @@ A two-player fighting game where robots battle by spinning their feet to hit eac
 - `checkCollisionAndToggleDirection()`: Detects foot-to-foot collisions
 - `checkBulletCollision()`: Detects bullet-to-foot hits and triggers spin reversal
 
-## Sky Ace
-A vertical scrolling plane shooter game built with TypeScript and Phaser 3.
-
-### Game Files
-- `/sky-ace/src/main.ts` - Application entry point and Phaser configuration
-- `/sky-ace/src/scenes/PreloadScene.ts` - Asset loading scene
-- `/sky-ace/src/scenes/GameScene.ts` - Main gameplay scene
-- `/sky-ace/src/objects/Player.ts` - Player plane class
-- `/sky-ace/src/objects/Enemy.ts` - Enemy plane class
-- `/sky-ace/src/objects/Bullet.ts` - Projectile class
-
-### Technologies
-- **TypeScript**: Type-safe game development
-- **Phaser 3**: Game framework for rendering and physics
-- **Vite**: Build tool and dev server
-
-### Game Mechanics
-- Vertical scrolling shooter gameplay
-- Player-controlled plane that shoots enemies
-- Enemy planes that persist until destroyed
-- Bullet collision detection
-- Score tracking system
-
-### Development
-- Built with modern TypeScript tooling
-- Hot module replacement for rapid development
-- Optimized production builds
-
 ## Wizards School
 A gesture-based magic wand application using hand tracking and machine learning.
 
@@ -197,42 +174,6 @@ A gesture-based magic wand application using hand tracking and machine learning.
 2. Perform hand gestures in view of webcam
 3. See real-time detection results and confidence scores
 4. Cast spells by making specific gestures
-
-## Pong
-A classic two-player Pong game with modern visual effects.
-
-### Game Files
-- `/pong/game.js` - Complete game logic, physics, and rendering
-- `/pong/index.html` - Game entry point with canvas and UI
-
-### Game Mechanics
-- **Classic Pong gameplay**: Two paddles, one ball, competitive scoring
-- **Physics-based ball movement**: Realistic bouncing with spin effects
-- **Paddle collision**: Ball angle changes based on where it hits the paddle
-- **Score tracking**: Points awarded when opponent misses the ball
-- **Game states**: Waiting, playing, and paused modes
-
-### Controls
-- **Player 1 (Left Paddle)**:
-  - `W`: Move up
-  - `S`: Move down
-- **Player 2 (Right Paddle)**:
-  - `↑`: Move up
-  - `↓`: Move down
-- **Spacebar**: Start/pause game
-
-### Visual Features
-- Gradient effects on paddles
-- Glowing ball with radial gradient
-- Dashed center line
-- Dark blue background (#0f3460)
-- Game state messages (start/pause)
-
-### Game Constants
-- Paddle: 10×100 pixels
-- Ball: 10 pixel diameter
-- Paddle speed: 5 pixels/frame
-- Ball speed: 4 pixels/frame
 
 ## Handy Blocks
 An Arkanoid/Breakout game controlled by hand tracking via webcam. Move your hand left and right to steer the magic paddle and break enchanted bricks.
@@ -268,3 +209,74 @@ Uses the same TensorFlow.js handpose architecture as Wizards School:
 - Per-row brick hues: purple → blue → teal → yellow → red-orange
 - Particle burst on every brick hit and ball loss
 - Dark magical overlay on top of webcam background
+
+## Tokio Invaders
+A neon-lit arcade shooter where the player defends Tokio from waves of aliens. Built on Cocos2d (vendored at `/space-invaders/vendor/cocos2d`).
+
+### Game Files
+- `/space-invaders/index.html` - Game entry point and HUD markup
+- `/space-invaders/main.js` - Boot: loads the campaign, level and sprite JSON, then starts the Cocos2d scene
+- `/space-invaders/project.json` - Cocos2d project configuration
+- `/space-invaders/src/model.js` - Game model: level validation (`Neon.validateLevel`), player, aliens, bullets, power-ups, lives and scoring
+- `/space-invaders/src/cocos-game.js` - Cocos2d scene that renders the model and spawns effects
+- `/space-invaders/src/ui.js` - DOM overlays (briefings, HUD, toasts), keyboard input and sound
+- `/space-invaders/levels/campaign.json` - Ordered list of level files
+- `/space-invaders/levels/*.json` - Five districts: Shinjuku, Shibuya, Akihabara, Ginza and Tokio Core (formation, movement, enemy fire, scores, power-up settings)
+- `/space-invaders/assets/sprites/sprites.json` - Sprite sheet metadata for the player, aliens (squid, crab, insect) and power-ups
+
+### Game Mechanics
+- 3 lives (shields); getting hit grants brief invulnerability and clears active power-ups
+- Alien types score differently per level; clearing a level gives a clear bonus
+- Power-ups drop from aliens: rapid fire, double shot and piercing shot (timed)
+
+### Controls
+- `Arrow Left/Right` or `A/D`: Move
+- `Space`: Fire
+- `Enter`: Start / skip the briefing
+- `Esc`: Pause
+- `M`: Toggle sound
+- `R`: Restart after game over or victory
+
+## Sticky Bubbles
+A bubble shooter aimed with hand tracking. Match three or more bubbles of the same colour on a hex grid to pop them.
+
+### Game Files
+- `/sticky-bubbles/game.js` - All game logic: hex grid, shooting, matching, hand tracking and rendering
+- `/sticky-bubbles/index.html` - Game entry point with canvas and loading screen
+
+### Hand Tracking
+Uses the same TensorFlow.js handpose architecture as Wizards School and Handy Blocks (`@tensorflow-models/handpose@0.0.7`, `@tensorflow/tfjs-core@3.7.0`). The hand's horizontal position aims the shooter.
+
+### Game Mechanics
+- 800×600 canvas, hex grid of 13/12 bubbles per row, 6 colours
+- Bubbles must attach to the top or to an existing bubble; groups of matching colours are popped
+- Game over when a bubble reaches row 10; win when the grid is empty
+
+### Controls
+- **Hand (primary)**: horizontal position aims the shooter
+- **Mouse / touch**: move to aim; click or tap to shoot
+- **Space / Enter**: shoot, or start/restart the game
+
+## Mikael Tax-On
+A side-scrolling endless-runner-style game, ported from the original Android game: dash through the months of the year collecting pesos while Argentine payroll taxes eat into the paycheck. It is dependency-free vanilla JS with Canvas2D and ES modules (no build step, and it does not use Cocos2d; see `PORTING_NOTES.md`).
+
+### Game Files
+- `/michaeltaxon/index.html`, `/michaeltaxon/style.css` - Canvas shell
+- `/michaeltaxon/src/main.js` - Boot and game loop
+- `/michaeltaxon/src/engine/` - Tiny canvas engine: assets, sprite sheets, camera, input
+- `/michaeltaxon/src/physics.js` - Simplified arcade gravity and platform physics
+- `/michaeltaxon/src/tax.js` - Payroll tax calculation (SIPA, Obra Social, PAMI, Ganancias)
+- `/michaeltaxon/src/level.js` - Loader for the original XML level format (`assets/level/level2.xml`)
+- `/michaeltaxon/src/entities/` - Player, Boss, Bomb, Coin
+- `/michaeltaxon/src/scenes/` - Splash, Welcome, Menu and Game scenes
+- `/michaeltaxon/README.md`, `/michaeltaxon/PORTING_NOTES.md` - Run instructions and what was ported vs adapted
+
+### Controls
+- Tap / click, `Space`, `Arrow Up` or `Enter`: Jump over gaps
+- During the Aguinaldo and Fin de Año sections, the same input turns the player around to dodge bombs and catch falling bills
+
+### Game Mechanics
+- Level flow: run and jump over gaps, then the Aguinaldo (mid-year bonus) event, then the Fin de Año (year-end) event, then the end-of-year star and salary summary
+- Rewards and penalties: +8000 per bill caught, -1500 per bomb hit
+- Final screen breaks the gross pay down by taxes into a final score
+- Serve over HTTP (e.g. `python3 -m http.server`); `fetch()` of level files fails from `file://`
